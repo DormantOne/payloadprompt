@@ -1,5 +1,5 @@
 {
-  "version": "2.3",
+  "version": "2.4",
   "catalog_name": "UPMC Grand Rounds — Copilot Payload Prompts",
   "launcher": {
     "copilot_url": "https://www.microsoft365.com/copilot",
@@ -8,20 +8,17 @@
   "defaults": {
     "default_selected_count": 3,
     "options": {
-      "include_takehomes": true,
-      "include_speaker_email": true,
-      "include_referenced_links": false
+      "include_takehomes": true
     }
   },
   "suggestion_questions": [
-    "Who gave a Grand Rounds on [TOPIC]? Search the selected sessions and return: session title, presenter name + role/title, date/time, attendance code, and the session link.",
-    "Are there any referenced links or SharePoint resources about [TOPIC] in these sessions? List and label them (video, transcript, take-home, mind map, other).",
-    "For the most relevant selected session: extract title, presenter, date/time, attendance code, and ALL available links (video/transcript/take-home/mind map/other).",
-    "Give me 5 impactful take-homes from the most relevant selected session, ranked most important → least important.",
-    "If a speaker email is listed anywhere in the session document, surface it and draft a short comment/thank-you note (3–5 sentences) with one thoughtful question.",
-    "Ask me ONE question that proves I was paying attention and understand the material. Make it challenging but fair, and provide the correct answer + why."
+    "Summarize each selected Grand Rounds session into 6 crisp bullets (clinical + practical).",
+    "Give 5 impactful take-homes for each selected session, ranked most important → least important.",
+    "Who gave a Grand Rounds on [TOPIC]? Scan the selected sessions and return the best match(es) with presenter name + any visible date/time.",
+    "Write a 4-bullet 'what I should do next' list based on the selected sessions.",
+    "Ask me ONE question that proves I was paying attention and understand the material. Then provide the correct answer + why."
   ],
-  "prompt_template": "LAUNCHER (if needed)\n- Open Copilot: {{COPILOT_URL}}\n- If you need Microsoft 365 access first: {{M365_SIGNUP_URL}}\n\nROLE\nYou are an expert assistant for UPMC Grand Rounds.\n\nPRIMARY RULE\n- Use the selected SharePoint session links below as the authoritative sources.\n- FIRST: open and review these links.\n- ONLY AFTER reviewing them: if you still cannot answer, you may explore further using other sources.\n- Do NOT ask me for new URLs unless one of the provided links fails to open.\n\nSELECTED GRAND ROUNDS SOURCES\n{{SOURCES_BLOCK}}\n\nWHAT TO DO\n1) Open and read EACH selected SharePoint link above.\n2) Extract key fields if visible: session title, presenter name + role/title, date/time, attendance code.\n3) Identify ALL linked resources inside the doc(s): video/transcript/take-home/mind map/other.\n4) If the user asks about a topic [TOPIC], try to infer it from the question OR scan the selected sessions for the best match. If [TOPIC] is still ambiguous, ask one clarifying question ONLY AFTER checking the docs.\n{{OPTIONS_BLOCK}}\n5) Answer the USER QUESTION using ONLY what you can verify.\n\nRESPONSE FORMAT\n- Short answer (2–4 sentences)\n- Per session (for each relevant selected session):\n  - Presenter (name + role/title)\n  - Session details (date/time + attendance code)\n  - Links (label each: video / transcript / take-home / mind map / other)\n  - Referenced links/resources mentioned inside the doc (if any)\n  - Speaker email (if found)\n  - 5 impactful take-homes (ranked most important → least) if requested\n- Sources (include the SharePoint URLs you actually used)\n- Caveats (missing/uncertain fields)\n\nUSER QUESTION:\n{{USER_QUESTION}}",
+  "prompt_template": "LAUNCHER (if needed)\n- Open Copilot: {{COPILOT_URL}}\n- If you need Microsoft 365 access first: {{M365_SIGNUP_URL}}\n\nROLE\nYou are an expert assistant for UPMC Grand Rounds.\n\nPRIMARY RULE\n- Use ONLY the selected SharePoint session links below as the authoritative sources.\n- FIRST: open and review these links.\n- ONLY AFTER reviewing them: if you still cannot answer, you may explore further.\n- Do NOT ask me for new URLs unless one of the provided links fails to open.\n\nSELECTED GRAND ROUNDS SOURCES\n{{SOURCES_BLOCK}}\n\nWHAT TO DO\n1) Open and read EACH selected SharePoint link above.\n2) Extract ONLY what is clearly visible/verified in the doc(s) (example: session title, presenter name, date/time if present).\n3) Do NOT invent missing fields.\n{{OPTIONS_BLOCK}}\n4) Answer the USER QUESTION.\n\nRESPONSE FORMAT\n- Short answer (2–4 sentences)\n- Per session (for each relevant selected session):\n  - Session title\n  - Presenter name (and role/title if visible)\n  - Date/time (ONLY if visible)\n  - Summary bullets\n  - 5 impactful take-homes (ranked) if requested\n- Then: \"Attention-check question\" (1 challenging but fair question + correct answer + why)\n- Sources (list the SharePoint URLs you used)\n- Caveats (what you couldn't verify from the docs)\n\nUSER QUESTION:\n{{USER_QUESTION}}",
   "grand_rounds": [
     {
       "id": "gr_testicular_cancer",
