@@ -60,9 +60,7 @@
     }
     .dot{ width:8px; height:8px; border-radius:999px; background:#22c55e; box-shadow:0 0 0 4px rgba(34,197,94,.28); }
 
-    .actionsTop{
-      display:flex; gap:8px; flex-wrap:wrap; align-items:center;
-    }
+    .actionsTop{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 
     .layout{
       margin-top:18px;
@@ -209,11 +207,6 @@
       box-shadow:0 4px 12px rgba(37,99,235,.28);
     }
 
-    .opts{
-      display:grid;
-      gap:8px;
-      margin-top:8px;
-    }
     .opt{
       display:flex;
       gap:10px;
@@ -224,6 +217,7 @@
       background:#fff;
       font-size:.86rem;
       line-height:1.25;
+      margin-top:8px;
     }
 
     .btnRow{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
@@ -255,6 +249,11 @@
     }
     .mini:hover{ background:var(--accent2); transform:translateY(-1px); box-shadow:0 6px 16px rgba(37,99,235,.40); }
 
+    .tooltipWrap{ position:relative; display:inline-flex; }
+    .tooltipWrap:hover .tip{
+      opacity:1; transform:translateY(0);
+      pointer-events:auto;
+    }
     .ghost{
       padding:8px 12px; border-radius:999px;
       border:1px solid rgba(37,99,235,.35);
@@ -267,6 +266,25 @@
       white-space:nowrap;
     }
     .ghost:hover{ transform:translateY(-1px); box-shadow:0 6px 16px rgba(37,99,235,.18); }
+
+    .tip{
+      position:absolute;
+      top:110%;
+      right:0;
+      width:min(360px, 80vw);
+      background:#111827;
+      color:#fff;
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:.82rem;
+      line-height:1.35;
+      box-shadow:0 14px 40px rgba(0,0,0,.35);
+      opacity:0;
+      transform:translateY(-6px);
+      pointer-events:none;
+      transition:opacity .15s ease, transform .15s ease;
+      z-index:999;
+    }
 
     .out{
       background:#0f172a;
@@ -295,28 +313,6 @@
       z-index:9999;
       max-width:90vw;
     }
-    details{
-      margin-top:10px;
-      border:1px solid rgba(209,213,219,.9);
-      border-radius:14px;
-      background:#fff;
-      padding:10px;
-    }
-    summary{
-      cursor:pointer;
-      font-weight:900;
-      color:var(--accent2);
-      list-style:none;
-    }
-    summary::-webkit-details-marker{ display:none; }
-    .howto{
-      margin-top:8px;
-      font-size:.86rem;
-      color:var(--text);
-      line-height:1.35;
-    }
-    .howto ol{ margin:8px 0 0 18px; }
-    .howto li{ margin:4px 0; }
   </style>
 </head>
 
@@ -327,23 +323,10 @@
       <div>
         <div class="title" id="pageTitle">UPMC Grand Rounds — Copilot Payload Builder</div>
         <div class="subtitle">
-          Select sessions → build payload → open Copilot → paste prompt.
+          Select sessions → build payload → Copilot opens → paste prompt.
           <br><strong>Only for use with UPMC Microsoft 365 Copilot.</strong>
         </div>
         <div class="meta" id="loadInfo">Loading catalog…</div>
-
-        <details open>
-          <summary>✅ How to get Microsoft 365 (M365) Copilot access (click to collapse)</summary>
-          <div class="howto">
-            <ol>
-              <li>Click <strong>Get 365</strong> to open the UPMC access/signup page.</li>
-              <li>Complete the steps and sign in with your UPMC credentials (if prompted).</li>
-              <li>Then click <strong>Open Copilot</strong> to launch Copilot on your computer.</li>
-              <li>Come back here and click <strong>Build & Open Copilot</strong> to copy the payload prompt automatically.</li>
-            </ol>
-            Tip: If Copilot can’t open a SharePoint link due to permissions, it should say so clearly.
-          </div>
-        </details>
       </div>
 
       <div class="actionsTop">
@@ -376,23 +359,14 @@
 
       <fieldset>
         <legend>Options</legend>
-        <div class="opts">
-          <label class="opt">
-            <input type="checkbox" id="optTakehomes" />
-            <span><strong>Include 5 impactful take-homes</strong> (ranked most important → least) per session.</span>
-          </label>
-          <label class="opt">
-            <input type="checkbox" id="optSpeakerEmail" />
-            <span><strong>Surface speaker email</strong> (if present) + draft a short comment/thank-you note.</span>
-          </label>
-          <label class="opt">
-            <input type="checkbox" id="optRefs" />
-            <span><strong>Extract referenced links/resources</strong> mentioned inside the session docs.</span>
-          </label>
-        </div>
-
+        <label class="opt">
+          <input type="checkbox" id="optTakehomes" />
+          <span><strong>Include 5 impactful take-homes</strong> (ranked most important → least) per session.</span>
+        </label>
         <div class="hint">
-          If your question is blank, default output will: <strong>summarize + take-homes for each of the first 3 selected sessions.</strong>
+          If your question is blank, default output will:
+          <strong>summary + top take-homes for each of the first 3 selected sessions</strong>,
+          plus one attention-check question.
         </div>
       </fieldset>
 
@@ -422,8 +396,17 @@
         <div class="ptitle"><span class="step">2</span> Payload Preview</div>
 
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <a class="ghost" id="get365Btn" href="#" target="_blank" rel="noopener">✅ Get 365</a>
-          <a class="ghost" id="openCopilotBtn" href="#" target="_blank" rel="noopener">🚀 Open Copilot</a>
+          <span class="tooltipWrap">
+            <a class="ghost" id="get365Btn" href="#" target="_blank" rel="noopener">✅ Get 365</a>
+            <span class="tip">
+              If Copilot doesn't open or you don't have access:
+              <br>1) Click <strong>Get 365</strong>
+              <br>2) Sign in with your UPMC credentials
+              <br>3) Complete the activation steps
+              <br>Then return here and click <strong>Build & Open Copilot</strong>.
+            </span>
+          </span>
+
           <button class="mini" id="copilotBtn" type="button">🪟 Build & Open Copilot</button>
         </div>
       </div>
@@ -448,7 +431,7 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
 (function(){
   'use strict';
 
-  // ✅ Use full URL so the loader never guesses wrong
+  // ✅ Full URL prevents “same-folder” guessing problems on GitHub Pages
   const CATALOG_URL_OVERRIDE = "https://dormantone.github.io/payloadprompt/grand_rounds_catalog.json";
   const DEFAULT_JSON_FILENAME = "grand_rounds_catalog.json";
 
@@ -460,8 +443,6 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
   const suggestionsEl = document.getElementById('suggestions');
 
   const optTakehomes = document.getElementById('optTakehomes');
-  const optSpeakerEmail = document.getElementById('optSpeakerEmail');
-  const optRefs = document.getElementById('optRefs');
 
   const questionEl = document.getElementById('question');
   const outputEl = document.getElementById('output');
@@ -473,7 +454,6 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
   const clearBtn = document.getElementById('clearBtn');
 
   const get365Btn = document.getElementById('get365Btn');
-  const openCopilotBtn = document.getElementById('openCopilotBtn');
   const copilotBtn = document.getElementById('copilotBtn');
 
   let catalog = null;
@@ -514,16 +494,11 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     const res = await fetch(u.toString(), { cache:"no-store" });
     if(!res.ok) throw new Error(`HTTP ${res.status} (${res.statusText}) ${res.url}`);
     const text = await res.text();
-
     const t = text.trim();
     if(t.startsWith("<!DOCTYPE html") || t.startsWith("<html")) {
       throw new Error("Got HTML instead of JSON. Wrong path or not GitHub Pages.");
     }
-    try {
-      return JSON.parse(text);
-    } catch(e){
-      throw new Error("JSON parse error: " + e.message + " | First 120 chars: " + t.slice(0,120));
-    }
+    return JSON.parse(text);
   }
 
   function normalizeSessions(){
@@ -539,15 +514,12 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     const defs = catalog.defaults || {};
     const opt = defs.options || {};
 
-    // Options defaults
+    // Option default
     optTakehomes.checked = (opt.include_takehomes !== false);
-    optSpeakerEmail.checked = (opt.include_speaker_email !== false);
-    optRefs.checked = (opt.include_referenced_links === true);
 
-    // Default selection: top N NON-archives sessions
+    // Default selection: top N NON-archives
     selectedIds = new Set();
     const want = Number(defs.default_selected_count || 3);
-
     const nonArchives = sessions.filter(s => s.status !== "archives");
     for(let i=0; i<Math.min(want, nonArchives.length); i++){
       selectedIds.add(nonArchives[i].id);
@@ -623,22 +595,16 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
 
   function buildOptionsBlock(){
     const lines = [];
-    if(optTakehomes.checked) lines.push("- Provide 5 impactful take-homes ranked most important → least (per session).");
-    if(optSpeakerEmail.checked) lines.push("- If a speaker email is present, surface it and draft a short comment/thank-you note with one thoughtful question.");
-    if(optRefs.checked) lines.push("- Extract referenced links/resources mentioned inside the document(s), and label each.");
+    if(optTakehomes.checked) {
+      lines.push("- Provide 5 impactful take-homes ranked most important → least (per session).");
+    }
     return lines.length ? (lines.join("\n") + "\n") : "";
   }
 
   function buildDefaultQuestionTop3(){
     const selected = getSelectedSessions().filter(s => s.status !== "archives").slice(0,3);
     const names = selected.map(s => s.name).join("; ");
-
-    let q = `Summarize EACH of the first ${selected.length} selected Grand Rounds sessions (${names}). For EACH session: extract presenter name + role/title, date/time, attendance code, and list ALL available links (video/transcript/take-home/mind map/other). Provide 5 impactful take-homes per session ranked most important → least important.`;
-
-    if(optRefs.checked) q += " Also list referenced links/resources mentioned inside the session docs.";
-    if(optSpeakerEmail.checked) q += " If a speaker email is present, surface it and draft a short comment/thank-you note.";
-
-    return q;
+    return `Summarize EACH of the first ${selected.length} selected Grand Rounds sessions (${names}). For EACH session: give 6 crisp bullets and 5 impactful take-homes ranked most important → least important. Then ask me ONE question that proves I was paying attention and include the correct answer + why.`;
   }
 
   function buildPrompt(){
@@ -728,12 +694,9 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     const baseDir = new URL(".", location.href).toString();
     const relCandidate = new URL(DEFAULT_JSON_FILENAME, baseDir).toString();
 
-    const candidates = [
-      CATALOG_URL_OVERRIDE,
-      relCandidate
-    ];
-
+    const candidates = [ CATALOG_URL_OVERRIDE, relCandidate ];
     let lastErr = null;
+
     for(const u of candidates){
       try {
         loadInfo.textContent = "Loading catalog from:\n" + u;
@@ -743,7 +706,6 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
         if(catalog.catalog_name) pageTitle.textContent = catalog.catalog_name;
 
         get365Btn.href = catalog.launcher.m365_signup_url;
-        openCopilotBtn.href = catalog.launcher.copilot_url;
 
         normalizeSessions();
         applyDefaults();
