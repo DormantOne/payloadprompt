@@ -1,16 +1,12 @@
 {
-  "version": "2.1",
+  "version": "2.3",
   "catalog_name": "UPMC Grand Rounds — Copilot Payload Prompts",
   "launcher": {
     "copilot_url": "https://www.microsoft365.com/copilot",
     "m365_signup_url": "https://apps.powerapps.com/play/e/c34e244b-e683-4eef-bb66-67176b581713/a/daf86d65-9ffb-4e95-aaf2-388bbb5304bf?tenantId=8b3dd73e-4e72-4679-b191-56da1588712b&hint=2e699ac1-227b-4779-ac48-f7a1b3ff5631&sourcetime=1743427811944"
   },
   "defaults": {
-    "default_selected_ids": [
-      "gr_testicular_cancer_internist",
-      "gr_lifestyle_medicine",
-      "gr_fixing_health_care"
-    ],
+    "default_selected_count": 3,
     "options": {
       "include_takehomes": true,
       "include_speaker_email": true,
@@ -18,34 +14,41 @@
     }
   },
   "suggestion_questions": [
-    "Who gave a grand rounds on [TOPIC]? Search the selected sessions and return: session title, presenter name + role/title, date/time, attendance code, and the session link.",
+    "Who gave a Grand Rounds on [TOPIC]? Search the selected sessions and return: session title, presenter name + role/title, date/time, attendance code, and the session link.",
     "Are there any referenced links or SharePoint resources about [TOPIC] in these sessions? List and label them (video, transcript, take-home, mind map, other).",
-    "For the most relevant selected session: extract title, presenter, date/time, attendance code, and ALL available links (video/transcript/take-home/mind map).",
+    "For the most relevant selected session: extract title, presenter, date/time, attendance code, and ALL available links (video/transcript/take-home/mind map/other).",
     "Give me 5 impactful take-homes from the most relevant selected session, ranked most important → least important.",
-    "If a speaker email is listed anywhere in the session document, surface it and draft a short comment/thank-you note (3–5 sentences) with one thoughtful question."
+    "If a speaker email is listed anywhere in the session document, surface it and draft a short comment/thank-you note (3–5 sentences) with one thoughtful question.",
+    "Ask me ONE question that proves I was paying attention and understand the material. Make it challenging but fair, and provide the correct answer + why."
   ],
-  "prompt_template": "LAUNCHER (if needed)\n- Open Copilot: {{COPILOT_URL}}\n- If you need M365 access first: {{M365_SIGNUP_URL}}\n\nROLE\nYou are an expert assistant for UPMC Grand Rounds.\nOpen and read the selected public SharePoint session documents below, then answer the user’s question using only what you can verify from those sources.\n\nSELECTED GRAND ROUNDS SOURCES\n{{SOURCES_BLOCK}}\n\nWHAT TO DO\n1) Open and read EACH selected SharePoint link.\n2) Extract key fields if visible: session title, presenter name + role/title, date/time, attendance code.\n3) Identify ALL linked resources (video/transcript/take-home/mind map/other).\n4) Identify any referenced links/resources mentioned inside the document(s).\n{{OPTIONS_BLOCK}}\n5) Answer the USER QUESTION using ONLY what you can verify from the source content.\n\nRESPONSE FORMAT\n- Short answer (2–4 sentences)\n- Who gave this Grand Rounds? (presenter name + role/title)\n- Session details (date/time + attendance code)\n- Links (label each: video / transcript / take-home / mind map / other)\n- Referenced links/resources mentioned inside the doc(s)\n- Speaker email (if found)\n- Sources (include the SharePoint URLs you actually used)\n- Caveats (missing/uncertain fields)\n\nUSER QUESTION:\n{{USER_QUESTION}}",
+  "prompt_template": "LAUNCHER (if needed)\n- Open Copilot: {{COPILOT_URL}}\n- If you need Microsoft 365 access first: {{M365_SIGNUP_URL}}\n\nROLE\nYou are an expert assistant for UPMC Grand Rounds.\n\nPRIMARY RULE\n- Use the selected SharePoint session links below as the authoritative sources.\n- FIRST: open and review these links.\n- ONLY AFTER reviewing them: if you still cannot answer, you may explore further using other sources.\n- Do NOT ask me for new URLs unless one of the provided links fails to open.\n\nSELECTED GRAND ROUNDS SOURCES\n{{SOURCES_BLOCK}}\n\nWHAT TO DO\n1) Open and read EACH selected SharePoint link above.\n2) Extract key fields if visible: session title, presenter name + role/title, date/time, attendance code.\n3) Identify ALL linked resources inside the doc(s): video/transcript/take-home/mind map/other.\n4) If the user asks about a topic [TOPIC], try to infer it from the question OR scan the selected sessions for the best match. If [TOPIC] is still ambiguous, ask one clarifying question ONLY AFTER checking the docs.\n{{OPTIONS_BLOCK}}\n5) Answer the USER QUESTION using ONLY what you can verify.\n\nRESPONSE FORMAT\n- Short answer (2–4 sentences)\n- Per session (for each relevant selected session):\n  - Presenter (name + role/title)\n  - Session details (date/time + attendance code)\n  - Links (label each: video / transcript / take-home / mind map / other)\n  - Referenced links/resources mentioned inside the doc (if any)\n  - Speaker email (if found)\n  - 5 impactful take-homes (ranked most important → least) if requested\n- Sources (include the SharePoint URLs you actually used)\n- Caveats (missing/uncertain fields)\n\nUSER QUESTION:\n{{USER_QUESTION}}",
   "grand_rounds": [
     {
-      "id": "gr_testicular_cancer_internist",
-      "grand_rounds_name": "Testicular Cancer for the Internist",
-      "public_sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQBxv6C1MEI1TL6JEDocS8avAYROzCCgv-XtSolPQBOGR68?e=TXBFV0"
+      "id": "gr_testicular_cancer",
+      "grand_rounds_name": "Testicular Cancer",
+      "public_sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQDcEYQ3zVBGQb3AZlhGunVMAUiGAHTkZ6sUKgBQ83HXsRU?e=S1Z7yu"
     },
     {
       "id": "gr_lifestyle_medicine",
       "grand_rounds_name": "Lifestyle Medicine",
-      "public_sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQBxv6C1MEI1TL6JEDocS8avAYROzCCgv-XtSolPQBOGR68?e=TXBFV0"
+      "public_sharepoint_url": "https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/IQCwXPV0qoRrSZ8BGjAiGHznATB9v8pQK6nBaRzUzrm9qkA?e=bRejdB"
     },
     {
-      "id": "gr_fixing_health_care",
-      "grand_rounds_name": "Fixing Health Care",
-      "public_sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQBuM_I3wliHTq-MUfJSTGswAcy5xuSy7NWpl8EqmWGbD7E?e=6oFrdT"
+      "id": "gr_how_to_fix_medicine",
+      "grand_rounds_name": "How to Fix Medicine",
+      "public_sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQBuM_I3wliHTq-MUfJSTGswAcy5xuSy7NWpl8EqmWGbD7E?e=4HKRD8"
     },
     {
       "id": "gr_marijuana",
-      "grand_rounds_name": "Marijuana (Backlog)",
-      "public_sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQC6bnPz5RTQRYt-aTBhxxycATw88d4sDIMn2eW1biHcmUs?e=AdWTIN",
-      "status": "backlog"
+      "grand_rounds_name": "Marijuana",
+      "public_sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQC6bnPz5RTQRYt-aTBhxxycATw88d4sDIMn2eW1biHcmUs?e=I6dqNe",
+      "status": "archives"
+    },
+    {
+      "id": "gr_av_fistulas",
+      "grand_rounds_name": "AV Fistulas",
+      "public_sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQABLSHQ_3wTRbJpn_QMSBD7AQ5A7lu1ao9gjLb29P4Uia8?e=aXN4gK",
+      "status": "archives"
     }
   ]
 }
