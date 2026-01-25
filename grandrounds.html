@@ -63,18 +63,6 @@
     .actionsTop{
       display:flex; gap:8px; flex-wrap:wrap; align-items:center;
     }
-    .btnTop{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:8px 12px; border-radius:999px;
-      border:1px solid rgba(37,99,235,.30);
-      background:rgba(37,99,235,.08);
-      color:var(--accent2);
-      font-weight:900; font-size:.82rem;
-      text-decoration:none; cursor:pointer;
-      transition:transform .15s ease, box-shadow .15s ease;
-      white-space:nowrap;
-    }
-    .btnTop:hover{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(37,99,235,.18); }
 
     .layout{
       margin-top:18px;
@@ -177,6 +165,7 @@
       word-break:break-word;
     }
     .rowLink:hover{ text-decoration:underline; }
+
     .pill{
       align-self:start;
       border:1px solid rgba(37,99,235,.35);
@@ -188,9 +177,9 @@
       font-weight:900;
       white-space:nowrap;
     }
-    .pill.backlog{
+    .pill.archives{
       border-color:rgba(245,158,11,.55);
-      background:rgba(245,158,11,.10);
+      background:rgba(245,158,11,.12);
       color:#92400e;
     }
 
@@ -294,6 +283,7 @@
       margin-top:6px;
     }
     .meta{ margin-top:8px; font-size:.75rem; color:var(--muted); line-height:1.35; word-break:break-word; }
+
     .toast{
       position:fixed; bottom:18px; right:18px;
       background:#111827; color:#fff;
@@ -337,22 +327,21 @@
       <div>
         <div class="title" id="pageTitle">UPMC Grand Rounds — Copilot Payload Builder</div>
         <div class="subtitle">
-          Select sessions → build payload → open Copilot. Paste the payload into Copilot chat.
+          Select sessions → build payload → open Copilot → paste prompt.
           <br><strong>Only for use with UPMC Microsoft 365 Copilot.</strong>
         </div>
         <div class="meta" id="loadInfo">Loading catalog…</div>
 
-        <!-- Careful M365 instructions (collapsible) -->
         <details open>
-          <summary>✅ How to get Microsoft 365 (M365) Copilot access</summary>
+          <summary>✅ How to get Microsoft 365 (M365) Copilot access (click to collapse)</summary>
           <div class="howto">
             <ol>
               <li>Click <strong>Get 365</strong> to open the UPMC access/signup page.</li>
-              <li>Complete access steps (if prompted) and sign in with your UPMC credentials.</li>
-              <li>Then click <strong>Open Copilot</strong> to launch Microsoft 365 Copilot on your computer.</li>
-              <li>Come back here and click <strong>Build & Open Copilot</strong> to copy your payload automatically.</li>
+              <li>Complete the steps and sign in with your UPMC credentials (if prompted).</li>
+              <li>Then click <strong>Open Copilot</strong> to launch Copilot on your computer.</li>
+              <li>Come back here and click <strong>Build & Open Copilot</strong> to copy the payload prompt automatically.</li>
             </ol>
-            Tip: If Copilot can’t open the SharePoint session link due to permissions, it should say so clearly.
+            Tip: If Copilot can’t open a SharePoint link due to permissions, it should say so clearly.
           </div>
         </details>
       </div>
@@ -374,7 +363,7 @@
       <fieldset>
         <legend>Grand Rounds Sessions (checkable)</legend>
         <div class="hint">
-          Default selection is the <strong>top 3 sessions</strong> (non-backlog).
+          Default selection is the <strong>top 3 sessions</strong> (non-Archives).
         </div>
 
         <div class="btnRow">
@@ -411,8 +400,8 @@
         <legend>Your question</legend>
         <textarea id="question" placeholder="Leave blank for default summary + take-homes (top 3 sessions)…"></textarea>
         <div class="hint">
-          Click a suggestion bubble below to auto-fill a strong query like:
-          “Who gave a Grand Rounds on [TOPIC]?” or “Referenced resources about [TOPIC]?”
+          Use the bubbles below for strong questions like:
+          “Who gave a Grand Rounds on [TOPIC]?” or “Ask me a question that proves I was paying attention.”
         </div>
       </fieldset>
 
@@ -433,7 +422,6 @@
         <div class="ptitle"><span class="step">2</span> Payload Preview</div>
 
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <!-- REQUIRED: Get 365 before Copilot -->
           <a class="ghost" id="get365Btn" href="#" target="_blank" rel="noopener">✅ Get 365</a>
           <a class="ghost" id="openCopilotBtn" href="#" target="_blank" rel="noopener">🚀 Open Copilot</a>
           <button class="mini" id="copilotBtn" type="button">🪟 Build & Open Copilot</button>
@@ -460,7 +448,7 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
 (function(){
   'use strict';
 
-  // ✅ KEY FIX: Force full absolute URL first (then fallback to relative)
+  // ✅ Use full URL so the loader never guesses wrong
   const CATALOG_URL_OVERRIDE = "https://dormantone.github.io/payloadprompt/grand_rounds_catalog.json";
   const DEFAULT_JSON_FILENAME = "grand_rounds_catalog.json";
 
@@ -556,13 +544,13 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     optSpeakerEmail.checked = (opt.include_speaker_email !== false);
     optRefs.checked = (opt.include_referenced_links === true);
 
-    // Default selection: top N NON-backlog sessions
+    // Default selection: top N NON-archives sessions
     selectedIds = new Set();
     const want = Number(defs.default_selected_count || 3);
 
-    const nonBacklog = sessions.filter(s => s.status !== "backlog");
-    for(let i=0; i<Math.min(want, nonBacklog.length); i++){
-      selectedIds.add(nonBacklog[i].id);
+    const nonArchives = sessions.filter(s => s.status !== "archives");
+    for(let i=0; i<Math.min(want, nonArchives.length); i++){
+      selectedIds.add(nonArchives[i].id);
     }
   }
 
@@ -597,8 +585,8 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
       mid.appendChild(link);
 
       const pill = document.createElement("div");
-      pill.className = "pill" + (s.status === "backlog" ? " backlog" : "");
-      pill.textContent = s.status === "backlog" ? "Backlog" : "GR";
+      pill.className = "pill" + (s.status === "archives" ? " archives" : "");
+      pill.textContent = s.status === "archives" ? "Archives" : "GR";
 
       row.appendChild(cb);
       row.appendChild(mid);
@@ -642,10 +630,9 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
   }
 
   function buildDefaultQuestionTop3(){
-    const selected = getSelectedSessions().filter(s => s.status !== "backlog").slice(0,3);
+    const selected = getSelectedSessions().filter(s => s.status !== "archives").slice(0,3);
     const names = selected.map(s => s.name).join("; ");
 
-    // Force summary + takehomes by default (per your request)
     let q = `Summarize EACH of the first ${selected.length} selected Grand Rounds sessions (${names}). For EACH session: extract presenter name + role/title, date/time, attendance code, and list ALL available links (video/transcript/take-home/mind map/other). Provide 5 impactful take-homes per session ranked most important → least important.`;
 
     if(optRefs.checked) q += " Also list referenced links/resources mentioned inside the session docs.";
@@ -712,7 +699,6 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     });
   }
 
-  // buttons
   seeBtn.addEventListener("click", () => {
     const p = buildPrompt();
     if(p) toast("Payload generated below.");
@@ -732,7 +718,6 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     renderSessions();
   });
 
-  // Load catalog with absolute override first
   async function loadCatalog(){
     if(location.protocol === "file:"){
       loadInfo.textContent = "❌ Opened as file:// — JSON fetch will fail. Use GitHub Pages URL.";
