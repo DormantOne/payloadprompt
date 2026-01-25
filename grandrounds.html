@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>UPMC Grand Rounds Copilot Payload Builder (JSON Loader)</title>
+  <title>UPMC Grand Rounds Copilot Payload Builder (Catalog-Driven)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -77,7 +77,7 @@
       background: rgba(37, 99, 235, 0.06);
       color: var(--accent-strong);
       font-size: 0.78rem;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.08em;
       border: 1px solid rgba(37, 99, 235, 0.18);
@@ -92,41 +92,8 @@
       box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.28);
     }
 
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-      flex-wrap: wrap;
-    }
-
-    .header-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(37, 99, 235, 0.30);
-      background: rgba(37, 99, 235, 0.08);
-      color: var(--accent-strong);
-      text-decoration: none;
-      font-size: 0.82rem;
-      font-weight: 700;
-      white-space: nowrap;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .header-link:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.20);
-    }
-
     /* Help box */
-    .help-wrap {
-      margin-top: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    .help-wrap { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
 
     .help-box {
       border-radius: 14px;
@@ -148,10 +115,9 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-weight: 800;
+      font-weight: 900;
       color: var(--accent-strong);
       font-size: 0.92rem;
-      letter-spacing: 0.01em;
     }
 
     .help-close {
@@ -162,21 +128,13 @@
       border-radius: 999px;
       padding: 6px 10px;
       font-size: 0.78rem;
-      font-weight: 800;
+      font-weight: 900;
       cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
-      white-space: nowrap;
     }
-    .help-close:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.18);
-    }
+    .help-close:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,0.18); }
 
-    .help-body {
-      color: var(--text);
-      font-size: 0.86rem;
-      line-height: 1.35;
-    }
+    .help-body { color: var(--text); font-size: 0.86rem; line-height: 1.35; }
 
     .help-body ol {
       margin: 6px 0 0 18px;
@@ -185,19 +143,10 @@
       gap: 6px;
     }
 
-    .help-body a {
-      color: var(--accent-strong);
-      font-weight: 700;
-      text-decoration: none;
-    }
+    .help-body a { color: var(--accent-strong); font-weight: 800; text-decoration: none; }
     .help-body a:hover { text-decoration: underline; }
 
-    .help-mini-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 10px;
-    }
+    .help-mini-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 
     .mini-btn {
       display: inline-flex;
@@ -209,15 +158,12 @@
       border-radius: 999px;
       padding: 7px 10px;
       font-size: 0.78rem;
-      font-weight: 700;
+      font-weight: 900;
       cursor: pointer;
       text-decoration: none;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
-    .mini-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.16);
-    }
+    .mini-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,0.16); }
 
     .show-help-btn {
       display: none;
@@ -228,15 +174,11 @@
       border-radius: 999px;
       padding: 7px 10px;
       font-size: 0.78rem;
-      font-weight: 800;
+      font-weight: 900;
       cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
-      white-space: nowrap;
     }
-    .show-help-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.16);
-    }
+    .show-help-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,0.16); }
 
     .layout {
       margin-top: 18px;
@@ -245,9 +187,7 @@
       gap: 16px;
     }
 
-    @media (max-width: 980px) {
-      .layout { grid-template-columns: minmax(0, 1fr); }
-    }
+    @media (max-width: 980px) { .layout { grid-template-columns: minmax(0, 1fr); } }
 
     .panel {
       background: var(--panel-bg);
@@ -271,7 +211,7 @@
 
     .panel-title {
       font-size: 0.98rem;
-      font-weight: 800;
+      font-weight: 900;
       color: var(--text);
       display: flex;
       align-items: center;
@@ -289,8 +229,7 @@
       background: var(--accent);
       color: #ffffff;
       font-size: 0.85rem;
-      font-weight: 800;
-      flex-shrink: 0;
+      font-weight: 900;
     }
 
     fieldset {
@@ -307,12 +246,12 @@
       text-transform: uppercase;
       letter-spacing: 0.08em;
       color: var(--text-soft);
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .input-label {
       font-size: 0.8rem;
-      font-weight: 800;
+      font-weight: 900;
       color: var(--text-soft);
       margin-bottom: 4px;
     }
@@ -364,7 +303,7 @@
       border-radius: 999px;
       cursor: pointer;
       transition: all 0.15s ease;
-      font-weight: 650;
+      font-weight: 750;
       text-align: left;
     }
 
@@ -375,12 +314,7 @@
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
     }
 
-    .actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      flex-wrap: wrap;
-    }
+    .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 
     .btn {
       flex: 1;
@@ -389,7 +323,7 @@
       border: none;
       border-radius: var(--radius-sm);
       font-size: 0.82rem;
-      font-weight: 800;
+      font-weight: 900;
       cursor: pointer;
       transition: all 0.15s ease;
       display: flex;
@@ -398,33 +332,13 @@
       gap: 6px;
     }
 
-    .btn-primary {
-      background: var(--accent);
-      color: #ffffff;
-    }
+    .btn-primary { background: var(--accent); color: #ffffff; }
+    .btn-primary:hover { background: var(--accent-strong); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
 
-    .btn-primary:hover {
-      background: var(--accent-strong);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-    }
+    .btn-secondary { background: #e5e7eb; color: var(--text); }
+    .btn-secondary:hover { background: #d1d5db; transform: translateY(-1px); box-shadow: 0 3px 8px rgba(15,23,42,0.15); }
 
-    .btn-secondary {
-      background: #e5e7eb;
-      color: var(--text);
-    }
-
-    .btn-secondary:hover {
-      background: #d1d5db;
-      transform: translateY(-1px);
-      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.15);
-    }
-
-    .btn-compact {
-      flex: 0 0 auto;
-      padding: 8px 12px;
-      border-radius: 999px;
-    }
+    .btn-compact { flex: 0 0 auto; padding: 8px 12px; border-radius: 999px; }
 
     .header-btn-small {
       padding: 7px 12px;
@@ -433,7 +347,7 @@
       background: var(--accent);
       color: #ffffff;
       font-size: 0.82rem;
-      font-weight: 800;
+      font-weight: 900;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -442,12 +356,7 @@
       transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
       white-space: nowrap;
     }
-
-    .header-btn-small:hover {
-      background: var(--accent-strong);
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
-    }
+    .header-btn-small:hover { background: var(--accent-strong); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,0.4); }
 
     .header-btn-ghost {
       padding: 7px 12px;
@@ -456,18 +365,16 @@
       background: #ffffff;
       color: var(--accent-strong);
       font-size: 0.82rem;
-      font-weight: 800;
+      font-weight: 900;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
       white-space: nowrap;
+      text-decoration: none;
     }
-    .header-btn-ghost:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.18);
-    }
+    .header-btn-ghost:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,0.18); }
 
     @keyframes pulse {
       0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
@@ -481,10 +388,10 @@
       color: #e2e8f0;
       border-radius: var(--radius-md);
       padding: 10px;
-      font-family: "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 0.82rem;
       line-height: 1.5;
-      max-height: 520px;
+      max-height: 560px;
       overflow-y: auto;
       white-space: pre-wrap;
       word-wrap: break-word;
@@ -498,6 +405,14 @@
       line-height: 1.35;
     }
 
+    .small-meta {
+      font-size: 0.75rem;
+      color: var(--text-soft);
+      margin-top: 6px;
+      line-height: 1.35;
+    }
+    .small-meta strong { font-weight: 900; }
+
     .toast {
       position: fixed;
       bottom: 18px;
@@ -508,7 +423,7 @@
       border-radius: var(--radius-sm);
       box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
       font-size: 0.88rem;
-      font-weight: 650;
+      font-weight: 750;
       z-index: 1000;
       animation: slideIn 0.25s ease;
       max-width: 90vw;
@@ -519,20 +434,12 @@
       to { transform: translateX(0); opacity: 1; }
     }
 
-    .small-meta {
-      font-size: 0.75rem;
-      color: var(--text-soft);
-      margin-top: 6px;
-      line-height: 1.35;
-    }
-    .small-meta strong { font-weight: 800; }
-
-    /* Session checklist */
+    /* Session list */
     .session-list {
       display: grid;
       gap: 8px;
       margin-top: 6px;
-      max-height: 240px;
+      max-height: 260px;
       overflow: auto;
       padding-right: 4px;
     }
@@ -542,14 +449,14 @@
       grid-template-columns: 22px 1fr auto;
       gap: 10px;
       align-items: start;
-      padding: 8px 8px;
+      padding: 8px;
       background: #fff;
       border: 1px solid rgba(209, 213, 219, 0.9);
       border-radius: 12px;
     }
 
     .session-title {
-      font-weight: 800;
+      font-weight: 900;
       font-size: 0.88rem;
       line-height: 1.25;
     }
@@ -558,7 +465,7 @@
       font-size: 0.78rem;
       color: var(--accent-strong);
       text-decoration: none;
-      font-weight: 700;
+      font-weight: 850;
       margin-top: 2px;
       display: inline-block;
     }
@@ -571,15 +478,18 @@
       border-radius: 999px;
       padding: 5px 10px;
       font-size: 0.74rem;
-      font-weight: 800;
+      font-weight: 900;
       white-space: nowrap;
+      align-self: start;
     }
 
-    .options-grid {
-      display: grid;
-      gap: 8px;
-      margin-top: 6px;
+    .pill.backlog {
+      border-color: rgba(245, 158, 11, 0.55);
+      background: rgba(245, 158, 11, 0.10);
+      color: #92400e;
     }
+
+    .options-grid { display: grid; gap: 8px; margin-top: 6px; }
 
     .checkline {
       display: flex;
@@ -609,18 +519,19 @@
   <header class="header">
     <div class="header-top">
       <div>
-        <div class="title">UPMC Grand Rounds Copilot Payload Builder</div>
+        <div class="title" id="pageTitle">UPMC Grand Rounds Copilot Payload Builder</div>
         <div class="subtitle">
-          JSON-powered prompt builder for Grand Rounds sessions. Select sessions → build a payload → open Copilot.
+          Catalog-driven prompt builder. Select sessions → build payload → open Copilot.
           <br><strong>Only for use with UPMC Microsoft 365 Copilot.</strong>
         </div>
       </div>
 
-      <div class="header-actions">
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
         <span class="badge">
           <span class="badge-dot"></span>
-          JSON Loader
+          Catalog Mode
         </span>
+        <span class="badge" id="loadedBadge">0 loaded</span>
       </div>
     </div>
 
@@ -654,13 +565,13 @@
 
           <div style="margin-top:10px;">
             <div class="input-label">Catalog JSON URL (GitHub Pages / RAW GitHub / local file)</div>
-            <input id="jsonUrlInput" type="text" placeholder="./grand_rounds_payloads_v1.json" />
+            <input id="jsonUrlInput" type="text" placeholder="./grand_rounds_payloads_v2.json" />
             <div class="actions">
               <button class="btn btn-secondary btn-compact" id="loadJsonBtn" type="button">🔄 Load JSON</button>
               <button class="btn btn-secondary btn-compact" id="useDefaultJsonBtn" type="button">↩️ Use Default</button>
             </div>
             <div class="hint">
-              Tip: On GitHub, use the <strong>raw.githubusercontent.com</strong> link for JSON if needed.
+              Tip: For GitHub raw JSON, use a <strong>raw.githubusercontent.com</strong> link.
             </div>
           </div>
         </div>
@@ -671,23 +582,20 @@
   </header>
 
   <div class="layout">
-    <!-- LEFT: selections + question -->
+    <!-- LEFT -->
     <section class="panel">
       <div class="panel-header">
         <div class="panel-title">
           <span class="step-badge">1</span>
           Select sessions + question
         </div>
-        <div class="pill" id="loadedCountPill">0 loaded</div>
+        <div class="pill" id="countPill">0 sessions</div>
       </div>
 
-      <div class="panel-body" style="display:flex; flex-direction:column; gap:10px;">
-
+      <div style="display:flex; flex-direction:column; gap:10px;">
         <fieldset>
           <legend>Sessions (checkboxes)</legend>
-          <div class="hint">
-            All sessions start selected. Uncheck any you don’t want included in the payload.
-          </div>
+          <div class="hint">All sessions start selected. Uncheck any you don’t want included in the payload.</div>
           <div class="actions">
             <button class="btn btn-secondary btn-compact" id="selectAllBtn" type="button">✅ Select all</button>
             <button class="btn btn-secondary btn-compact" id="selectNoneBtn" type="button">🚫 Select none</button>
@@ -700,23 +608,17 @@
           <div class="options-grid">
             <label class="checkline">
               <input type="checkbox" id="optTakehomes" />
-              <span>
-                <strong>Include 5 impactful take-homes</strong> ranked most important → least.
-              </span>
+              <span><strong>Include 5 impactful take-homes</strong> ranked most important → least.</span>
             </label>
 
             <label class="checkline">
               <input type="checkbox" id="optSpeakerEmail" />
-              <span>
-                <strong>Surface speaker email</strong> (if present) and draft a short “thank you + question” note.
-              </span>
+              <span><strong>Surface speaker email</strong> (if present) and draft a short comment/thank-you note.</span>
             </label>
 
             <label class="checkline">
               <input type="checkbox" id="optRefs" />
-              <span>
-                <strong>Extract referenced links/resources</strong> (any links or SharePoint resources mentioned inside the doc).
-              </span>
+              <span><strong>Extract referenced links/resources</strong> mentioned inside the session doc(s).</span>
             </label>
           </div>
         </fieldset>
@@ -724,28 +626,24 @@
         <fieldset>
           <legend>Your question</legend>
           <label class="input-label" for="question">Question to send to Copilot</label>
-          <textarea id="question" placeholder="e.g., Who gave a Grand Rounds on pancreatic cancer, and what were the key takeaways?"></textarea>
-          <div class="hint">
-            Leave blank to auto-generate a useful default based on your selected options.
-          </div>
+          <textarea id="question" placeholder="e.g., Who gave a Grand Rounds on diabetes and what were the referenced resources?"></textarea>
+          <div class="hint">Leave blank to auto-build a strong default question based on your selected options.</div>
         </fieldset>
 
         <fieldset>
-          <legend>Example questions</legend>
+          <legend>Example questions (from JSON)</legend>
           <div class="suggestions" id="suggestions"></div>
-          <div class="small-meta">
-            Click a bubble to use it; you can edit after.
-          </div>
+          <div class="small-meta">Click a bubble to use it; you can edit afterward.</div>
         </fieldset>
 
         <div class="actions">
-          <button class="btn btn-primary" id="see-btn" type="button">👁 See Prompt</button>
-          <button class="btn btn-secondary" id="clear-btn" type="button">🧹 Clear</button>
+          <button class="btn btn-primary" id="seeBtn" type="button">👁 See Prompt</button>
+          <button class="btn btn-secondary" id="clearBtn" type="button">🧹 Clear</button>
         </div>
       </div>
     </section>
 
-    <!-- RIGHT: output -->
+    <!-- RIGHT -->
     <section class="panel">
       <div class="panel-header">
         <div class="panel-title">
@@ -754,84 +652,87 @@
         </div>
 
         <div class="right-header-actions">
-          <!-- ✅ REQUIRED: Get 365 button BEFORE Copilot button -->
+          <!-- ✅ Get 365 button BEFORE Copilot button -->
           <a class="header-btn-ghost" id="get365Btn" href="#" target="_blank" rel="noopener">✅ Get 365</a>
-          <button class="header-btn-small" id="copilot-btn" type="button">🪟 Build & Open Copilot</button>
+          <button class="header-btn-small" id="copilotBtn" type="button">🪟 Build & Open Copilot</button>
         </div>
       </div>
 
-      <div class="panel-body">
-        <fieldset>
-          <legend>Generated payload prompt</legend>
-          <div class="output-header-note">
-            Click “Build & Open Copilot” to copy payload + open Copilot.
-          </div>
-          <div class="output-box" id="output">
+      <fieldset>
+        <legend>Generated payload prompt</legend>
+        <div class="output-header-note">
+          Click “Build & Open Copilot” to copy payload + open Copilot.
+        </div>
+        <div class="output-box" id="output">
 You haven't generated a payload yet.
 Click "See Prompt" or "Build & Open Copilot" to construct it.
-          </div>
-        </fieldset>
-
-        <div class="small-meta">
-          After Copilot opens, click in the chat box and press
-          <strong>Ctrl+V</strong> (Windows) or <strong>⌘+V</strong> (Mac) to paste the payload.
         </div>
+      </fieldset>
+
+      <div class="small-meta">
+        After Copilot opens, click in the chat box and press
+        <strong>Ctrl+V</strong> (Windows) or <strong>⌘+V</strong> (Mac) to paste the payload.
       </div>
     </section>
   </div>
 </div>
 
 <script>
-(function() {
+(function () {
   'use strict';
 
   // -------------------------
-  // Default JSON location:
-  // Put grand_rounds_payloads_v1.json in same folder as this HTML (GitHub Pages-friendly)
+  // Config
   // -------------------------
-  const DEFAULT_JSON_URL = "./grand_rounds_payloads_v1.json";
+  const DEFAULT_JSON_URL = "./grand_rounds_payloads_v2.json";
+  const HELP_STORAGE_KEY = "gr_help_dismissed_v3";
+  const JSON_URL_STORAGE_KEY = "gr_catalog_json_url_v2";
 
-  // State
-  let catalog = null;
-  let sessions = [];
-  let selectedIds = new Set();
+  // -------------------------
+  // DOM
+  // -------------------------
+  const pageTitle = document.getElementById('pageTitle');
+  const loadedBadge = document.getElementById('loadedBadge');
+  const countPill = document.getElementById('countPill');
 
-  // Elements
-  const questionEl = document.getElementById('question');
-  const suggestionsEl = document.getElementById('suggestions');
-  const outputEl = document.getElementById('output');
-  const seeBtn = document.getElementById('see-btn');
-  const clearBtn = document.getElementById('clear-btn');
-  const copilotBtn = document.getElementById('copilot-btn');
+  const helpBox = document.getElementById('helpBox');
+  const hideHelpBtn = document.getElementById('hideHelpBtn');
+  const showHelpBtn = document.getElementById('showHelpBtn');
+
+  const m365SignupLinkHelp = document.getElementById('m365SignupLinkHelp');
+  const copilotLinkHelp = document.getElementById('copilotLinkHelp');
+  const openCopilotMini = document.getElementById('openCopilotMini');
+  const getM365Mini = document.getElementById('getM365Mini');
+
+  const jsonUrlInput = document.getElementById('jsonUrlInput');
+  const loadJsonBtn = document.getElementById('loadJsonBtn');
+  const useDefaultJsonBtn = document.getElementById('useDefaultJsonBtn');
 
   const sessionListEl = document.getElementById('sessionList');
-  const loadedCountPill = document.getElementById('loadedCountPill');
+  const suggestionsEl = document.getElementById('suggestions');
 
   const optTakehomes = document.getElementById('optTakehomes');
   const optSpeakerEmail = document.getElementById('optSpeakerEmail');
   const optRefs = document.getElementById('optRefs');
 
+  const questionEl = document.getElementById('question');
+  const outputEl = document.getElementById('output');
+
   const selectAllBtn = document.getElementById('selectAllBtn');
   const selectNoneBtn = document.getElementById('selectNoneBtn');
 
+  const seeBtn = document.getElementById('seeBtn');
+  const clearBtn = document.getElementById('clearBtn');
+
   const get365Btn = document.getElementById('get365Btn');
+  const copilotBtn = document.getElementById('copilotBtn');
 
-  // Help panel controls
-  const helpBox = document.getElementById('helpBox');
-  const hideHelpBtn = document.getElementById('hideHelpBtn');
-  const showHelpBtn = document.getElementById('showHelpBtn');
-  const HELP_STORAGE_KEY = "gr_help_dismissed_v2";
-
-  // JSON loader controls
-  const jsonUrlInput = document.getElementById('jsonUrlInput');
-  const loadJsonBtn = document.getElementById('loadJsonBtn');
-  const useDefaultJsonBtn = document.getElementById('useDefaultJsonBtn');
-
-  // Help links
-  const m365SignupLinkHelp = document.getElementById('m365SignupLinkHelp');
-  const copilotLinkHelp = document.getElementById('copilotLinkHelp');
-  const openCopilotMini = document.getElementById('openCopilotMini');
-  const getM365Mini = document.getElementById('getM365Mini');
+  // -------------------------
+  // State
+  // -------------------------
+  let catalog = null;
+  let sessions = [];
+  let selectedIds = new Set();
 
   // -------------------------
   // Toast
@@ -846,19 +747,19 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
   }
 
   // -------------------------
-  // Help box show/hide with memory
+  // Help show/hide with memory
   // -------------------------
   function hideHelp(remember) {
-    if (helpBox) helpBox.style.display = "none";
-    if (showHelpBtn) showHelpBtn.style.display = "inline-flex";
+    helpBox.style.display = "none";
+    showHelpBtn.style.display = "inline-flex";
     if (remember) {
       try { localStorage.setItem(HELP_STORAGE_KEY, "1"); } catch (e) {}
     }
   }
 
   function showHelp() {
-    if (helpBox) helpBox.style.display = "block";
-    if (showHelpBtn) showHelpBtn.style.display = "none";
+    helpBox.style.display = "block";
+    showHelpBtn.style.display = "none";
     try { localStorage.removeItem(HELP_STORAGE_KEY); } catch (e) {}
   }
 
@@ -869,16 +770,15 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     else showHelp();
   }
 
-  if (hideHelpBtn) hideHelpBtn.addEventListener('click', () => hideHelp(true));
-  if (showHelpBtn) showHelpBtn.addEventListener('click', showHelp);
+  hideHelpBtn.addEventListener('click', () => hideHelp(true));
+  showHelpBtn.addEventListener('click', showHelp);
 
   // -------------------------
-  // Fetch + parse JSON catalog
+  // Fetch JSON
   // -------------------------
   async function fetchJson(url) {
-    // cache bust to avoid stale github pages caching
     const u = new URL(url, window.location.href);
-    u.searchParams.set("_", String(Date.now()));
+    u.searchParams.set("_", String(Date.now())); // cache bust
     const res = await fetch(u.toString(), { cache: "no-store" });
     if (!res.ok) throw new Error("HTTP " + res.status);
     return await res.json();
@@ -889,61 +789,48 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     if (!obj.launcher || !obj.launcher.copilot_url || !obj.launcher.m365_signup_url) {
       throw new Error("Invalid JSON: missing launcher.copilot_url or launcher.m365_signup_url");
     }
-    if (!Array.isArray(obj.grand_rounds)) {
-      throw new Error("Invalid JSON: missing grand_rounds array");
+    if (!Array.isArray(obj.grand_rounds)) throw new Error("Invalid JSON: grand_rounds must be an array");
+    if (!obj.prompt_template || typeof obj.prompt_template !== "string") {
+      throw new Error("Invalid JSON: missing prompt_template string");
+    }
+    if (!Array.isArray(obj.suggestion_questions)) {
+      throw new Error("Invalid JSON: suggestion_questions must be an array");
     }
     return obj;
   }
 
-  async function loadCatalog(url) {
-    showToast("Loading JSON catalog…", 1400);
-    const data = await fetchJson(url);
-    catalog = validateCatalog(data);
-
-    sessions = (catalog.grand_rounds || []).map(s => ({
-      id: s.id || ("gr_" + Math.random().toString(36).slice(2)),
-      name: s.grand_rounds_name || "Untitled Grand Rounds",
-      url: s.public_sharepoint_url || "",
-      defaultQ: s.default_user_question || ""
-    }));
-
-    // Default: all selected
-    selectedIds = new Set(sessions.map(s => s.id));
-
-    // Update launcher links everywhere
-    wireLauncherLinks();
-
-    // Render UI from catalog
-    renderSessionList();
-    renderSuggestions();
-
-    loadedCountPill.textContent = `${sessions.length} loaded`;
-    showToast(`Loaded ${sessions.length} sessions.`);
-  }
-
-  // -------------------------
-  // Launcher link wiring
-  // -------------------------
   function wireLauncherLinks() {
-    if (!catalog) return;
     const copilotUrl = catalog.launcher.copilot_url;
     const m365Url = catalog.launcher.m365_signup_url;
 
-    // Help area links
-    if (m365SignupLinkHelp) m365SignupLinkHelp.href = m365Url;
-    if (copilotLinkHelp) { copilotLinkHelp.href = copilotUrl; copilotLinkHelp.textContent = copilotUrl; }
-    if (openCopilotMini) openCopilotMini.href = copilotUrl;
-    if (getM365Mini) getM365Mini.href = m365Url;
+    m365SignupLinkHelp.href = m365Url;
+    copilotLinkHelp.href = copilotUrl;
+    copilotLinkHelp.textContent = "Microsoft 365 Copilot";
+    openCopilotMini.href = copilotUrl;
+    getM365Mini.href = m365Url;
+    get365Btn.href = m365Url;
 
-    // Right-side Get365 button
-    if (get365Btn) get365Btn.href = m365Url;
+    // Title
+    if (catalog.catalog_name) pageTitle.textContent = catalog.catalog_name;
   }
 
-  // -------------------------
-  // Render session checkbox list
-  // -------------------------
+  function normalizeSessions() {
+    sessions = catalog.grand_rounds.map(gr => ({
+      id: gr.id,
+      name: gr.grand_rounds_name || "Untitled Grand Rounds",
+      url: gr.public_sharepoint_url || "",
+      defaultQ: gr.default_user_question || "",
+      status: (gr.status || "").toLowerCase()
+    }));
+
+    selectedIds = new Set(sessions.map(s => s.id));
+    loadedBadge.textContent = `${sessions.length} loaded`;
+    countPill.textContent = `${sessions.length} sessions`;
+  }
+
   function renderSessionList() {
     sessionListEl.innerHTML = "";
+
     sessions.forEach(s => {
       const row = document.createElement('div');
       row.className = "session-row";
@@ -958,6 +845,7 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
       });
 
       const mid = document.createElement('div');
+
       const title = document.createElement('div');
       title.className = "session-title";
       title.textContent = s.name;
@@ -973,8 +861,8 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
       mid.appendChild(link);
 
       const pill = document.createElement('div');
-      pill.className = "pill";
-      pill.textContent = "GR";
+      pill.className = "pill" + (s.status === "backlog" ? " backlog" : "");
+      pill.textContent = s.status === "backlog" ? "Backlog" : "GR";
 
       row.appendChild(cb);
       row.appendChild(mid);
@@ -984,28 +872,11 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     });
   }
 
-  // -------------------------
-  // Example question chips
-  // -------------------------
   function renderSuggestions() {
     suggestionsEl.innerHTML = "";
 
-    const chips = [
-      "Who gave a Grand Rounds on [TOPIC]? Search the selected sessions and tell me presenter + date + session link.",
-      "Are there any referenced links or SharePoint resources about [TOPIC] in these sessions? List them with labels.",
-      "Find the attendance code + presenter for the most relevant selected session and confirm from the doc.",
-      "Summarize the selected session(s) into 5 clinical pearls and include any linked resources.",
-      "If there is a speaker email listed, surface it and draft a short appreciative message with one question."
-    ];
-
-    // Also include per-session defaults (if present)
-    sessions.forEach(s => {
-      if (s.defaultQ && s.defaultQ.trim().length > 0) {
-        chips.push(`(${s.name}) ${s.defaultQ.trim()}`);
-      }
-    });
-
-    chips.forEach(txt => {
+    // Global suggestions from JSON (your exact prompts)
+    catalog.suggestion_questions.forEach(txt => {
       const chip = document.createElement('button');
       chip.type = "button";
       chip.className = "suggest-chip";
@@ -1017,30 +888,58 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
       });
       suggestionsEl.appendChild(chip);
     });
+
+    // Add per-session defaults as extra chips
+    sessions.forEach(s => {
+      if (!s.defaultQ) return;
+      const chip = document.createElement('button');
+      chip.type = "button";
+      chip.className = "suggest-chip";
+      chip.textContent = `(${s.name}) ${s.defaultQ}`;
+      chip.addEventListener('click', () => {
+        questionEl.value = s.defaultQ;
+        questionEl.focus();
+        pulseCopilotButton();
+      });
+      suggestionsEl.appendChild(chip);
+    });
   }
 
-  // -------------------------
-  // Prompt builder
-  // -------------------------
   function getSelectedSessions() {
     return sessions.filter(s => selectedIds.has(s.id) && s.url);
   }
 
+  function buildOptionsBlock() {
+    const lines = [];
+    if (optTakehomes.checked) lines.push("- Provide 5 impactful take-homes ranked most important → least.");
+    if (optRefs.checked) lines.push("- Extract referenced links/resources mentioned inside the document(s), and label each link.");
+    if (optSpeakerEmail.checked) lines.push("- If a speaker email is present, surface it and draft a short comment/thank-you note with one thoughtful question.");
+
+    if (lines.length === 0) return "";
+    return lines.join("\n") + "\n";
+  }
+
   function buildDefaultQuestion() {
     const parts = [];
-    parts.push("Extract the title, presenter, date/time, and any attendance code for the most relevant selected session(s).");
+    parts.push("Who gave the most relevant selected Grand Rounds session? Confirm presenter name + role/title, date/time, and attendance code.");
+    if (optRefs.checked) parts.push("Are there any referenced links/resources mentioned inside the document(s)? List and label them.");
+    if (optTakehomes.checked) parts.push("Provide 5 impactful take-homes ranked most important → least.");
+    if (optSpeakerEmail.checked) parts.push("If the speaker email is present, surface it and draft a short comment/thank-you note.");
+    return parts.join(" ");
+  }
 
-    if (optTakehomes.checked) {
-      parts.push("Then provide 5 impactful take-homes ranked most important → least.");
-    }
-    if (optRefs.checked) {
-      parts.push("Also list any referenced links/resources mentioned in the document(s), including SharePoint links if present.");
-    }
-    if (optSpeakerEmail.checked) {
-      parts.push("If the speaker email is present anywhere, surface it and draft a short thank-you note with one thoughtful question.");
-    }
+  function fillTemplate(template, vars) {
+    // Simple exact string replace (no regex)
+    let out = template;
+    Object.keys(vars).forEach(k => {
+      out = out.split(`{{${k}}}`).join(String(vars[k]));
+    });
+    return out;
+  }
 
-    return parts.join("\n");
+  function buildSourcesBlock(selected) {
+    // nice readable list
+    return selected.map(s => `- ${s.name}\n  ${s.url}`).join("\n");
   }
 
   function buildPrompt() {
@@ -1055,66 +954,31 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
       return "";
     }
 
-    const copilotUrl = catalog.launcher.copilot_url;
-    const m365Url = catalog.launcher.m365_signup_url;
+    let userQ = (questionEl.value || "").trim();
+    if (!userQ) userQ = buildDefaultQuestion();
 
-    let q = (questionEl.value || "").trim();
-    if (!q) q = buildDefaultQuestion();
+    const sourcesBlock = buildSourcesBlock(selected);
+    const optionsBlock = buildOptionsBlock();
 
-    // Build multi-source payload
-    const sourcesLines = selected.map(s => `- ${s.name}\n  ${s.url}`).join("\n");
-
-    const optionsLines = [];
-    if (optTakehomes.checked) optionsLines.push("- Include 5 impactful take-homes ranked most important → least.");
-    if (optRefs.checked) optionsLines.push("- Extract referenced links/resources mentioned in the docs (label each).");
-    if (optSpeakerEmail.checked) optionsLines.push("- Surface speaker email if present and draft a brief note to the speaker.");
-
-    const optionsBlock = optionsLines.length ? ("\nADDITIONAL INSTRUCTIONS\n" + optionsLines.join("\n")) : "";
-
-    const prompt =
-`LAUNCHER (if needed)
-- Open Copilot: ${copilotUrl}
-- If you need M365 access first: ${m365Url}
-
-ROLE
-You are an expert assistant for UPMC Grand Rounds.
-Use the selected public SharePoint documents below as your primary sources.
-
-SELECTED GRAND ROUNDS SOURCES
-${sourcesLines}
-
-WHAT TO DO
-1) Open and read EACH selected SharePoint link.
-2) Extract key fields when visible (session title, presenter, date/time, attendance code).
-3) Find any additional linked resources (video / transcript / take-home / mind map / other).
-4) Answer the user's question using ONLY what you can verify from the sources.${optionsBlock}
-
-RESPONSE FORMAT
-- Short answer (2–4 sentences)
-- Details (bullets)
-- Links (label each: video / transcript / take-home / mind map / other)
-- Speaker email (if found)
-- Sources (include the SharePoint URLs you actually used)
-- Caveats (missing/uncertain fields)
-
-USER QUESTION:
-${q}`.trim();
+    const prompt = fillTemplate(catalog.prompt_template, {
+      COPILOT_URL: catalog.launcher.copilot_url,
+      M365_SIGNUP_URL: catalog.launcher.m365_signup_url,
+      SOURCES_BLOCK: sourcesBlock,
+      OPTIONS_BLOCK: optionsBlock,
+      USER_QUESTION: userQ
+    });
 
     outputEl.textContent = prompt;
     return prompt;
   }
 
-  function clearQuestion() {
+  function clearAll() {
     questionEl.value = "";
-    questionEl.focus();
     outputEl.textContent =
       "You haven't generated a payload yet.\nClick \"See Prompt\" or \"Build & Open Copilot\" to construct it.";
     pulseCopilotButton();
   }
 
-  // -------------------------
-  // Clipboard + Copilot open
-  // -------------------------
   function copyTextToClipboard(text, onSuccess) {
     if (!text) { showToast("Nothing to copy."); return; }
 
@@ -1143,29 +1007,56 @@ ${q}`.trim();
   }
 
   function pulseCopilotButton() {
-    if (!copilotBtn) return;
     copilotBtn.classList.remove('pulse');
     void copilotBtn.offsetWidth;
     copilotBtn.classList.add('pulse');
   }
 
   // -------------------------
-  // Buttons wiring
+  // JSON URL controls
   // -------------------------
-  seeBtn.addEventListener('click', () => {
-    const p = buildPrompt();
-    if (p) showToast("Payload generated below.");
-    pulseCopilotButton();
+  function setJsonUrlValue(v) {
+    jsonUrlInput.value = v;
+    try { localStorage.setItem(JSON_URL_STORAGE_KEY, v); } catch (e) {}
+  }
+
+  async function loadCatalogFrom(url) {
+    showToast("Loading JSON catalog…", 1400);
+    const data = await fetchJson(url);
+    catalog = validateCatalog(data);
+
+    wireLauncherLinks();
+    normalizeSessions();
+    renderSessionList();
+    renderSuggestions();
+
+    showToast("Catalog loaded.");
+  }
+
+  loadJsonBtn.addEventListener('click', async () => {
+    const url = (jsonUrlInput.value || "").trim() || DEFAULT_JSON_URL;
+    try {
+      await loadCatalogFrom(url);
+      setJsonUrlValue(url);
+    } catch (e) {
+      console.error(e);
+      showToast("JSON load failed: " + (e && e.message ? e.message : "unknown error"), 3800);
+    }
   });
 
-  clearBtn.addEventListener('click', clearQuestion);
-  copilotBtn.addEventListener('click', openInCopilot);
-  questionEl.addEventListener('input', pulseCopilotButton);
+  useDefaultJsonBtn.addEventListener('click', async () => {
+    setJsonUrlValue(DEFAULT_JSON_URL);
+    try {
+      await loadCatalogFrom(DEFAULT_JSON_URL);
+    } catch (e) {
+      console.error(e);
+      showToast("Default JSON load failed: " + (e && e.message ? e.message : "unknown error"), 3800);
+    }
+  });
 
-  optTakehomes.addEventListener('change', pulseCopilotButton);
-  optSpeakerEmail.addEventListener('change', pulseCopilotButton);
-  optRefs.addEventListener('change', pulseCopilotButton);
-
+  // -------------------------
+  // Session select buttons
+  // -------------------------
   selectAllBtn.addEventListener('click', () => {
     selectedIds = new Set(sessions.map(s => s.id));
     renderSessionList();
@@ -1178,45 +1069,38 @@ ${q}`.trim();
     pulseCopilotButton();
   });
 
-  // JSON loader controls
-  function setJsonUrlValue(v) {
-    jsonUrlInput.value = v;
-    try { localStorage.setItem("gr_catalog_json_url_v1", v); } catch (e) {}
-  }
-
-  async function doLoadJson(url) {
-    try {
-      await loadCatalog(url);
-      setJsonUrlValue(url);
-    } catch (e) {
-      console.error(e);
-      showToast("JSON load failed: " + (e && e.message ? e.message : "unknown error"), 3800);
-    }
-  }
-
-  loadJsonBtn.addEventListener('click', async () => {
-    const url = (jsonUrlInput.value || "").trim() || DEFAULT_JSON_URL;
-    await doLoadJson(url);
+  // -------------------------
+  // Main buttons
+  // -------------------------
+  seeBtn.addEventListener('click', () => {
+    const p = buildPrompt();
+    if (p) showToast("Payload generated below.");
+    pulseCopilotButton();
   });
 
-  useDefaultJsonBtn.addEventListener('click', async () => {
-    setJsonUrlValue(DEFAULT_JSON_URL);
-    await doLoadJson(DEFAULT_JSON_URL);
-  });
+  clearBtn.addEventListener('click', clearAll);
+  copilotBtn.addEventListener('click', openInCopilot);
+
+  questionEl.addEventListener('input', pulseCopilotButton);
+  optTakehomes.addEventListener('change', pulseCopilotButton);
+  optSpeakerEmail.addEventListener('change', pulseCopilotButton);
+  optRefs.addEventListener('change', pulseCopilotButton);
 
   // -------------------------
   // Startup
   // -------------------------
   initHelpState();
 
-  // Restore saved URL if present
   let savedUrl = "";
-  try { savedUrl = localStorage.getItem("gr_catalog_json_url_v1") || ""; } catch (e) {}
+  try { savedUrl = localStorage.getItem(JSON_URL_STORAGE_KEY) || ""; } catch (e) {}
   if (!savedUrl) savedUrl = DEFAULT_JSON_URL;
   jsonUrlInput.value = savedUrl;
 
   // Load immediately
-  doLoadJson(savedUrl);
+  loadCatalogFrom(savedUrl).catch(e => {
+    console.error(e);
+    showToast("Auto-load failed. Click Load JSON.", 3200);
+  });
 
 })();
 </script>
