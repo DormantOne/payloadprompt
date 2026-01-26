@@ -360,18 +360,19 @@
         <legend>Options</legend>
         <label class="opt">
           <input type="checkbox" id="optTakehomes" />
-          <span><strong>Include 5 impactful take-homes</strong> (ranked most important → least) per session.</span>
+          <span><strong>Include 5 actionable take-homes</strong> (ranked most important → least) per session.</span>
         </label>
         <div class="hint">
           If your question is blank, default output will:
-          <strong>summary + top take-homes for each of the first 3 selected sessions</strong>,
+          <strong>a crisp summary of each selected session</strong>,
           plus one attention-check question.
+          <span id="hintTakehomes"></span>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Your question</legend>
-        <textarea id="question" placeholder="Leave blank for default summary + take-homes (top 3 sessions)…"></textarea>
+        <textarea id="question" placeholder="Leave blank for default summary (and take-homes if selected)…"></textarea>
         <div class="hint">
           Use the bubbles below for strong questions like:
           “Who gave a Grand Rounds on [TOPIC]?” or “Ask me a question that proves I was paying attention.”
@@ -444,6 +445,7 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
   const suggestionsEl = document.getElementById('suggestions');
 
   const optTakehomes = document.getElementById('optTakehomes');
+  const hintTakehomes = document.getElementById('hintTakehomes');
 
   const questionEl = document.getElementById('question');
   const outputEl = document.getElementById('output');
@@ -509,8 +511,7 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
       status: String(gr.status || "gr").toLowerCase(),
       teams_team_name: gr.teams_team_name || "",
       teams_folder: gr.teams_folder || "Documents",
-      teams_filename: gr.teams_filename || "",
-      sharepoint_url: gr.sharepoint_url || gr.public_sharepoint_url || ""
+      teams_filename: gr.teams_filename || ""
     }));
   }
 
@@ -527,6 +528,10 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     for(let i=0; i<Math.min(want, nonArchives.length); i++){
       selectedIds.add(nonArchives[i].id);
     }
+  }
+
+  function updateHintTakehomes(){
+    hintTakehomes.textContent = optTakehomes.checked ? " Also includes 5 actionable take-homes per session." : "";
   }
 
   function renderSessions(){
@@ -600,25 +605,18 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
   }
 
   function buildSourcesBlock(selected){
-    return selected.map(s => {
-      const lines = [
-        `- ${s.name}`,
-        `  Team: ${s.teams_team_name || "(missing)"}`,
-        `  Location: Files → Documents`,
-        `  Filename: ${s.teams_filename}`,
-        `  Status: ${s.status === "archives" ? "Archives" : "GR"}`
-      ];
-      if(s.sharepoint_url){
-        lines.push(`  (Optional reference link): ${s.sharepoint_url}`);
-      }
-      return lines.join("\n");
-    }).join("\n");
+    return selected.map(s => [
+      `- ${s.name}`,
+      `  Team: ${s.teams_team_name || "(missing)"}`,
+      `  Location: Files → Documents`,
+      `  Filename: ${s.teams_filename}`
+    ].join("\n")).join("\n");
   }
 
   function buildOptionsBlock(){
     const lines = [];
     if(optTakehomes.checked) {
-      lines.push("- Provide 5 impactful take-homes ranked most important → least (per session).");
+      lines.push("- Provide 5 actionable take-homes ranked most important → least (per session).");
     }
     return lines.length ? (lines.join("\n") + "\n") : "";
   }
@@ -626,7 +624,12 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
   function buildDefaultQuestionTop3(){
     const selected = getSelectedSessions().filter(s => s.status !== "archives").slice(0,3);
     const names = selected.map(s => s.name).join("; ");
-    return `Summarize EACH of the first ${selected.length} selected Grand Rounds sessions (${names}). For EACH session: give 6 crisp bullets and 5 impactful take-homes ranked most important → least important. Then ask me ONE question that proves I was paying attention and include the correct answer + why.`;
+    let q = `Summarize EACH of the first ${selected.length} selected Grand Rounds sessions (${names}). For EACH session: give 6 crisp bullets (clinical + practical).`;
+    if(optTakehomes.checked){
+      q += " Then provide 5 actionable take-homes ranked most important → least important.";
+    }
+    q += " Then ask me ONE question that proves I was paying attention and include the correct answer + why.";
+    return q;
   }
 
   function buildPrompt(){
@@ -647,8 +650,6 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     }
 
     const prompt = fillTemplate(catalog.prompt_template, {
-      COPILOT_URL: catalog.launcher.copilot_url,
-      M365_SIGNUP_URL: catalog.launcher.m365_signup_url,
       SOURCES_BLOCK: buildSourcesBlock(selected),
       OPTIONS_BLOCK: buildOptionsBlock(),
       USER_QUESTION: userQ
@@ -693,8 +694,11 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
   });
 
   clearBtn.addEventListener("click", clearAll);
-
   copilotBtn.addEventListener("click", openCopilot);
+
+  optTakehomes.addEventListener("change", () => {
+    updateHintTakehomes();
+  });
 
   // ✅ select top 3 only
   selectAllBtn.addEventListener("click", () => {
@@ -739,6 +743,7 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
         applyDefaults();
         renderSessions();
         renderSuggestions();
+        updateHintTakehomes();
 
         loadInfo.textContent = "✅ Loaded catalog:\n" + u;
         toast("Catalog loaded ✅");
