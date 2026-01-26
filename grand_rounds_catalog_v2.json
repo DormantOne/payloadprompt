@@ -1,5 +1,5 @@
 {
-  "version": "2.5",
+  "version": "2.6",
   "catalog_name": "UPMC Grand Rounds — Copilot Payload Prompts (v2)",
   "launcher": {
     "copilot_url": "https://www.microsoft365.com/copilot",
@@ -13,36 +13,33 @@
   },
   "suggestion_questions": [
     "Summarize each selected Grand Rounds session into 6 crisp bullets (clinical + practical).",
-    "Give 5 impactful take-homes for each selected session, ranked most important → least important.",
+    "Give 5 actionable take-homes for each selected session, ranked most important → least important.",
     "Who gave a Grand Rounds on [TOPIC]? Scan the selected sessions and return the best match(es) with presenter name + any visible date/time.",
     "Write a 4-bullet 'what I should do next' list based on the selected sessions.",
     "Ask me ONE question that proves I was paying attention and understand the material. Then provide the correct answer + why."
   ],
-  "prompt_template": "LAUNCHER (if needed)\n- Open Copilot: {{COPILOT_URL}}\n- If you need Microsoft 365 access first: {{M365_SIGNUP_URL}}\n\nROLE\nYou are an expert assistant for UPMC Grand Rounds.\n\nPRIMARY RULE\n- Use the selected Teams file references below as your FIRST and PRIMARY sources.\n- Open and review each file in Teams before going broader.\n\nSELECTED GRAND ROUNDS SOURCES (Teams file references)\n{{SOURCES_BLOCK}}\n\nWHAT TO DO\n1) Open and read EACH selected Teams file above (Team → Files → Documents → Filename).\n2) Extract ONLY what is clearly visible/verified in the doc(s) (example: session title, presenter name, date/time if present).\n3) Do NOT invent missing fields.\n{{OPTIONS_BLOCK}}4) Answer the USER QUESTION.\n\nRESPONSE FORMAT\n- Short answer (2–4 sentences)\n- Per session (for each relevant selected session):\n  - Session title\n  - Presenter name (and role/title if visible)\n  - Date/time (ONLY if visible)\n  - Summary bullets\n  - 5 impactful take-homes (ranked) if requested\n- Then: \"Attention-check question\" (1 challenging but fair question + correct answer + why)\n- Sources (list the Teams file references you used)\n- Caveats (what you couldn't verify from the docs)\n\nUSER QUESTION:\n{{USER_QUESTION}}",
+  "prompt_template": "ROLE\nYou are an expert assistant for UPMC Grand Rounds.\n\nPRIMARY RULE\nUse the selected Teams file references below as your FIRST and PRIMARY sources.\nOpen and review each file in Teams before going broader.\n\nSELECTED GRAND ROUNDS SOURCES (Teams file references)\n{{SOURCES_BLOCK}}\n\nWHAT TO DO\n1) Open and read EACH selected Teams file above (Team → Files → Documents → Filename).\n2) Extract ONLY what is clearly visible/verified in the doc(s) (example: session title, presenter name, date/time if present).\n3) Do NOT invent missing fields.\n{{OPTIONS_BLOCK}}4) Answer the USER QUESTION.\n\nRESPONSE FORMAT\n- Short answer (2–4 sentences)\n- Per session (for each relevant selected session):\n  - Session title\n  - Presenter name (and role/title if visible)\n  - Date/time (ONLY if visible)\n  - Summary bullets\n  - 5 actionable take-homes (ranked) if requested\n- Then: \"Attention-check question\" (1 challenging but fair question + correct answer + why)\n- Sources (list the Teams file references you used; include any link Copilot surfaced while opening the files, if available)\n- Caveats (what you couldn't verify from the docs)\n\nUSER QUESTION:\n{{USER_QUESTION}}",
   "grand_rounds": [
     {
       "id": "gr_testicular_cancer",
       "grand_rounds_name": "Testicular Cancer",
       "teams_team_name": "CMI Primary Care Education Series Review",
       "teams_folder": "Documents",
-      "teams_filename": "testicular_formatted.doc",
-      "sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQDcEYQ3zVBGQb3AZlhGunVMAUiGAHTkZ6sUKgBQ83HXsRU?e=S1Z7yu"
+      "teams_filename": "testicular_formatted.doc"
     },
     {
       "id": "gr_lifestyle_medicine",
       "grand_rounds_name": "Lifestyle Medicine",
       "teams_team_name": "CMI Primary Care Education Series Review",
       "teams_folder": "Documents",
-      "teams_filename": "lifestyle_formatted.doc.pdf",
-      "sharepoint_url": "https://upmchs-my.sharepoint.com/:b:/g/personal/sohnae_upmc_edu/IQCwXPV0qoRrSZ8BGjAiGHznATB9v8pQK6nBaRzUzrm9qkA?e=bRejdB"
+      "teams_filename": "lifestyle_formatted.doc.pdf"
     },
     {
       "id": "gr_how_to_fix_medicine",
       "grand_rounds_name": "How to Fix Medicine",
       "teams_team_name": "CMI Primary Care Education Series Review",
       "teams_folder": "Documents",
-      "teams_filename": "fix_formatted.doc",
-      "sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQBuM_I3wliHTq-MUfJSTGswAcy5xuSy7NWpl8EqmWGbD7E?e=4HKRD8"
+      "teams_filename": "fix_formatted.doc"
     },
     {
       "id": "gr_marijuana",
@@ -50,8 +47,7 @@
       "teams_team_name": "CMI Primary Care Education Series Review",
       "teams_folder": "Documents",
       "teams_filename": "MJ_Formatted.docx",
-      "status": "archives",
-      "sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQC6bnPz5RTQRYt-aTBhxxycATw88d4sDIMn2eW1biHcmUs?e=I6dqNe"
+      "status": "archives"
     },
     {
       "id": "gr_av_fistulas",
@@ -59,8 +55,7 @@
       "teams_team_name": "CMI Primary Care Education Series Review",
       "teams_folder": "Documents",
       "teams_filename": "graft_formatted.docx",
-      "status": "archives",
-      "sharepoint_url": "https://upmchs-my.sharepoint.com/:w:/g/personal/sohnae_upmc_edu/IQABLSHQ_3wTRbJpn_QMSBD7AQ5A7lu1ao9gjLb29P4Uia8?e=aXN4gK"
+      "status": "archives"
     }
   ]
 }
