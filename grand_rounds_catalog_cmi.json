@@ -1,0 +1,80 @@
+{
+  "version": "2.6",
+  "catalog_name": "CMI Lecture Series — Copilot Payload Prompts (v2)",
+  "launcher": {
+    "copilot_url": "https://www.microsoft365.com/copilot",
+    "m365_signup_url": "https://apps.powerapps.com/play/e/c34e244b-e683-4eef-bb66-67176b581713/a/daf86d65-9ffb-4e95-aaf2-388bbb5304bf?tenantId=8b3dd73e-4e72-4679-b191-56da1588712b&hint=2e699ac1-227b-4779-ac48-f7a1b3ff5631&sourcetime=1743427811944"
+  },
+  "defaults": {
+    "default_selected_count": 3,
+    "options": {
+      "include_takehomes": true
+    }
+  },
+  "suggestion_questions": [
+    "Summarize each selected Grand Rounds session into 6 crisp bullets (clinical + practical).",
+    "Give 5 actionable take-homes for each selected session, ranked most important → least important.",
+    "Who gave a Grand Rounds on [TOPIC]? Scan the selected sessions and return the best match(es) with presenter name + any visible date/time.",
+    "Write a 4-bullet 'what I should do next' list based on the selected sessions.",
+    "Ask me ONE question that proves I was paying attention and understand the material. Then provide the correct answer + why."
+  ],
+  "prompt_template": "ROLE\nYou are an expert assistant for UPMC Grand Rounds.\n\nPRIMARY RULE\nUse the selected Teams file references below as your FIRST and PRIMARY sources.\nOpen and review each file in Teams before going broader.\n\nSELECTED GRAND ROUNDS SOURCES (Teams file references)\n{{SOURCES_BLOCK}}\n\nWHAT TO DO\n1) Open and read EACH selected Teams file above (Team → Files → Documents → Filename).\n2) Extract ONLY what is clearly visible/verified in the doc(s) (example: session title, presenter name, date/time if present).\n3) Do NOT invent missing fields.\n{{OPTIONS_BLOCK}}4) Answer the USER QUESTION.\n\nRESPONSE FORMAT\n- Short answer (2–4 sentences)\n- Per session (for each relevant selected session):\n  - Session title\n  - Presenter name (and role/title if visible)\n  - Date/time (ONLY if visible)\n  - Summary bullets\n  - 5 actionable take-homes (ranked) if requested\n- Sources (list the Teams file references you used; include any link Copilot surfaced while opening the files, if available)\n- Caveats (what you couldn't verify from the docs)\n\nUSER QUESTION:\n{{USER_QUESTION}}",
+   "grand_rounds": [
+    {
+      "id": "gr_genetics",
+      "grand_rounds_name": "Genetics",
+      "teams_team_name": "CMI Primary Care Education Series Review",
+      "teams_folder": "Documents",
+      "teams_filename": "genetics_Formatted.docx"
+    },
+    {
+      "id": "gr_prostate",
+      "grand_rounds_name": "Prostate",
+      "teams_team_name": "CMI Primary Care Education Series Review",
+      "teams_folder": "Documents",
+      "teams_filename": "prostate_formatted.doc"
+    },
+    {
+      "id": "gr_migraine",
+      "grand_rounds_name": "Migraine",
+      "teams_team_name": "CMI Primary Care Education Series Review",
+      "teams_folder": "Documents",
+      "teams_filename": "migraine_formatted.doc"
+    },
+    {
+      "id": "gr_life",
+      "grand_rounds_name": "LifeStyle",
+      "teams_team_name": "CMI Primary Care Education Series Review",
+      "teams_folder": "Documents",
+      "teams_filename": "life_formatted.doc"
+    },
+    {
+      "id": "gr_lyme",
+      "grand_rounds_name": "Lyme",
+      "teams_team_name": "CMI Primary Care Education Series Review",
+      "teams_folder": "Documents",
+      "teams_filename": "lyme_formatted.doc"
+    },
+    {
+      "id": "gr_htn",
+      "grand_rounds_name": "HTN",
+      "teams_team_name": "CMI Primary Care Education Series Review",
+      "teams_folder": "Documents",
+      "teams_filename": "htn_formatted.doc"
+    },
+    {
+      "id": "gr_joint_replacement",
+      "grand_rounds_name": "Joint Replacement",
+      "teams_team_name": "CMI Primary Care Education Series Review",
+      "teams_folder": "Documents",
+      "teams_filename": "Joint_Replacement_Formatted.docx"
+    },
+    {
+      "id": "gr_ckd",
+      "grand_rounds_name": "CKD",
+      "teams_team_name": "CMI Primary Care Education Series Review",
+      "teams_folder": "Documents",
+      "teams_filename": "CKD_ParagraphFormat.docx"
+    }
+  ]
+}

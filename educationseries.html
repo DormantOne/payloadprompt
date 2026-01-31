@@ -1,0 +1,774 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CMI Education Series — Copilot Payload Builder (v2)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --panel:#ffffff;
+      --accent:#2563eb;
+      --accent2:#1d4ed8;
+      --border:#d1d5db;
+      --text:#111827;
+      --muted:#6b7280;
+      --shadow:0 10px 25px rgba(15,23,42,.12);
+      --r-lg:16px;
+      --r-md:12px;
+      --r-sm:8px;
+    }
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    body{
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:radial-gradient(circle at top left,#e0f2fe 0,#f3f4f6 40%,#e5e7eb 100%);
+      color:var(--text);
+      min-height:100vh;
+      padding:16px;
+    }
+    .wrap{ max-width:1200px; margin:0 auto; }
+
+    .header{
+      background:linear-gradient(135deg,#fff,#e0f2fe);
+      border-radius:18px;
+      padding:16px 18px;
+      box-shadow:0 16px 40px rgba(15,23,42,.15);
+      border:1px solid rgba(148,163,184,.35);
+      position:sticky; top:8px; z-index:10;
+      backdrop-filter:blur(10px);
+    }
+    .htop{
+      display:flex; justify-content:space-between; align-items:flex-start;
+      gap:10px; flex-wrap:wrap;
+    }
+    .title{
+      font-size:1.18rem; font-weight:900; letter-spacing:.04em;
+      text-transform:uppercase; color:var(--accent2);
+    }
+    .subtitle{ font-size:.9rem; color:var(--muted); margin-top:6px; line-height:1.35; }
+
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 10px; border-radius:999px;
+      background:rgba(37,99,235,.06);
+      color:var(--accent2);
+      font-size:.78rem; font-weight:900;
+      text-transform:uppercase; letter-spacing:.08em;
+      border:1px solid rgba(37,99,235,.18);
+      white-space:nowrap;
+    }
+    .dot{ width:8px; height:8px; border-radius:999px; background:#22c55e; box-shadow:0 0 0 4px rgba(34,197,94,.28); }
+
+    .actionsTop{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+
+    .layout{
+      margin-top:18px;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);
+      gap:16px;
+    }
+    @media (max-width:980px){ .layout{ grid-template-columns:1fr; } }
+
+    .panel{
+      background:var(--panel);
+      border-radius:var(--r-lg);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      padding:14px 14px 16px;
+      display:flex; flex-direction:column;
+      min-height:0;
+    }
+    .phead{
+      display:flex; justify-content:space-between; align-items:center;
+      gap:8px; flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .ptitle{
+      display:flex; align-items:center; gap:8px;
+      font-weight:900;
+    }
+    .step{
+      min-width:26px; height:26px;
+      display:inline-flex; align-items:center; justify-content:center;
+      border-radius:999px;
+      background:var(--accent);
+      color:#fff; font-weight:900; font-size:.85rem;
+    }
+
+    fieldset{
+      border:1px solid var(--border);
+      background:#f9fafb;
+      border-radius:var(--r-md);
+      padding:10px;
+      margin-top:10px;
+      min-width:0;
+    }
+    legend{
+      padding:0 6px;
+      font-size:.78rem;
+      font-weight:900;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .hint{ margin-top:6px; font-size:.78rem; color:var(--muted); line-height:1.35; }
+
+    textarea{
+      width:100%;
+      min-height:110px;
+      margin-top:6px;
+      padding:9px 10px;
+      border:1px solid var(--border);
+      border-radius:var(--r-sm);
+      font-size:.92rem;
+      line-height:1.45;
+      font-family:inherit;
+      resize:vertical;
+      transition:border-color .15s ease, box-shadow .15s ease;
+      background:#fff;
+    }
+    textarea:focus{
+      outline:none;
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(37,99,235,.18);
+    }
+
+    .sessionList{
+      margin-top:10px;
+      display:grid;
+      gap:8px;
+      max-height:260px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .row{
+      display:grid;
+      grid-template-columns:22px 1fr auto;
+      gap:10px;
+      align-items:start;
+      padding:8px;
+      border:1px solid rgba(209,213,219,.9);
+      border-radius:12px;
+      background:#fff;
+    }
+    .rowTitle{ font-weight:900; font-size:.88rem; line-height:1.25; }
+    .rowLink{
+      display:inline-block;
+      margin-top:3px;
+      font-size:.78rem;
+      font-weight:900;
+      color:var(--accent2);
+      word-break:break-word;
+    }
+
+    .pill{
+      align-self:start;
+      border:1px solid rgba(37,99,235,.35);
+      background:rgba(37,99,235,.08);
+      color:var(--accent2);
+      border-radius:999px;
+      padding:5px 10px;
+      font-size:.74rem;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .pill.archives{
+      border-color:rgba(245,158,11,.55);
+      background:rgba(245,158,11,.12);
+      color:#92400e;
+    }
+
+    .suggestions{
+      display:flex; flex-wrap:wrap; gap:6px;
+      margin-top:8px;
+      max-height:200px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .chip{
+      border:1px solid var(--accent);
+      background:#fff;
+      color:var(--accent2);
+      font-size:.8rem;
+      padding:7px 10px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:900;
+      text-align:left;
+      transition:all .15s ease;
+    }
+    .chip:hover{
+      background:var(--accent);
+      color:#fff;
+      transform:translateY(-1px);
+      box-shadow:0 4px 12px rgba(37,99,235,.28);
+    }
+
+    .opt{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:8px;
+      border:1px solid rgba(209,213,219,.9);
+      border-radius:12px;
+      background:#fff;
+      font-size:.86rem;
+      line-height:1.25;
+      margin-top:8px;
+    }
+
+    .btnRow{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .btn{
+      flex:1;
+      min-width:160px;
+      padding:10px 10px;
+      border:none;
+      border-radius:10px;
+      font-weight:900;
+      cursor:pointer;
+      transition:all .15s ease;
+      display:flex; align-items:center; justify-content:center; gap:6px;
+    }
+    .primary{ background:var(--accent); color:#fff; }
+    .primary:hover{ background:var(--accent2); transform:translateY(-1px); box-shadow:0 6px 16px rgba(37,99,235,.30); }
+    .secondary{ background:#e5e7eb; color:var(--text); }
+    .secondary:hover{ background:#d1d5db; transform:translateY(-1px); box-shadow:0 3px 8px rgba(15,23,42,.15); }
+
+    .mini{
+      padding:8px 12px; border-radius:999px;
+      border:none; cursor:pointer;
+      font-weight:900;
+      background:var(--accent); color:#fff;
+      display:inline-flex; align-items:center; gap:8px;
+      box-shadow:0 4px 12px rgba(37,99,235,.30);
+      transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+      white-space:nowrap;
+    }
+    .mini:hover{ background:var(--accent2); transform:translateY(-1px); box-shadow:0 6px 16px rgba(37,99,235,.40); }
+
+    .tooltipWrap{ position:relative; display:inline-flex; }
+    .tooltipWrap:hover .tip{
+      opacity:1; transform:translateY(0);
+      pointer-events:auto;
+    }
+    .ghost{
+      padding:8px 12px; border-radius:999px;
+      border:1px solid rgba(37,99,235,.35);
+      background:#fff;
+      color:var(--accent2);
+      font-weight:900;
+      text-decoration:none;
+      display:inline-flex; align-items:center; gap:8px;
+      transition:transform .15s ease, box-shadow .15s ease;
+      white-space:nowrap;
+    }
+    .ghost:hover{ transform:translateY(-1px); box-shadow:0 6px 16px rgba(37,99,235,.18); }
+
+    .tip{
+      position:absolute;
+      top:110%;
+      right:0;
+      width:min(360px, 80vw);
+      background:#111827;
+      color:#fff;
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:.82rem;
+      line-height:1.35;
+      box-shadow:0 14px 40px rgba(0,0,0,.35);
+      opacity:0;
+      transform:translateY(-6px);
+      pointer-events:none;
+      transition:opacity .15s ease, transform .15s ease;
+      z-index:999;
+    }
+
+    .out{
+      background:#0f172a;
+      color:#e2e8f0;
+      border-radius:12px;
+      padding:10px;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      font-size:.82rem;
+      line-height:1.5;
+      max-height:650px;
+      overflow:auto;
+      white-space:pre-wrap;
+      word-wrap:break-word;
+      margin-top:6px;
+    }
+    .meta{ margin-top:8px; font-size:.75rem; color:var(--muted); line-height:1.35; word-break:break-word; }
+
+    .toast{
+      position:fixed; bottom:18px; right:18px;
+      background:#111827; color:#fff;
+      padding:10px 16px;
+      border-radius:10px;
+      box-shadow:0 10px 28px rgba(0,0,0,.35);
+      font-size:.88rem;
+      font-weight:900;
+      z-index:9999;
+      max-width:90vw;
+    }
+  </style>
+</head>
+
+<body>
+<div class="wrap">
+  <header class="header">
+    <div class="htop">
+      <div>
+        <div class="title" id="pageTitle">CMI Education Series — Copilot Payload Builder (v2)</div>
+        <div class="subtitle">
+          Select sessions → build payload → Copilot opens → paste prompt.
+          <br><strong>Only for use with UPMC Microsoft 365 Copilot.</strong>
+        </div>
+        <div class="meta" id="loadInfo">Loading catalog…</div>
+      </div>
+
+      <div class="actionsTop">
+        <span class="badge"><span class="dot"></span> Prototype</span>
+        <span class="badge" id="loadedBadge">0 loaded</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- LEFT -->
+    <section class="panel">
+      <div class="phead">
+        <div class="ptitle"><span class="step">1</span> Pick sessions + question</div>
+      </div>
+
+      <fieldset>
+        <legend>CMI Education Sessions (checkable)</legend>
+        <div class="hint">
+          Default selection is the <strong>top 3 sessions</strong> (non-Archives).
+          <br><strong>Limit:</strong> up to 3 sessions can be selected at once.
+        </div>
+
+        <div class="btnRow">
+          <button class="btn secondary" id="selectAllBtn" type="button">✅ Select top 3</button>
+          <button class="btn secondary" id="selectNoneBtn" type="button">🚫 Select none</button>
+        </div>
+
+        <div class="sessionList" id="sessionList"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Options</legend>
+        <label class="opt">
+          <input type="checkbox" id="optTakehomes" />
+          <span><strong>Include 5 actionable take-homes</strong> (ranked most important → least) per session.</span>
+        </label>
+        <div class="hint">
+          If your question is blank, default output will:
+          <strong>a crisp summary of each selected session</strong>,
+          plus one attention-check question.
+          <span id="hintTakehomes"></span>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Your question</legend>
+        <textarea id="question" placeholder="Leave blank for default summary (and take-homes if selected)…"></textarea>
+        <div class="hint">
+          Use the bubbles below for strong questions like:
+          “Who gave a Lecture on [TOPIC]?” or “Ask me a question that proves I was paying attention.”
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Standard Questions (clickable)</legend>
+        <div class="suggestions" id="suggestions"></div>
+      </fieldset>
+
+      <div class="btnRow">
+        <button class="btn primary" id="seeBtn" type="button">👁 See Prompt</button>
+        <button class="btn secondary" id="clearBtn" type="button">🧹 Clear</button>
+      </div>
+    </section>
+
+    <!-- RIGHT -->
+    <section class="panel">
+      <div class="phead">
+        <div class="ptitle"><span class="step">2</span> Payload Preview</div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="tooltipWrap">
+            <a class="ghost" id="get365Btn" href="#" target="_blank" rel="noopener">✅ Get 365</a>
+            <span class="tip">
+              If Copilot doesn't open or you don't have access:
+              <br>1) Click <strong>Get 365</strong>
+              <br>2) Sign in with your UPMC credentials
+              <br>3) Complete the activation steps
+              <br>Then return here and click <strong>Build & Open Copilot</strong>.
+            </span>
+          </span>
+
+          <button class="mini" id="copilotBtn" type="button">🪟 Build & Open Copilot</button>
+        </div>
+      </div>
+
+      <fieldset>
+        <legend>Generated payload prompt</legend>
+        <div class="out" id="output">
+You haven't generated a payload yet.
+Click "See Prompt" or "Build & Open Copilot" to construct it.
+        </div>
+      </fieldset>
+
+      <div class="meta">
+        After Copilot opens, click in the chat box and press
+        <strong>Ctrl+V</strong> (Windows) or <strong>⌘+V</strong> (Mac) to paste the payload.
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // ✅ v2 JSON (same base URL)
+  const CATALOG_URL_OVERRIDE = "https://dormantone.github.io/payloadprompt/grand_rounds_catalog_cmi.json";
+  const DEFAULT_JSON_FILENAME = "grand_rounds_catalog_cmi.json";
+
+  const MAX_SELECTED = 3;
+
+  const pageTitle = document.getElementById('pageTitle');
+  const loadedBadge = document.getElementById('loadedBadge');
+  const loadInfo = document.getElementById('loadInfo');
+
+  const sessionListEl = document.getElementById('sessionList');
+  const suggestionsEl = document.getElementById('suggestions');
+
+  const optTakehomes = document.getElementById('optTakehomes');
+  const hintTakehomes = document.getElementById('hintTakehomes');
+
+  const questionEl = document.getElementById('question');
+  const outputEl = document.getElementById('output');
+
+  const selectAllBtn = document.getElementById('selectAllBtn');
+  const selectNoneBtn = document.getElementById('selectNoneBtn');
+
+  const seeBtn = document.getElementById('seeBtn');
+  const clearBtn = document.getElementById('clearBtn');
+
+  const get365Btn = document.getElementById('get365Btn');
+  const copilotBtn = document.getElementById('copilotBtn');
+
+  let catalog = null;
+  let sessions = [];
+  let selectedIds = new Set();
+
+  function toast(msg, ms){
+    ms = ms || 2600;
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(), ms);
+  }
+
+  function fillTemplate(tpl, vars){
+    let out = tpl;
+    Object.keys(vars).forEach(k => {
+      out = out.split(`{{${k}}}`).join(String(vars[k]));
+    });
+    return out;
+  }
+
+  function validateCatalog(obj){
+    if(!obj || typeof obj !== "object") throw new Error("Invalid JSON: not an object");
+    if(!obj.launcher || !obj.launcher.copilot_url || !obj.launcher.m365_signup_url) {
+      throw new Error("JSON missing launcher.copilot_url or launcher.m365_signup_url");
+    }
+    if(!Array.isArray(obj.grand_rounds)) throw new Error("JSON must be an array");
+    if(typeof obj.prompt_template !== "string") throw new Error("JSON missing prompt_template string");
+    if(!Array.isArray(obj.suggestion_questions)) throw new Error("JSON suggestion_questions must be an array");
+    return obj;
+  }
+
+  async function fetchJson(url){
+    const u = new URL(url);
+    u.searchParams.set("_", String(Date.now())); // cache bust
+    const res = await fetch(u.toString(), { cache:"no-store" });
+    if(!res.ok) throw new Error(`HTTP ${res.status} (${res.statusText}) ${res.url}`);
+    const text = await res.text();
+    const t = text.trim();
+    if(t.startsWith("<!DOCTYPE html") || t.startsWith("<html")) {
+      throw new Error("Got HTML instead of JSON. Wrong path or not GitHub Pages.");
+    }
+    return JSON.parse(text);
+  }
+
+  function normalizeSessions(){
+    sessions = catalog.grand_rounds.map(gr => ({
+      id: gr.id,
+      name: gr.grand_rounds_name || "Untitled Grand Rounds",
+      status: String(gr.status || "gr").toLowerCase(),
+      teams_team_name: gr.teams_team_name || "",
+      teams_folder: gr.teams_folder || "Documents",
+      teams_filename: gr.teams_filename || ""
+    }));
+  }
+
+  function applyDefaults(){
+    const defs = catalog.defaults || {};
+    const opt = defs.options || {};
+
+    optTakehomes.checked = (opt.include_takehomes !== false);
+
+    selectedIds = new Set();
+    const want = Math.min(Number(defs.default_selected_count || 3), MAX_SELECTED);
+
+    const nonArchives = sessions.filter(s => s.status !== "archives");
+    for(let i=0; i<Math.min(want, nonArchives.length); i++){
+      selectedIds.add(nonArchives[i].id);
+    }
+  }
+
+  function updateHintTakehomes(){
+    hintTakehomes.textContent = optTakehomes.checked ? " Also includes 5 actionable take-homes per session." : "";
+  }
+
+  function renderSessions(){
+    sessionListEl.innerHTML = "";
+    sessions.forEach(s => {
+      const row = document.createElement("div");
+      row.className = "row";
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = selectedIds.has(s.id);
+      cb.addEventListener("change", () => {
+        if(cb.checked){
+          if(selectedIds.size >= MAX_SELECTED){
+            cb.checked = false;
+            toast(`Limit: select up to ${MAX_SELECTED} sessions.`, 2400);
+            return;
+          }
+          selectedIds.add(s.id);
+        } else {
+          selectedIds.delete(s.id);
+        }
+      });
+
+      const mid = document.createElement("div");
+
+      const title = document.createElement("div");
+      title.className = "rowTitle";
+      title.textContent = s.name;
+
+      const ref = document.createElement("div");
+      ref.className = "rowLink";
+      const team = s.teams_team_name ? `Team: ${s.teams_team_name}` : "Team: (missing)";
+      const file = s.teams_filename ? `File: ${s.teams_filename}` : "File: (missing)";
+      ref.textContent = `${team} · Documents · ${file}`;
+
+      mid.appendChild(title);
+      mid.appendChild(ref);
+
+      const pill = document.createElement("div");
+      pill.className = "pill" + (s.status === "archives" ? " archives" : "");
+      pill.textContent = s.status === "archives" ? "Archives" : "GR";
+
+      row.appendChild(cb);
+      row.appendChild(mid);
+      row.appendChild(pill);
+
+      sessionListEl.appendChild(row);
+    });
+
+    loadedBadge.textContent = `${sessions.length} loaded`;
+  }
+
+  function renderSuggestions(){
+    suggestionsEl.innerHTML = "";
+    catalog.suggestion_questions.forEach(q => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip";
+      chip.textContent = q;
+      chip.addEventListener("click", () => {
+        questionEl.value = q;
+        questionEl.focus();
+      });
+      suggestionsEl.appendChild(chip);
+    });
+  }
+
+  function getSelectedSessions(){
+    return sessions.filter(s => selectedIds.has(s.id) && s.teams_filename);
+  }
+
+  function buildSourcesBlock(selected){
+    return selected.map(s => [
+      `- ${s.name}`,
+      `  Team: ${s.teams_team_name || "(missing)"}`,
+      `  Location: Files → Documents`,
+      `  Filename: ${s.teams_filename}`
+    ].join("\n")).join("\n");
+  }
+
+  function buildOptionsBlock(){
+    const lines = [];
+    if(optTakehomes.checked) {
+      lines.push("- Provide 5 actionable take-homes ranked most important → least (per session).");
+    }
+    return lines.length ? (lines.join("\n") + "\n") : "";
+  }
+
+  function buildDefaultQuestionTop3(){
+    const selected = getSelectedSessions().filter(s => s.status !== "archives").slice(0,3);
+    const names = selected.map(s => s.name).join("; ");
+    let q = `Summarize EACH of the first ${selected.length} selected Lecure Series sessions (${names}). For EACH session: give 6 crisp bullets (clinical + practical).`;
+    if(optTakehomes.checked){
+      q += " Then provide 5 actionable take-homes ranked most important → least important.";
+    }
+    q += " Then ask me ONE question that proves I was paying attention and include the correct answer + why.";
+    return q;
+  }
+
+  function buildPrompt(){
+    if(!catalog){
+      toast("Catalog not loaded yet.");
+      return "";
+    }
+
+    const selected = getSelectedSessions();
+    if(selected.length === 0){
+      toast("No sessions selected (or missing Teams filenames). Check at least one session.");
+      return "";
+    }
+
+    let userQ = (questionEl.value || "").trim();
+    if(!userQ){
+      userQ = buildDefaultQuestionTop3();
+    }
+
+    const prompt = fillTemplate(catalog.prompt_template, {
+      SOURCES_BLOCK: buildSourcesBlock(selected),
+      OPTIONS_BLOCK: buildOptionsBlock(),
+      USER_QUESTION: userQ
+    });
+
+    outputEl.textContent = prompt;
+    return prompt;
+  }
+
+  function clearAll(){
+    questionEl.value = "";
+    outputEl.textContent =
+      "You haven't generated a payload yet.\nClick \"See Prompt\" or \"Build & Open Copilot\" to construct it.";
+  }
+
+  function copyToClipboard(text, cb){
+    if(!text){ toast("Nothing to copy."); return; }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=>cb && cb(), ()=> {
+        toast("Clipboard blocked. Select and copy manually.");
+        cb && cb();
+      });
+    } else {
+      toast("Clipboard not supported. Select and copy manually.");
+      cb && cb();
+    }
+  }
+
+  function openCopilot(){
+    const prompt = buildPrompt();
+    if(!prompt) return;
+
+    copyToClipboard(prompt, () => {
+      toast("Payload copied. Opening Copilot…", 2200);
+      window.open(catalog.launcher.copilot_url, "_blank", "noopener");
+    });
+  }
+
+  seeBtn.addEventListener("click", () => {
+    const p = buildPrompt();
+    if(p) toast("Payload generated below.");
+  });
+
+  clearBtn.addEventListener("click", clearAll);
+  copilotBtn.addEventListener("click", openCopilot);
+
+  optTakehomes.addEventListener("change", () => {
+    updateHintTakehomes();
+  });
+
+  // ✅ select top 3 only
+  selectAllBtn.addEventListener("click", () => {
+    selectedIds = new Set();
+    const nonArchives = sessions.filter(s => s.status !== "archives");
+    for(let i=0; i<Math.min(MAX_SELECTED, nonArchives.length); i++){
+      selectedIds.add(nonArchives[i].id);
+    }
+    renderSessions();
+    toast(`Selected top ${Math.min(MAX_SELECTED, nonArchives.length)} sessions.`);
+  });
+
+  selectNoneBtn.addEventListener("click", () => {
+    selectedIds = new Set();
+    renderSessions();
+  });
+
+  async function loadCatalog(){
+    if(location.protocol === "file:"){
+      loadInfo.textContent = "❌ Opened as file:// — JSON fetch will fail. Use GitHub Pages URL.";
+      toast("Open via GitHub Pages (https://...) not file://", 4500);
+      return;
+    }
+
+    const baseDir = new URL(".", location.href).toString();
+    const relCandidate = new URL(DEFAULT_JSON_FILENAME, baseDir).toString();
+
+    const candidates = [ CATALOG_URL_OVERRIDE, relCandidate ];
+    let lastErr = null;
+
+    for(const u of candidates){
+      try {
+        loadInfo.textContent = "Loading catalog from:\n" + u;
+        const data = await fetchJson(u);
+        catalog = validateCatalog(data);
+
+        if(catalog.catalog_name) pageTitle.textContent = catalog.catalog_name;
+
+        get365Btn.href = catalog.launcher.m365_signup_url;
+
+        normalizeSessions();
+        applyDefaults();
+        renderSessions();
+        renderSuggestions();
+        updateHintTakehomes();
+
+        loadInfo.textContent = "✅ Loaded catalog:\n" + u;
+        toast("Catalog loaded ✅");
+        return;
+      } catch(e){
+        lastErr = e;
+      }
+    }
+
+    loadInfo.textContent =
+      "❌ Catalog load failed.\n" +
+      "Tried:\n- " + candidates.join("\n- ") + "\n\n" +
+      "Error:\n" + String(lastErr);
+
+    toast("Catalog load failed ❌ (see details at top)", 5200);
+    console.error(lastErr);
+  }
+
+  loadCatalog().catch(err => {
+    loadInfo.textContent = "❌ Unexpected error: " + String(err);
+    console.error(err);
+  });
+
+})();
+</script>
+</body>
+</html>
