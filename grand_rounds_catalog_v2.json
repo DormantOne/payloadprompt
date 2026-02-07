@@ -21,6 +21,13 @@
   "prompt_template": "ROLE\nYou are an expert assistant for UPMC Grand Rounds.\n\nPRIMARY RULE\nUse the selected Teams file references below as your FIRST and PRIMARY sources.\nOpen and review each file in Teams before going broader.\n\nSELECTED GRAND ROUNDS SOURCES (Teams file references)\n{{SOURCES_BLOCK}}\n\nWHAT TO DO\n1) Open and read EACH selected Teams file above (Team → Files → Documents → Filename).\n2) Extract ONLY what is clearly visible/verified in the doc(s) (example: session title, presenter name, date/time if present).\n3) Do NOT invent missing fields.\n{{OPTIONS_BLOCK}}4) Answer the USER QUESTION.\n\nRESPONSE FORMAT\n- Short answer (2–4 sentences)\n- Per session (for each relevant selected session):\n  - Session title\n  - Presenter name (and role/title if visible)\n  - Date/time (ONLY if visible)\n  - Summary bullets\n  - 5 actionable take-homes (ranked) if requested\n- Sources (list the Teams file references you used; include any link Copilot surfaced while opening the files, if available)\n- Caveats (what you couldn't verify from the docs)\n\nUSER QUESTION:\n{{USER_QUESTION}}",
   "grand_rounds": [
     {
+  "id": "gr_scad",
+  "grand_rounds_name": "Spontaneous Coronary Artery Dissection",
+  "teams_team_name": "CMI Primary Care Education Series Review",
+  "teams_folder": "Documents",
+  "teams_filename": "postmenohealth_formatted.doc"
+     },
+    {
   "id": "gr_postmenohealth",
   "grand_rounds_name": "Postmenopausal Hormone Therapy and Sexual Function",
   "teams_team_name": "CMI Primary Care Education Series Review",
