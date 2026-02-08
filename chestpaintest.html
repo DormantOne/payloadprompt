@@ -1,0 +1,702 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CCD AUC Table Navigator (JACC 2023) — Simple Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --panel:#ffffff;
+      --ink:#111827;
+      --muted:#6b7280;
+      --border:#d1d5db;
+      --accent:#2563eb;
+      --accent2:#111827;
+      --soft:#eff6ff;
+      --warn:#b45309;
+      --warnbg:#fffbeb;
+      --ok:#16a34a;
+      --okbg:#ecfdf5;
+      --radius:14px;
+      --radius2:10px;
+      --shadow:0 10px 25px rgba(15,23,42,.12);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(circle at top left, #e0f2fe 0, var(--bg) 45%, #e5e7eb 100%);
+      color:var(--ink);
+      padding:14px;
+      min-height:100vh;
+    }
+    .wrap{max-width:1200px;margin:0 auto}
+    header{
+      background: linear-gradient(135deg,#fff,#e0f2fe);
+      border:1px solid rgba(148,163,184,.35);
+      border-radius:18px;
+      box-shadow: 0 16px 40px rgba(15,23,42,.15);
+      padding:14px 16px;
+      position:sticky;
+      top:8px;
+      z-index:10;
+      backdrop-filter: blur(10px);
+    }
+    .top{
+      display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;
+    }
+    .title{
+      font-weight:900;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      color:#1d4ed8;
+      font-size:1.05rem;
+    }
+    .sub{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:.92rem;
+      line-height:1.35;
+      max-width:980px;
+    }
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:4px 10px;border-radius:999px;
+      border:1px solid rgba(37,99,235,.18);
+      background: rgba(37,99,235,.06);
+      color:#1d4ed8;
+      font-size:.75rem;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      white-space:nowrap;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;background:#22c55e;
+      box-shadow:0 0 0 4px rgba(34,197,94,.25);
+    }
+
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+      gap:14px;
+    }
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+      header{position:static}
+    }
+    .panel{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:12px;
+      min-height:0;
+    }
+    .ph{
+      display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .pt{
+      display:flex;align-items:center;gap:8px;
+      font-weight:900;
+      font-size:.95rem;
+    }
+    .step{
+      width:26px;height:26px;border-radius:999px;
+      display:flex;align-items:center;justify-content:center;
+      background:var(--accent);color:#fff;font-weight:900;font-size:.85rem;
+      flex-shrink:0;
+    }
+    .note{color:var(--muted);font-size:.78rem;line-height:1.35}
+    fieldset{
+      border:1px solid var(--border);
+      background:#f9fafb;
+      border-radius: var(--radius2);
+      padding:10px;
+      margin-top:10px;
+    }
+    legend{
+      padding:0 6px;
+      color:var(--muted);
+      font-weight:900;
+      font-size:.74rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    .choice{
+      flex:1;min-width:190px;
+      border:1px solid var(--border);
+      border-radius: 12px;
+      background:#fff;
+      padding:10px;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+      user-select:none;
+    }
+    .choice:hover{transform: translateY(-1px); box-shadow:0 8px 18px rgba(15,23,42,.12)}
+    .choice.active{border-color: rgba(37,99,235,.8); box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+    .choice .lbl{font-weight:900;font-size:.9rem}
+    .choice .sm{color:var(--muted);font-size:.8rem;margin-top:4px;line-height:1.25}
+
+    .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    button{
+      border:none;border-radius:10px;
+      padding:9px 10px;
+      font-weight:900;
+      font-size:.82rem;
+      cursor:pointer;
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+      min-width: 140px;
+    }
+    .primary{background:var(--accent);color:#fff}
+    .primary:hover{background:#1d4ed8;transform:translateY(-1px);box-shadow:0 10px 22px rgba(37,99,235,.28)}
+    .secondary{background:#e5e7eb;color:var(--ink)}
+    .secondary:hover{background:#d1d5db;transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,23,42,.12)}
+    .ghost{background:#111827;color:#fff}
+    .ghost:hover{background:#374151;transform:translateY(-1px);box-shadow:0 8px 18px rgba(0,0,0,.22)}
+
+    .callout{
+      border-radius:12px;
+      padding:10px;
+      border:1px solid var(--border);
+      margin-top:10px;
+      line-height:1.35;
+      font-size:.86rem;
+    }
+    .warn{background:var(--warnbg);border-color:#fcd34d}
+    .ok{background:var(--okbg);border-color:#86efac}
+    .callout strong{font-weight:900}
+    .mono{font-family:var(--mono)}
+    .small{font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.35}
+    .kbd{font-family:var(--mono);background:#111827;color:#fff;padding:1px 6px;border-radius:6px;font-size:.75rem;font-weight:900}
+
+    /* PDF */
+    .pdfwrap{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height:0;
+    }
+    .pdfbar{
+      display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;
+    }
+    .pdfbar .left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    input[type="text"]{
+      width:min(820px, 100%);
+      padding:8px 10px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      font-family:var(--mono);
+      font-size:.82rem;
+      outline:none;
+    }
+    input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
+    .pdf{
+      width:100%;
+      height: 74vh;
+      border:1px solid var(--border);
+      border-radius: 12px;
+      background:#fff;
+    }
+    @media (max-width: 980px){
+      .pdf{height:70vh}
+    }
+
+    /* Emphasis checkboxes */
+    .checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+    @media (max-width: 520px){.checks{grid-template-columns:1fr}}
+    .check{
+      display:flex;gap:8px;align-items:flex-start;
+      padding:8px;border-radius:10px;border:1px solid #bfdbfe;background:#eff6ff;
+      font-size:.84rem;font-weight:800;
+    }
+    .check input{accent-color:var(--accent);margin-top:2px;flex-shrink:0}
+    .outbox{
+      background:#0f172a;color:#e2e8f0;border-radius:12px;
+      padding:10px;
+      font-family:var(--mono);
+      font-size:.82rem;
+      line-height:1.5;
+      white-space:pre-wrap;
+      max-height: 280px;
+      overflow:auto;
+      border:1px solid rgba(148,163,184,.3);
+    }
+
+    .toast{
+      position:fixed;
+      bottom:18px;right:18px;
+      background:#111827;color:#fff;
+      padding:10px 14px;
+      border-radius:10px;
+      box-shadow:0 14px 34px rgba(0,0,0,.35);
+      z-index:9999;
+      font-weight:800;
+      max-width: min(520px, 92vw);
+      animation: slidein .22s ease;
+    }
+    @keyframes slidein{
+      from{transform:translateX(320px);opacity:0}
+      to{transform:translateX(0);opacity:1}
+    }
+
+    .mini-toggle{
+      display:flex;gap:8px;align-items:center;
+      padding:8px;border-radius:10px;border:1px solid #bfdbfe;background:#eff6ff;
+      font-size:.84rem;font-weight:900;
+      margin-top:10px;
+    }
+    .mini-toggle input{accent-color:var(--accent)}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="top">
+      <div>
+        <div class="title">CCD AUC Table Navigator — Simple Calculator</div>
+        <div class="sub">
+          Use the flowchart logic to jump to the right AUC table inside the PDF.
+          <strong>This is NOT medical advice.</strong> It helps you navigate the document; you must read the tables & footnotes yourself.
+          AI summaries can be wrong — verify against the PDF.
+        </div>
+      </div>
+      <div class="badge"><span class="dot"></span> Prototype</div>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: CALCULATOR + AI PAYLOAD -->
+    <section class="panel">
+      <div class="ph">
+        <div class="pt"><span class="step">1</span> Calculator (Flowchart → Table)</div>
+        <div class="note">Pick symptoms → pick scenario → jump to table page.</div>
+      </div>
+
+      <div class="callout warn">
+        <strong>Reminder:</strong> This tool only points you to the table pages. You still need to read the table text and footnotes in the PDF.
+        AI can make mistakes.
+      </div>
+
+      <fieldset>
+        <legend>Symptoms of ischemia?</legend>
+        <div class="row" id="symptomRow">
+          <div class="choice" data-sym="yes" tabindex="0" role="button" aria-label="Symptoms: Yes">
+            <div class="lbl">Yes</div>
+            <div class="sm">Symptomatic / ischemic symptoms are present</div>
+          </div>
+          <div class="choice" data-sym="no" tabindex="0" role="button" aria-label="Symptoms: No">
+            <div class="lbl">No</div>
+            <div class="sm">No symptoms of ischemia</div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Which clinical scenario?</legend>
+        <div class="note">Shown options depend on your answer above.</div>
+        <div class="row" id="scenarioRow" style="margin-top:10px;"></div>
+
+        <div class="callout ok" id="resultBox" style="display:none;">
+          <strong>Result:</strong>
+          <div style="margin-top:6px;">
+            <span class="mono" id="resultLine">—</span>
+          </div>
+          <div class="small">
+            Page mapping requested:
+            <span class="mono">p12</span> (Tables 1.1–1.2),
+            <span class="mono">p13</span> (Tables 1.3–2.2),
+            <span class="mono">p14</span> (Tables 2.3–2.4).
+          </div>
+        </div>
+
+        <div class="btnrow">
+          <button class="primary" id="jumpBtn">📄 Jump to table page</button>
+          <button class="secondary" id="copyLinkBtn">🔗 Copy page link</button>
+          <button class="ghost" id="openPdfBtn">↗ Open PDF (new tab)</button>
+        </div>
+
+        <div class="small">
+          After jumping, scroll within the PDF panel. If your PDF viewer supports it, use <span class="kbd">Ctrl+F</span> / <span class="kbd">⌘+F</span>
+          and search the table label (e.g., <span class="mono">Table 1.1</span>).
+        </div>
+      </fieldset>
+
+      <div class="mini-toggle">
+        <input type="checkbox" id="voiceToggle" checked />
+        <label for="voiceToggle">Voice guide (speaks instructions)</label>
+      </div>
+
+      <div class="ph" style="margin-top:12px;">
+        <div class="pt"><span class="step">2</span> AI Summary Payload Prompt</div>
+        <div class="note">Build a prompt to paste into Copilot/AI for table-based summary.</div>
+      </div>
+
+      <fieldset>
+        <legend>Emphasis (checkboxes)</legend>
+        <div class="checks">
+          <label class="check"><input type="checkbox" class="emph" value="radiation exposure / dose considerations" checked />Radiation</label>
+          <label class="check"><input type="checkbox" class="emph" value="contrast / renal function and contraindications" checked />Contrast / renal</label>
+          <label class="check"><input type="checkbox" class="emph" value="exercise capacity / ECG interpretability / stress modality fit" />Exercise fit</label>
+          <label class="check"><input type="checkbox" class="emph" value="test availability, timeliness, and operational feasibility" />Feasibility</label>
+          <label class="check"><input type="checkbox" class="emph" value="downstream testing implications / false positives / incidental findings" />Downstream impact</label>
+          <label class="check"><input type="checkbox" class="emph" value="what decision the test changes (management impact)" checked />Decision impact</label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Payload prompt (copy/paste)</legend>
+        <div class="note">This includes the PDF link and instructs the AI to quote table rows/footnotes rather than guessing.</div>
+        <div class="outbox" id="promptBox">Select a scenario to generate a prompt…</div>
+        <div class="btnrow">
+          <button class="primary" id="copyPromptBtn">📋 Copy prompt</button>
+        </div>
+        <div class="small">
+          Source PDF link:
+          <span class="mono">https://www.jacc.org/doi/epdf/10.1016/j.jacc.2023.03.410</span>
+        </div>
+      </fieldset>
+
+      <div class="callout warn">
+        <strong>Not medical advice.</strong> The AI prompt tells the model to only summarize what it can directly read from the PDF.
+        Still verify the original tables and footnotes.
+      </div>
+
+    </section>
+
+    <!-- RIGHT: PDF VIEWER -->
+    <section class="panel pdfwrap">
+      <div class="ph">
+        <div class="pt"><span class="step">3</span> PDF Viewer</div>
+        <div class="note">You can scroll inside the PDF after jumping.</div>
+      </div>
+
+      <div class="pdfbar">
+        <div class="left">
+          <button class="secondary" id="useRemoteBtn">Use JACC PDF URL</button>
+          <button class="secondary" id="useLocalBtn" title="If you put the PDF in your GitHub repo, use a relative path.">Use local PDF file</button>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:-2px;">
+        PDF source (editable): If embedding is blocked by the remote site, click “Open PDF (new tab)”.
+      </div>
+      <input id="pdfUrl" type="text" spellcheck="false" />
+
+      <iframe class="pdf" id="pdfFrame" title="PDF Viewer"></iframe>
+
+      <div class="small">
+        GitHub Pages tip: put the PDF in the repo root and set the source to:
+        <span class="mono">./winchester-et-al-2023-acc-aha-ase-asnc-aspc-hfsa-hrs-scai-scct-scmr-sts-2023-multimodality-appropriate-use-criteria-for.pdf</span>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  // --- TABLE MAP (per your requested page mapping) ---
+  const TABLES = {
+    "1.1": { label: "Table 1.1", page: 12, scenario: "Symptoms of ischemia: YES → No prior testing" },
+    "1.2": { label: "Table 1.2", page: 12, scenario: "Symptoms of ischemia: YES → Prior testing without MI or revascularization" },
+    "1.3": { label: "Table 1.3", page: 13, scenario: "Symptoms of ischemia: YES → Prior MI or revascularization" },
+    "2.1": { label: "Table 2.1", page: 13, scenario: "Symptoms of ischemia: NO → Testing for risk of ASCVD events" },
+    "2.2": { label: "Table 2.2", page: 13, scenario: "Symptoms of ischemia: NO → Prior MI or revascularization (e.g., rehabilitation)" },
+    "2.3": { label: "Table 2.3", page: 14, scenario: "Symptoms of ischemia: NO → Exercise Rx / rehabilitation" },
+    "2.4": { label: "Table 2.4", page: 14, scenario: "Symptoms of ischemia: NO → Other CV conditions (e.g., heart failure, arrhythmia, syncope)" }
+  };
+
+  // Flowchart choices
+  const SCENARIOS_BY_SYM = {
+    yes: [
+      { key: "1.1", title: "No prior testing", sub: "Go to Table 1.1 (page 12)" },
+      { key: "1.2", title: "Prior testing w/o MI or revascularization", sub: "Go to Table 1.2 (page 12)" },
+      { key: "1.3", title: "Prior MI or revascularization", sub: "Go to Table 1.3 (page 13)" }
+    ],
+    no: [
+      { key: "2.1", title: "Testing for risk of ASCVD events", sub: "Go to Table 2.1 (page 13)" },
+      { key: "2.2", title: "Prior MI or revasc (e.g., rehab)", sub: "Go to Table 2.2 (page 13)" },
+      { key: "2.3", title: "Exercise Rx / Rehab", sub: "Go to Table 2.3 (page 14)" },
+      { key: "2.4", title: "Other CV conditions*", sub: "Go to Table 2.4 (page 14)" }
+    ]
+  };
+
+  // Defaults
+  const REMOTE_PDF = "https://www.jacc.org/doi/epdf/10.1016/j.jacc.2023.03.410";
+  const LOCAL_PDF  = "./winchester-et-al-2023-acc-aha-ase-asnc-aspc-hfsa-hrs-scai-scct-scmr-sts-2023-multimodality-appropriate-use-criteria-for.pdf";
+
+  // Elements
+  const symptomRow = document.getElementById('symptomRow');
+  const scenarioRow = document.getElementById('scenarioRow');
+
+  const resultBox = document.getElementById('resultBox');
+  const resultLine = document.getElementById('resultLine');
+
+  const jumpBtn = document.getElementById('jumpBtn');
+  const copyLinkBtn = document.getElementById('copyLinkBtn');
+  const openPdfBtn = document.getElementById('openPdfBtn');
+
+  const pdfUrlEl = document.getElementById('pdfUrl');
+  const pdfFrame = document.getElementById('pdfFrame');
+  const useRemoteBtn = document.getElementById('useRemoteBtn');
+  const useLocalBtn = document.getElementById('useLocalBtn');
+
+  const promptBox = document.getElementById('promptBox');
+  const copyPromptBtn = document.getElementById('copyPromptBtn');
+
+  const voiceToggle = document.getElementById('voiceToggle');
+
+  let selectedSym = null;     // "yes" | "no"
+  let selectedTableKey = null; // "1.1" etc.
+
+  // --- Helpers ---
+  function toast(msg, ms){
+    ms = ms || 2600;
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(), ms);
+  }
+
+  function speak(text){
+    if (!voiceToggle.checked) return;
+    if (!('speechSynthesis' in window)) return;
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.06;
+      u.pitch = 1;
+      window.speechSynthesis.speak(u);
+    }catch(_){}
+  }
+
+  function setActiveChoice(container, predicate){
+    const choices = Array.from(container.querySelectorAll('.choice'));
+    choices.forEach(ch=>{
+      if (predicate(ch)) ch.classList.add('active');
+      else ch.classList.remove('active');
+    });
+  }
+
+  function buildScenarioChoices(sym){
+    scenarioRow.innerHTML = '';
+    const list = SCENARIOS_BY_SYM[sym] || [];
+    list.forEach(item=>{
+      const div = document.createElement('div');
+      div.className = 'choice';
+      div.tabIndex = 0;
+      div.setAttribute('role','button');
+      div.dataset.table = item.key;
+      div.innerHTML = `
+        <div class="lbl">${item.title}</div>
+        <div class="sm">${item.sub}</div>
+      `;
+      div.addEventListener('click', ()=>selectTable(item.key));
+      div.addEventListener('keydown', (e)=>{
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTable(item.key); }
+      });
+      scenarioRow.appendChild(div);
+    });
+  }
+
+  function getPdfBase(){
+    return (pdfUrlEl.value || '').trim() || REMOTE_PDF;
+  }
+
+  function makePdfLink(page){
+    // Many browser PDF viewers support #page=.
+    // If remote embedding is blocked, user can still open this in a new tab.
+    return `${getPdfBase()}#page=${page}`;
+  }
+
+  function loadPdfToPage(page){
+    const url = makePdfLink(page);
+    pdfFrame.src = url;
+  }
+
+  function selectSym(sym){
+    selectedSym = sym;
+    setActiveChoice(symptomRow, ch => ch.dataset.sym === sym);
+    buildScenarioChoices(sym);
+    selectedTableKey = null;
+    resultBox.style.display = 'none';
+    promptBox.textContent = "Select a scenario to generate a prompt…";
+    toast(`Selected: Symptoms of ischemia = ${sym.toUpperCase()}`);
+    speak(`Selected. Symptoms of ischemia: ${sym === 'yes' ? 'Yes' : 'No'}. Now choose a clinical scenario.`);
+  }
+
+  function getSelectedEmphasis(){
+    const emph = Array.from(document.querySelectorAll('.emph:checked')).map(x=>x.value);
+    return emph.length ? emph : ["decision impact (what changes)"];
+  }
+
+  function buildAIPrompt(tableKey){
+    const t = TABLES[tableKey];
+    const page = t.page;
+    const emph = getSelectedEmphasis();
+
+    return [
+`SYSTEM / SAFETY`,
+`- This is educational and NOT medical advice.`,
+`- You are an AI system and can make mistakes. If uncertain, say so.`,
+`- Use the PDF as the ONLY source. Do not guess AUC ratings.`,
+``,
+`PRIMARY SOURCE`,
+`- PDF: ${REMOTE_PDF}`,
+`- I am using ${t.label} (page ${page}).`,
+``,
+`TASK`,
+`1) Open the PDF link and navigate to page ${page}.`,
+`2) Locate ${t.label} exactly and read it (including footnotes).`,
+`3) Summarize the table content relevant to this scenario:`,
+`   - ${t.scenario}`,
+`4) Include (verbatim where possible):`,
+`   - The table title`,
+`   - The specific scenario row(s) that match`,
+`   - AUC ratings (A/M/R) and any numeric scores shown`,
+`   - Footnotes that affect interpretation`,
+`5) Emphasize: ${emph.join("; ")}.`,
+``,
+`OUTPUT FORMAT`,
+`- 2–4 sentence plain-language summary`,
+`- “Where to find it”: page ${page}, ${t.label}`,
+`- “Table excerpt”: quote the relevant row(s) and footnotes (short quotes only)`,
+`- “Interpretation notes”: explain how you mapped the scenario to the row(s)`,
+`- “Caveats”: remind reader to verify in the PDF (AI may be wrong)`,
+``,
+`If you cannot access the PDF or cannot see the table clearly, say so and stop (do not guess).`
+    ].join("\n");
+  }
+
+  function selectTable(tableKey){
+    selectedTableKey = tableKey;
+
+    setActiveChoice(scenarioRow, ch => ch.dataset.table === tableKey);
+
+    const t = TABLES[tableKey];
+    resultLine.textContent = `${t.label} → page ${t.page}  |  ${t.scenario}`;
+    resultBox.style.display = 'block';
+
+    // Update prompt
+    promptBox.textContent = buildAIPrompt(tableKey);
+
+    toast(`Selected ${t.label} (page ${t.page})`);
+    speak(`Selected ${t.label}. Jump will open page ${t.page}. You can scroll within the PDF to the exact table.`);
+
+    // Auto-jump for “simple wimple”
+    loadPdfToPage(t.page);
+  }
+
+  // --- Wire events ---
+  // Symptom choices
+  Array.from(symptomRow.querySelectorAll('.choice')).forEach(ch=>{
+    ch.addEventListener('click', ()=>selectSym(ch.dataset.sym));
+    ch.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectSym(ch.dataset.sym); }
+    });
+  });
+
+  jumpBtn.addEventListener('click', ()=>{
+    if (!selectedTableKey) {
+      toast("Pick a scenario first.");
+      speak("Pick a scenario first.");
+      return;
+    }
+    const t = TABLES[selectedTableKey];
+    loadPdfToPage(t.page);
+    toast(`Jumped to page ${t.page}. Scroll to ${t.label}.`);
+    speak(`Jumped to page ${t.page}. Scroll to ${t.label}.`);
+  });
+
+  openPdfBtn.addEventListener('click', ()=>{
+    const page = selectedTableKey ? TABLES[selectedTableKey].page : 1;
+    window.open(makePdfLink(page), "_blank");
+  });
+
+  copyLinkBtn.addEventListener('click', async ()=>{
+    const page = selectedTableKey ? TABLES[selectedTableKey].page : 1;
+    const link = makePdfLink(page);
+    try{
+      await navigator.clipboard.writeText(link);
+      toast("Copied page link to clipboard.");
+      speak("Copied.");
+    }catch(_){
+      toast("Clipboard blocked. Copy manually from the PDF source box on the right.");
+    }
+  });
+
+  copyPromptBtn.addEventListener('click', async ()=>{
+    const text = promptBox.textContent || "";
+    if (!selectedTableKey) {
+      toast("Select a scenario first (so the prompt knows which table).");
+      speak("Select a scenario first.");
+      return;
+    }
+    try{
+      await navigator.clipboard.writeText(text);
+      toast("Copied AI prompt to clipboard.");
+      speak("Prompt copied. Paste into Copilot, then verify the table and footnotes in the PDF.");
+    }catch(_){
+      toast("Clipboard blocked. Select and copy the prompt manually.");
+    }
+  });
+
+  // Emphasis changes update prompt (live)
+  Array.from(document.querySelectorAll('.emph')).forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if (selectedTableKey) promptBox.textContent = buildAIPrompt(selectedTableKey);
+    });
+  });
+
+  // PDF source buttons
+  useRemoteBtn.addEventListener('click', ()=>{
+    pdfUrlEl.value = REMOTE_PDF;
+    toast("Using JACC PDF URL. If iframe is blocked, use Open PDF (new tab).");
+    speak("Using the JACC PDF link. If it does not display, open the PDF in a new tab.");
+    if (selectedTableKey) loadPdfToPage(TABLES[selectedTableKey].page);
+    else pdfFrame.src = REMOTE_PDF;
+  });
+
+  useLocalBtn.addEventListener('click', ()=>{
+    pdfUrlEl.value = LOCAL_PDF;
+    toast("Using local PDF path (best for GitHub Pages).");
+    speak("Using local PDF path. This is best for GitHub Pages.");
+    if (selectedTableKey) loadPdfToPage(TABLES[selectedTableKey].page);
+    else pdfFrame.src = LOCAL_PDF;
+  });
+
+  // If user edits URL manually, reload current page
+  let urlEditTimer = null;
+  pdfUrlEl.addEventListener('input', ()=>{
+    clearTimeout(urlEditTimer);
+    urlEditTimer = setTimeout(()=>{
+      const page = selectedTableKey ? TABLES[selectedTableKey].page : 1;
+      pdfFrame.src = makePdfLink(page);
+      toast("Reloaded PDF with new source.");
+    }, 600);
+  });
+
+  // --- Initialize ---
+  // Default to local if present, but remote is safer if user doesn't host the PDF.
+  // We'll start with REMOTE in the box so it's consistent with your ask.
+  pdfUrlEl.value = REMOTE_PDF;
+  pdfFrame.src = REMOTE_PDF;
+
+  // Preselect “Yes” so the UI feels immediate
+  selectSym('yes');
+
+})();
+</script>
+</body>
+</html>
