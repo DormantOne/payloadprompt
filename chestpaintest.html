@@ -1,863 +1,900 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>CCD AUC Table Navigator — Chest Pain Test (PDF Jump + Voice + Copy&Open)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CCD AUC Testing Calculator — 2023 Multimodality Appropriate Use Criteria</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
-    :root{
-      --bg:#f3f4f6;
-      --panel:#ffffff;
-      --ink:#111827;
-      --muted:#6b7280;
-      --border:#d1d5db;
-      --accent:#2563eb;
-      --accent-strong:#1d4ed8;
-      --soft:#eff6ff;
-      --warn:#b45309;
-      --warnbg:#fffbeb;
-      --ok:#16a34a;
-      --okbg:#ecfdf5;
-      --radius:16px;
-      --radius2:12px;
-      --shadow:0 10px 25px rgba(15,23,42,.12);
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    :root {
+      --bg: #f0f1f3;
+      --surface: #ffffff;
+      --text: #1a1a2e;
+      --muted: #6c6e7e;
+      --border: #d4d6de;
+      --green: #16a34a;
+      --green-bg: #dcfce7;
+      --green-border: #86efac;
+      --yellow: #b45309;
+      --yellow-bg: #fef9c3;
+      --yellow-border: #fde047;
+      --red: #dc2626;
+      --red-bg: #fee2e2;
+      --red-border: #fca5a5;
+      --na-bg: #f1f1f4;
+      --na-border: #e0e0e6;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --mono: 'IBM Plex Mono', ui-monospace, monospace;
+      --sans: 'IBM Plex Sans', system-ui, sans-serif;
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      background: radial-gradient(circle at top left, #e0f2fe 0, var(--bg) 45%, #e5e7eb 100%);
-      color:var(--ink);
-      padding:14px;
-      min-height:100vh;
-    }
-    .wrap{max-width:1320px;margin:0 auto}
-    header{
-      background: linear-gradient(135deg,#fff,#e0f2fe);
-      border:1px solid rgba(148,163,184,.35);
-      border-radius: 18px;
-      box-shadow: 0 16px 40px rgba(15,23,42,.15);
-      padding:14px 16px;
-      position:sticky;
-      top:8px;
-      z-index:10;
-      backdrop-filter: blur(10px);
-    }
-    .top{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
-    .title{
-      font-weight:900;
-      letter-spacing:.04em;
-      text-transform:uppercase;
-      color:var(--accent-strong);
-      font-size:1.05rem;
-    }
-    .sub{
-      margin-top:6px;
-      color:var(--muted);
-      font-size:.92rem;
-      line-height:1.35;
-      max-width:1060px;
-    }
-    .badge{
-      display:inline-flex;align-items:center;gap:6px;
-      padding:4px 10px;border-radius:999px;
-      border:1px solid rgba(37,99,235,.18);
-      background: rgba(37,99,235,.06);
-      color:var(--accent-strong);
-      font-size:.75rem;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.08em;
-      white-space:nowrap;
-    }
-    .dot{
-      width:8px;height:8px;border-radius:999px;background:#22c55e;
-      box-shadow:0 0 0 4px rgba(34,197,94,.25);
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
     }
 
-    /* Give the PDF MORE space (width) */
-    .grid{
-      margin-top:14px;
-      display:grid;
-      grid-template-columns: minmax(340px, 0.62fr) minmax(0, 1.38fr);
-      gap:14px;
+    /* ---- HEADER ---- */
+    .header {
+      background: #1a1a2e;
+      color: #e2e4ef;
+      padding: 18px 24px;
+      border-bottom: 3px solid var(--accent);
     }
-    @media (max-width: 980px){
-      .grid{grid-template-columns:1fr}
-      header{position:static}
+    .header-inner { max-width: 1400px; margin: 0 auto; }
+    .header h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+      color: #fff;
     }
-    .panel{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding:12px;
-      min-height:0;
+    .header .sub {
+      font-size: .82rem;
+      color: #9ca3c0;
+      margin-top: 4px;
     }
-    .ph{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-    .pt{display:flex;align-items:center;gap:8px;font-weight:900;font-size:.95rem}
-    .step{
-      width:26px;height:26px;border-radius:999px;
-      display:flex;align-items:center;justify-content:center;
-      background:var(--accent);color:#fff;font-weight:900;font-size:.85rem;
-      flex-shrink:0;
+    .header .links {
+      margin-top: 8px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: .78rem;
     }
-    .note{color:var(--muted);font-size:.78rem;line-height:1.35}
-    fieldset{
-      border:1px solid var(--border);
-      background:#f9fafb;
-      border-radius: var(--radius2);
-      padding:10px;
-      margin-top:10px;
+    .header a {
+      color: #93c5fd;
+      text-decoration: none;
+      font-weight: 600;
     }
-    legend{
-      padding:0 6px;
-      color:var(--muted);
-      font-weight:900;
-      font-size:.74rem;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-    }
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    .choice{
-      flex:1;min-width:190px;
-      border:1px solid var(--border);
+    .header a:hover { text-decoration: underline; }
+
+    /* ---- MAIN LAYOUT ---- */
+    .main { max-width: 1400px; margin: 0 auto; padding: 16px; }
+
+    /* ---- CONTROLS ---- */
+    .controls {
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      background:#fff;
-      padding:10px;
-      cursor:pointer;
-      transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-      user-select:none;
+      padding: 16px;
+      margin-bottom: 16px;
     }
-    .choice:hover{transform: translateY(-1px); box-shadow:0 8px 18px rgba(15,23,42,.12)}
-    .choice.active{border-color: rgba(37,99,235,.85); box-shadow:0 0 0 3px rgba(37,99,235,.18)}
-    .choice .lbl{font-weight:900;font-size:.9rem}
-    .choice .sm{color:var(--muted);font-size:.8rem;margin-top:4px;line-height:1.25}
-
-    .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    button{
-      border:none;border-radius:12px;
-      padding:10px 12px;
-      font-weight:900;
-      font-size:.82rem;
-      cursor:pointer;
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
-      min-width: 168px;
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 12px;
+      align-items: start;
     }
-    .primary{background:var(--accent);color:#fff}
-    .primary:hover{background:var(--accent-strong);transform:translateY(-1px);box-shadow:0 10px 22px rgba(37,99,235,.28)}
-    .secondary{background:#e5e7eb;color:var(--ink)}
-    .secondary:hover{background:#d1d5db;transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,23,42,.12)}
-
-    .pill{
-      border-radius: 999px;
-      padding:6px 10px;
-      background:#eff6ff;
-      border:1px solid #bfdbfe;
-      font-size:.78rem;
-      font-weight:900;
-      color:#1e40af;
-      display:inline-flex;gap:6px;align-items:center;
+    @media (max-width: 700px) {
+      .controls-grid { grid-template-columns: 1fr; }
     }
-
-    .callout{
-      border-radius:12px;
-      padding:10px;
-      border:1px solid var(--border);
-      margin-top:10px;
-      line-height:1.35;
-      font-size:.86rem;
+    label.ctrl-label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      margin-bottom: 5px;
     }
-    .warn{background:var(--warnbg);border-color:#fcd34d}
-    .ok{background:var(--okbg);border-color:#86efac}
-    .callout strong{font-weight:900}
-    .mono{font-family:var(--mono)}
-    .small{font-size:.78rem;color:var(--muted);margin-top:8px;line-height:1.35}
-    .kbd{font-family:var(--mono);background:#111827;color:#fff;padding:1px 6px;border-radius:6px;font-size:.75rem;font-weight:900}
-
-    .checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
-    @media (max-width: 520px){.checks{grid-template-columns:1fr}}
-    .check{
-      display:flex;gap:8px;align-items:flex-start;
-      padding:8px;border-radius:12px;border:1px solid #bfdbfe;background:#eff6ff;
-      font-size:.84rem;font-weight:900;
+    select, input[type="text"], textarea {
+      width: 100%;
+      font-family: var(--sans);
+      font-size: .9rem;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
     }
-    .check input{accent-color:var(--accent);margin-top:2px;flex-shrink:0}
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+    textarea { min-height: 60px; resize: vertical; }
 
-    .outbox{
-      background:#0f172a;color:#e2e8f0;border-radius:12px;
-      padding:10px;
-      font-family:var(--mono);
-      font-size:.82rem;
-      line-height:1.5;
-      white-space:pre-wrap;
-      max-height: 320px;
-      overflow:auto;
-      border:1px solid rgba(148,163,184,.3);
+    /* Sub-scenario select */
+    .sub-scenario-wrap {
+      margin-top: 12px;
+      padding: 12px;
+      background: #f8f9fb;
+      border: 1px solid var(--border);
+      border-radius: 8px;
     }
 
-    .toast{
-      position:fixed;
-      bottom:18px;right:18px;
-      background:#111827;color:#fff;
-      padding:10px 14px;
-      border-radius:12px;
-      box-shadow:0 14px 34px rgba(0,0,0,.35);
-      z-index:9999;
-      font-weight:900;
-      max-width: min(560px, 92vw);
-      animation: slidein .22s ease;
+    /* ---- RESULTS TABLE ---- */
+    .results-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      overflow-x: auto;
     }
-    @keyframes slidein{
-      from{transform:translateX(320px);opacity:0}
-      to{transform:translateX(0);opacity:1}
+    .results-panel h2 {
+      font-size: .95rem;
+      font-weight: 700;
+      margin-bottom: 4px;
     }
-
-    .mini-toggle{
-      display:flex;gap:8px;align-items:center;
-      padding:8px;border-radius:12px;border:1px solid #bfdbfe;background:#eff6ff;
-      font-size:.84rem;font-weight:900;
-      margin-top:10px;
-    }
-    .mini-toggle input{accent-color:var(--accent)}
-    .ai-links{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:10px;
-    }
-    .ai-links button{min-width: 210px}
-
-    /* PDF.js viewer area - make it TALLER */
-    .pdfwrap{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-height:0;
-    }
-    .pdfTop{
-      display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;
-    }
-    input[type="text"]{
-      width:100%;
-      padding:9px 10px;
-      border:1px solid var(--border);
-      border-radius:12px;
-      font-family:var(--mono);
-      font-size:.82rem;
-      outline:none;
-    }
-    input[type="text"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.18)}
-
-    .pdfwrap .btnrow{margin-top:0}
-    .pdfScroll{
-      width:100%;
-      height: calc(100vh - 230px); /* bigger/longer */
-      border:1px solid var(--border);
-      border-radius: 14px;
-      background:#fff;
-      overflow:auto;
-      padding: 10px;
-    }
-    @media (max-width: 980px){
-      .pdfScroll{height: calc(100vh - 260px)}
-    }
-    .pageCard{
-      border:1px solid rgba(148,163,184,.35);
-      border-radius:14px;
-      padding:10px;
+    .results-panel .scenario-desc {
+      font-size: .82rem;
+      color: var(--muted);
       margin-bottom: 12px;
-      box-shadow: 0 10px 22px rgba(15,23,42,.10);
-      background: linear-gradient(180deg, #ffffff, #f8fafc);
     }
-    .pageHdr{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
+
+    .ratings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 8px;
+    }
+    .rating-card {
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      border: 2px solid;
+      transition: transform .12s;
+    }
+    .rating-card:hover { transform: translateY(-2px); }
+    .rating-card.A {
+      background: var(--green-bg);
+      border-color: var(--green-border);
+    }
+    .rating-card.M {
+      background: var(--yellow-bg);
+      border-color: var(--yellow-border);
+    }
+    .rating-card.R {
+      background: var(--red-bg);
+      border-color: var(--red-border);
+    }
+    .rating-card.NA {
+      background: var(--na-bg);
+      border-color: var(--na-border);
+      opacity: .5;
+    }
+    .rating-card .modality {
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .rating-card .rating-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .rating-card.A .rating-badge { background: var(--green); }
+    .rating-card.M .rating-badge { background: var(--yellow); }
+    .rating-card.R .rating-badge { background: var(--red); }
+    .rating-card.NA .rating-badge { background: #bbb; }
+    .rating-card .score {
+      font-family: var(--mono);
+      font-size: .82rem;
+      font-weight: 600;
+    }
+    .rating-card.A .score { color: var(--green); }
+    .rating-card.M .score { color: var(--yellow); }
+    .rating-card.R .score { color: var(--red); }
+    .rating-card.NA .score { color: #999; }
+    .rating-card .rating-label {
+      font-size: .68rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ---- LEGEND ---- */
+    .legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      font-size: .78rem;
+      font-weight: 600;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+    .legend-dot.A { background: var(--green); }
+    .legend-dot.M { background: var(--yellow); }
+    .legend-dot.R { background: var(--red); }
+
+    /* ---- PROMPT SECTION ---- */
+    .prompt-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .prompt-panel h2 {
+      font-size: .95rem;
+      font-weight: 700;
       margin-bottom: 8px;
     }
-    .pageNum{
-      font-weight:900;
-      color: var(--accent-strong);
-      letter-spacing:.02em;
+    .emphasis-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
     }
-    .canvasWrap{
-      width: 100%;
-      display:flex;
-      justify-content:center;
-    }
-    canvas{
-      max-width: 100%;
-      height: auto;
-      border-radius: 10px;
+    .emp-chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid var(--border);
       background: #fff;
+      color: var(--text);
+      user-select: none;
+      transition: all .15s;
     }
-    .loading{
-      padding:12px;
-      border-radius:12px;
-      border:1px solid #bfdbfe;
-      background:#eff6ff;
-      font-weight:900;
-      color:#1e40af;
+    .emp-chip:hover { border-color: var(--accent); }
+    .emp-chip.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .prompt-output {
+      background: #1a1a2e;
+      color: #c8cce0;
+      font-family: var(--mono);
+      font-size: .78rem;
+      line-height: 1.55;
+      padding: 12px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 300px;
+      overflow: auto;
+      margin-top: 10px;
+    }
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .btn {
+      font-family: var(--sans);
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: .82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-dark); }
+    .btn-secondary { background: #e5e7eb; color: var(--text); }
+    .btn-secondary:hover { background: #d1d5db; }
+
+    .disclaimer {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: .78rem;
+      color: #1e40af;
+      margin-bottom: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      background: #1a1a2e;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: .82rem;
+      z-index: 9999;
+      box-shadow: 0 8px 24px rgba(0,0,0,.3);
+    }
+
+    .note-text {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: 6px;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div class="top">
-      <div>
-        <div class="title">CCD AUC Table Navigator — Chest Pain Test</div>
-        <div class="sub">
-          Use the flowchart logic to jump to the right AUC table pages (<span class="mono">p12–p14</span>) inside <span class="mono">chestpaintest.pdf</span>.
-          <strong>This is NOT medical advice.</strong> It only helps you find the relevant tables quickly.
-          AI summaries can be wrong — verify by reading the PDF tables & footnotes.
-        </div>
-      </div>
-      <div class="badge"><span class="dot"></span> Prototype</div>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>ACC/AHA 2023 Multimodality AUC — Chronic Coronary Disease Testing Calculator</h1>
+    <div class="sub">Interactive lookup for Tables 1.1–2.4. Shows appropriateness ratings (A / M / R) by test modality for each clinical scenario. <b>Not medical advice.</b></div>
+    <div class="links">
+      <a href="https://www.jacc.org/doi/epdf/10.1016/j.jacc.2023.03.410" target="_blank" rel="noopener">📄 JACC ePDF (Full Article)</a>
+      <a href="https://www.jacc.org/doi/10.1016/j.jacc.2023.03.410" target="_blank" rel="noopener">📖 Article Page</a>
+      <a href="chestpaintest.pdf" target="_blank" rel="noopener">📋 Local PDF</a>
+      <a href="https://professional.heart.org/en/guidelines-and-statements/prevent-calculator" target="_blank" rel="noopener">🧮 AHA PREVENT™ Risk Calculator</a>
     </div>
-  </header>
-
-  <div class="grid">
-
-    <!-- LEFT: CALCULATOR + AI PAYLOAD -->
-    <section class="panel">
-      <div class="ph">
-        <div class="pt"><span class="step">1</span> Calculator (Flowchart → Table)</div>
-        <div class="note">Pick symptoms → pick scenario → jump (scroll) to the right PDF page.</div>
-      </div>
-
-      <div class="callout warn">
-        <strong>Reminder:</strong> Not medical advice. This tool navigates the PDF; you must read the tables & footnotes yourself.
-        AI can make mistakes — verify.
-      </div>
-
-      <fieldset>
-        <legend>Symptoms of ischemia?</legend>
-        <div class="row" id="symptomRow">
-          <div class="choice" data-sym="yes" tabindex="0" role="button" aria-label="Symptoms: Yes">
-            <div class="lbl">Yes</div>
-            <div class="sm">Symptomatic / ischemic symptoms are present</div>
-          </div>
-          <div class="choice" data-sym="no" tabindex="0" role="button" aria-label="Symptoms: No">
-            <div class="lbl">No</div>
-            <div class="sm">No symptoms of ischemia</div>
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Which clinical scenario?</legend>
-        <div class="note">Options depend on your answer above.</div>
-        <div class="row" id="scenarioRow" style="margin-top:10px;"></div>
-
-        <div class="callout ok" id="resultBox" style="display:none;">
-          <strong>Result:</strong>
-          <div style="margin-top:6px;">
-            <span class="mono" id="resultLine">—</span>
-          </div>
-          <div class="small">
-            Page mapping:
-            <span class="mono">p12</span> (Tables 1.1–1.2),
-            <span class="mono">p13</span> (Tables 1.3–2.2),
-            <span class="mono">p14</span> (Tables 2.3–2.4).
-          </div>
-        </div>
-
-        <div class="btnrow">
-          <button class="primary" id="jumpBtn">📄 Jump (scroll) to page</button>
-          <button class="secondary" id="openPdfNewTabBtn">↗ Open PDF at page</button>
-        </div>
-
-        <div class="small">
-          After jumping, scroll within the PDF panel. You can also use <span class="kbd">Ctrl+F</span> / <span class="kbd">⌘+F</span>
-          and search for <span class="mono">Table 1.1</span>, etc.
-        </div>
-      </fieldset>
-
-      <div class="mini-toggle">
-        <input type="checkbox" id="voiceToggle" checked />
-        <label for="voiceToggle">Voice guide (speaks step-by-step instructions)</label>
-      </div>
-
-      <div class="ph" style="margin-top:12px;">
-        <div class="pt"><span class="step">2</span> AI Summary Prompt</div>
-        <div class="note">Copy + open Copilot (or other models). Voice will guide paste steps.</div>
-      </div>
-
-      <fieldset>
-        <legend>Emphasis (checkboxes)</legend>
-        <div class="checks">
-          <label class="check"><input type="checkbox" class="emph" value="radiation exposure / dose considerations" checked />Radiation</label>
-          <label class="check"><input type="checkbox" class="emph" value="contrast / renal function and contraindications" checked />Contrast / renal</label>
-          <label class="check"><input type="checkbox" class="emph" value="exercise capacity / ECG interpretability / stress modality fit" />Exercise fit</label>
-          <label class="check"><input type="checkbox" class="emph" value="test availability, timeliness, and operational feasibility" />Feasibility</label>
-          <label class="check"><input type="checkbox" class="emph" value="downstream testing implications / false positives / incidental findings" />Downstream impact</label>
-          <label class="check"><input type="checkbox" class="emph" value="what decision the test changes (management impact)" checked />Decision impact</label>
-        </div>
-      </fieldset>
-
-      <fieldset>
-        <legend>Prompt (copy/paste)</legend>
-        <div class="note">The prompt instructs the AI to only summarize what it can directly read from the PDF and to quote table rows/footnotes.</div>
-        <div class="outbox" id="promptBox">Select a scenario to generate a prompt…</div>
-
-        <div class="ai-links">
-          <button class="primary" id="copilotBtn">📋 Copy + Open Copilot (M365)</button>
-          <button class="secondary" id="chatgptBtn">📋 Copy + Open ChatGPT</button>
-          <button class="secondary" id="claudeBtn">📋 Copy + Open Claude</button>
-          <button class="secondary" id="geminiBtn">📋 Copy + Open Gemini</button>
-        </div>
-
-        <div class="small">
-          Source PDF (publisher): <span class="mono">https://www.jacc.org/doi/epdf/10.1016/j.jacc.2023.03.410</span><br>
-          Local PDF on this site: <span class="mono" id="sitePdfUrl">(computed)</span>
-        </div>
-      </fieldset>
-
-      <div class="callout warn">
-        <strong>Not medical advice.</strong> The AI prompt tells the model to cite/quote from the PDF and to stop if it can’t access the table.
-        Still verify the original tables and footnotes.
-      </div>
-    </section>
-
-    <!-- RIGHT: PDF VIEWER (PDF.js, reliable jump) -->
-    <section class="panel pdfwrap">
-      <div class="ph">
-        <div class="pt"><span class="step">3</span> PDF Viewer (reliable jump)</div>
-        <div class="note">Rendered with PDF.js so “jump” works on GitHub Pages.</div>
-      </div>
-
-      <div class="pdfTop">
-        <div class="pill">Default render range: <span class="mono">pages 8–14</span> (tables A/B/C + 1.1–2.4)</div>
-        <div class="btnrow">
-          <button class="secondary" id="renderTablesBtn">Render pages 8–14</button>
-          <button class="secondary" id="renderAllBtn">Render ALL pages</button>
-        </div>
-      </div>
-
-      <div class="note">
-        PDF path (default is <span class="mono">./chestpaintest.pdf</span>). If you change it, re-render.
-      </div>
-      <input id="pdfPath" type="text" spellcheck="false" />
-
-      <div class="pdfScroll" id="pdfScroll">
-        <div class="loading">Loading PDF viewer…</div>
-      </div>
-
-      <div class="small">
-        If rendering fails, check the PDF path and ensure the file exists in your repo.
-        You can also open the PDF directly at: <span class="mono" id="directPdfLink">(computed)</span>
-      </div>
-    </section>
-
   </div>
 </div>
 
-<script type="module">
-  import * as pdfjsLib from "https://unpkg.com/pdfjs-dist@5.4.624/build/pdf.min.mjs";
-  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@5.4.624/build/pdf.worker.min.mjs";
+<div class="main">
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    <b>⚠ Not medical advice.</b> This tool displays ratings from the 2023 ACC/AHA/ASE/ASNC/ASPC/HFSA/HRS/SCAI/SCCT/SCMR/STS Multimodality AUC for Chronic Coronary Disease (JACC 2023;81:2445–2467). It does not replace clinical judgment. Read the primary source.
+  </div>
 
-  const LOCAL_PDF_DEFAULT = "./chestpaintest.pdf";
-  const JACC_PDF = "https://www.jacc.org/doi/epdf/10.1016/j.jacc.2023.03.410";
+  <!-- STEP 1: SELECT SCENARIO -->
+  <div class="controls">
+    <div style="font-weight:700; font-size:.88rem; margin-bottom:10px;">① Select Clinical Scenario</div>
+    <div class="controls-grid">
+      <div>
+        <label class="ctrl-label" for="sympSel">Symptoms of Ischemia?</label>
+        <select id="sympSel">
+          <option value="symptomatic">Yes — Symptomatic</option>
+          <option value="asymptomatic">No — Asymptomatic</option>
+        </select>
+      </div>
+      <div>
+        <label class="ctrl-label" for="tableSel">Which Table / Category?</label>
+        <select id="tableSel"></select>
+      </div>
+    </div>
+    <div class="sub-scenario-wrap">
+      <label class="ctrl-label" for="scenarioSel">Specific Clinical Scenario</label>
+      <select id="scenarioSel"></select>
+    </div>
+  </div>
 
-  const COPILOT_URL = "https://m365.cloud.microsoft/chat/?fromCode=cmcv2&redirectId=ACB3DED96EE440709FB6B42BE2DCA492&internalredirect=CCM&auth=2";
-  const CHATGPT_URL = "https://chat.openai.com/";
-  const CLAUDE_URL  = "https://claude.ai/";
-  const GEMINI_URL  = "https://gemini.google.com/";
+  <!-- STEP 2: RESULTS -->
+  <div class="results-panel" id="resultsPanel">
+    <h2 id="resultsTitle">Appropriateness Ratings</h2>
+    <div class="scenario-desc" id="scenarioDesc"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot A"></div> Appropriate (7–9)</div>
+      <div class="legend-item"><div class="legend-dot M"></div> May Be Appropriate (4–6)</div>
+      <div class="legend-item"><div class="legend-dot R"></div> Rarely Appropriate (1–3)</div>
+    </div>
+    <div class="ratings-grid" id="ratingsGrid"></div>
+    <div class="note-text" id="tableNote"></div>
+  </div>
+
+  <!-- STEP 3: PROMPT BUILDER -->
+  <div class="prompt-panel">
+    <h2>② Payload Prompt Builder</h2>
+    <p style="font-size:.82rem; color:var(--muted); margin-bottom:10px;">
+      Generate a prompt to paste into an LLM for a guided summary of this scenario from the paper.
+    </p>
+
+    <label class="ctrl-label">Emphasis</label>
+    <div class="emphasis-chips" id="emphasisChips">
+      <div class="emp-chip" data-emp="symptoms">Symptoms</div>
+      <div class="emp-chip" data-emp="testing">Testing Strategy</div>
+      <div class="emp-chip" data-emp="both" >Symptoms + Testing</div>
+      <div class="emp-chip" data-emp="risk">Risk Factors</div>
+      <div class="emp-chip" data-emp="notest">When to Defer Testing</div>
+    </div>
+
+    <label class="ctrl-label" for="freeEmphasis">Custom Emphasis (optional)</label>
+    <input type="text" id="freeEmphasis" placeholder="e.g., focus on metabolic syndrome implications, or clarify CCTA vs stress echo trade-offs"/>
+
+    <label class="ctrl-label" style="margin-top:10px;" for="riskContext">Risk / Patient Context (optional)</label>
+    <textarea id="riskContext" placeholder="e.g., 62yo male, DM2, HTN, former smoker, BMI 34, CKD stage 3a"></textarea>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="buildBtn">🧠 Build Prompt</button>
+      <button class="btn btn-secondary" id="copyBtn">📋 Copy Prompt</button>
+    </div>
+
+    <div class="prompt-output" id="promptOutput">Select a scenario and click "Build Prompt".</div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ===================================================================
+  // DATA: All tables from the 2023 AUC document
+  // Each scenario has: id, text (description), and ratings array
+  // Ratings map to columns: ECG, Nuclear, Echo, CMR, CAC, CCTA, Cath, NoTest
+  // null = not applicable (grayed out in the paper)
+  // Each rating is [letter, score] e.g. ["A", 7]
+  // ===================================================================
+
+  const MODALITIES = ["ECG Treadmill", "Stress Nuclear MPI", "Stress Echo", "Stress CMR", "CAC", "CCTA", "Cath", "No Test"];
 
   const TABLES = {
-    "1.1": { label: "Table 1.1", page: 12, scenario: "Symptoms of ischemia: YES → No prior testing" },
-    "1.2": { label: "Table 1.2", page: 12, scenario: "Symptoms of ischemia: YES → Prior testing without MI or revascularization" },
-    "1.3": { label: "Table 1.3", page: 13, scenario: "Symptoms of ischemia: YES → Prior MI or revascularization" },
-    "2.1": { label: "Table 2.1", page: 13, scenario: "Symptoms of ischemia: NO → Testing for risk of ASCVD events" },
-    "2.2": { label: "Table 2.2", page: 13, scenario: "Symptoms of ischemia: NO → Prior MI or revascularization (e.g., rehabilitation)" },
-    "2.3": { label: "Table 2.3", page: 14, scenario: "Symptoms of ischemia: NO → Exercise Rx / rehabilitation" },
-    "2.4": { label: "Table 2.4", page: 14, scenario: "Symptoms of ischemia: NO → Other CV conditions (e.g., heart failure, arrhythmia, syncope)" }
+    // ---- TABLE 1.1 ----
+    "1.1": {
+      title: "Table 1.1 — Symptomatic, No Known CCD, No Prior Testing",
+      page: 12,
+      note: "CV risk factors: diabetes mellitus, smoking, family history of premature CAD, hypertension, dyslipidemia.",
+      scenarios: [
+        { id: 1, text: "Less-likely anginal symptoms with a noncardiac explanation",
+          r: [["R",3],["R",2],["R",2],["R",2],["R",3],["R",1],["R",1],["A",8]] },
+        { id: 2, text: "Less-likely anginal symptoms, age <50 y and 0 or 1 CV risk factor",
+          r: [["M",4],["R",3],["R",3],["R",3],["M",4],["R",3],["R",1],["A",7]] },
+        { id: 3, text: "Less-likely anginal symptoms, age ≥50 y and/or ≥2 CV risk factors",
+          r: [["M",6],["M",6],["M",6],["M",5],["M",6],["M",5],["R",2],["M",4]] },
+        { id: 4, text: "Likely anginal symptoms, age <50 y and 0 or 1 CV risk factor",
+          r: [["A",7],["A",7],["A",7],["A",7],["M",6],["A",7],["R",3],["R",3]] },
+        { id: 5, text: "Likely anginal symptoms, age ≥50 y and/or ≥2 CV risk factors",
+          r: [["A",7],["A",8],["A",8],["A",7],["M",5],["A",7],["A",7],["R",1]] },
+      ]
+    },
+
+    // ---- TABLE 1.2 ----
+    "1.2": {
+      title: "Table 1.2 — Symptomatic, No Known CCD, With Prior Testing",
+      page: 12,
+      note: "Refers to sequential testing as part of continued evaluation. Stress imaging = SPECT, PET, echo, or CMR. Invasive angiography rows refer to diagnostic angiography, not PCI.",
+      scenarios: [
+        { id: 6, text: "Abnormal ECG",
+          r: [["M",4],["A",8],["A",8],["A",8],["M",5],["A",8],["M",5],["M",4]] },
+        { id: 7, text: "Normal exercise treadmill test (ET)",
+          r: [null,["M",6],["M",6],["M",6],["M",5],["M",6],["R",3],["M",5]] },
+        { id: 8, text: "Inconclusive exercise treadmill test (ET)",
+          r: [null,["A",8],["A",8],["A",7],["M",5],["A",8],["M",5],["R",3]] },
+        { id: 9, text: "Abnormal exercise treadmill test (ET)",
+          r: [null,["A",8],["A",8],["A",7],["M",4],["A",8],["A",8],["M",5]] },
+        { id: 10, text: "Normal stress imaging",
+          r: [["R",1],["R",2],["R",2],["R",2],["M",4],["A",7],["M",5],["M",6]] },
+        { id: 11, text: "Mild ischemia on stress imaging",
+          r: [["R",1],["R",3],["R",3],["R",3],["R",3],["A",7],["M",6],["M",5]] },
+        { id: 12, text: "Inconclusive stress imaging",
+          r: [["R",1],["M",5],["M",5],["M",5],["M",4],["A",8],["M",6],["R",3]] },
+        { id: 13, text: "Moderate to severe ischemia on stress imaging",
+          r: [["R",1],["R",1],["R",1],["R",1],["R",2],["A",7],["A",9],["M",4]] },
+        { id: 14, text: "CCTA: no CAD or up to 49% stenosis (CAD-RADS 0–2)",
+          r: [null,["M",4],["M",5],["M",5],["M",5],["R",1],["R",2],["M",6]] },
+        { id: 15, text: "CCTA: moderate stenosis 50–69% (CAD-RADS 3)",
+          r: [null,["M",6],["A",7],["A",7],["A",7],["R",1],["A",7],["M",5]] },
+        { id: 16, text: "CCTA: severe stenosis ≥70% (CAD-RADS 4–5)",
+          r: [null,["M",5],["M",6],["M",6],["M",6],["R",1],["A",8],["M",5]] },
+        { id: 17, text: "CCTA: inconclusive (CAD-RADS N)",
+          r: [null,["A",7],["A",8],["A",8],["A",8],["R",1],["A",7],["R",3]] },
+        { id: 18, text: "CAC score = 0 (CAC-DRS 0)",
+          r: [["M",5],["M",6],["M",6],["M",6],null,["M",5],["R",1],["M",5]] },
+        { id: 19, text: "CAC score 1–99 (CAC-DRS 1)",
+          r: [["M",6],["M",5],["M",6],["M",5],null,["M",5],["R",3],["M",5]] },
+        { id: 20, text: "CAC score 100–299 (CAC-DRS 2)",
+          r: [["A",7],["A",7],["A",7],["A",7],null,["A",7],["M",5],["M",4]] },
+        { id: 21, text: "CAC score ≥300 (CAC-DRS 3)",
+          r: [["A",7],["A",7],["A",7],["A",7],null,["M",6],["M",6],["R",3]] },
+        { id: 22, text: "Invasive angiography: mild or no CAD and/or normal invasive physiological testing",
+          r: [["R",2],["M",3],["R",2],["M",4],["R",1],["R",1],null,["A",7]] },
+        { id: 23, text: "Invasive angiography: intermediate severity and/or physiological testing not done",
+          r: [["M",5],["A",7],["A",8],["A",7],["R",1],["R",1],null,["M",4]] },
+        { id: 24, text: "Invasive angiography: obstructive CAD and/or abnormal invasive physiological testing",
+          r: [["R",2],["M",4],["M",4],["M",4],["R",1],["R",1],null,["M",4]] },
+      ]
+    },
+
+    // ---- TABLE 1.3 ----
+    "1.3": {
+      title: "Table 1.3 — Symptomatic, Prior MI or Revascularization",
+      page: 13,
+      note: "Anginal symptoms = chest/epigastric/shoulder/arm/jaw pain or pressure with exertion or stress, relieved by rest or nitroglycerin.",
+      scenarios: [
+        { id: 25, text: "Incomplete revascularization",
+          r: [["M",4],["A",8],["A",8],["A",7],["R",1],["R",3],["M",6],["M",4]] },
+        { id: 26, text: "Prior PCI, symptoms similar to prior ischemic episode and/or anginal symptoms",
+          r: [["M",5],["A",8],["A",8],["A",8],["R",1],["M",5],["A",7],["M",5]] },
+        { id: 27, text: "Prior PCI, nonanginal symptoms",
+          r: [["M",5],["M",6],["M",6],["M",6],["R",1],["M",5],["R",3],["M",6]] },
+        { id: 28, text: "Prior CABG, symptoms similar to prior ischemic episode and/or anginal symptoms",
+          r: [["M",4],["A",8],["A",8],["A",8],["R",1],["M",6],["A",7],["M",5]] },
+        { id: 29, text: "Prior CABG, nonanginal symptoms",
+          r: [["M",5],["M",6],["M",6],["M",6],["R",1],["M",6],["R",3],["M",5]] },
+        { id: 30, text: "Prior MI, no revascularization, symptoms similar to prior ischemic episode and/or anginal",
+          r: [["M",5],["A",8],["A",8],["A",8],["R",1],["A",7],["A",7],["R",3]] },
+        { id: 31, text: "Prior MI, no revascularization, nonanginal symptoms",
+          r: [["M",5],["M",6],["M",6],["M",6],["R",1],["M",6],["M",5],["M",5]] },
+        { id: 32, text: "Assessment of myocardial viability",
+          r: [["R",1],["A",8],["A",7],["A",8],["R",1],["R",1],["R",1],null] },
+        { id: 33, text: "Prior to cardiac rehabilitation, coronary disease (no new or worsening symptoms)",
+          r: [["A",7],["M",5],["M",5],["M",4],["R",1],["R",2],["R",1],["M",4]] },
+      ]
+    },
+
+    // ---- TABLE 2.1 ----
+    "2.1": {
+      title: "Table 2.1 — Asymptomatic, Without Known ASCVD",
+      page: 13,
+      note: "Risk calculated using the ASCVD risk estimator. See Table C for risk-enhancing factors.",
+      scenarios: [
+        { id: 34, text: "Low ASCVD risk <5%",
+          r: [["R",2],["R",1],["R",1],["R",1],["M",4],["R",1],["R",1],["A",8]] },
+        { id: 35, text: "Borderline ASCVD risk 5%–7.5%",
+          r: [["M",4],["R",2],["R",2],["R",2],["A",7],["R",2],["R",1],["A",7]] },
+        { id: 36, text: "Borderline ASCVD risk 5%–7.5% with risk-enhancing factors",
+          r: [["M",4],["R",3],["R",3],["R",3],["A",7],["R",3],["R",1],["A",7]] },
+        { id: 37, text: "Intermediate ASCVD risk 7.5%–20% with or without risk-enhancing factors",
+          r: [["M",5],["R",3],["R",3],["R",3],["A",8],["R",3],["R",1],["M",5]] },
+        { id: 38, text: "High ASCVD risk >20%",
+          r: [["M",5],["M",4],["M",4],["M",4],["M",6],["M",4],["R",2],["M",5]] },
+      ]
+    },
+
+    // ---- TABLE 2.2 ----
+    "2.2": {
+      title: "Table 2.2 — Asymptomatic, Prior Revascularization or MI",
+      page: 13,
+      note: "High risk for silent ischemia: DM with accelerated CAD, CKD, PAD, prior brachytherapy, in-stent restenosis, SVG intervention.",
+      scenarios: [
+        { id: 39, text: "Incomplete revascularization",
+          r: [["M",5],["M",6],["M",6],["M",6],["R",1],["M",4],["R",2],["M",5]] },
+        { id: 40, text: "Prior high-risk PCI",
+          r: [["M",4],["M",6],["M",5],["M",5],["R",1],["M",4],["R",3],["M",5]] },
+        { id: 41, text: "<5 years after CABG",
+          r: [["R",2],["R",2],["R",2],["R",2],["R",1],["R",3],["R",1],["A",7]] },
+        { id: 42, text: ">5 years after CABG",
+          r: [["M",4],["M",4],["M",4],["M",4],["R",1],["M",4],["R",2],["A",7]] },
+        { id: 43, text: "<2 years after PCI",
+          r: [["R",2],["R",2],["R",2],["R",2],["R",1],["R",2],["R",1],["A",7]] },
+        { id: 44, text: ">2 years after PCI",
+          r: [["M",5],["M",5],["M",5],["M",5],["R",1],["M",4],["R",1],["A",7]] },
+        { id: 45, text: "Patients at high risk for or with history of silent ischemia",
+          r: [["M",4],["A",7],["A",7],["A",7],["R",1],["M",5],["R",3],["M",5]] },
+        { id: 46, text: "Assessment of myocardial viability",
+          r: [["R",1],["A",7],["M",6],["A",7],["R",1],["R",1],["R",1],null] },
+        { id: 47, text: "Isolated evaluation of bypass graft patency",
+          r: [["R",3],["M",5],["M",5],["M",5],["R",1],["A",7],["R",3],["M",6]] },
+      ]
+    },
+
+    // ---- TABLE 2.3 ----
+    "2.3": {
+      title: "Table 2.3 — Asymptomatic, Exercise Program or Cardiac Rehabilitation",
+      page: 14,
+      note: "Exercise ECG column header. Assessing exercise readiness.",
+      scenarios: [
+        { id: 48, text: "Prior to unsupervised exercise program, without known CCD",
+          r: [["M",6],["R",3],["R",3],["R",3],["R",3],["R",1],["R",1],["A",7]] },
+        { id: 49, text: "Prior to unsupervised exercise program, with known CCD",
+          r: [["A",7],["M",5],["M",5],["M",4],["R",1],["R",2],["R",1],["M",4]] },
+        { id: 50, text: "Prior to cardiac rehabilitation",
+          r: [["A",7],["M",4],["M",4],["M",4],["R",1],["R",2],["R",1],["M",5]] },
+      ]
+    },
+
+    // ---- TABLE 2.4 ----
+    "2.4": {
+      title: "Table 2.4 — Other CV Conditions, No Symptoms of Ischemia",
+      page: 14,
+      note: "Frequent PVCs = >30/hr. Sustained VT = >100 bpm lasting >30s. HF = stages B–D.",
+      scenarios: [
+        // Heart Failure
+        { id: 51, text: "Newly diagnosed HFpEF (LV function previously assessed, no prior CAD evaluation)",
+          r: [["M",4],["A",7],["A",8],["A",7],["R",3],["A",7],["M",6],["R",3]] },
+        { id: 52, text: "Newly diagnosed HFrEF (LV function previously assessed, no prior CAD evaluation)",
+          r: [["M",4],["A",7],["A",8],["A",8],["R",2],["A",7],["A",8],["R",1]] },
+        { id: 53, text: "Screening for transplant vasculopathy",
+          r: [["R",3],["A",7],["A",7],["A",7],["R",1],["A",7],["A",8],null] },
+        // Arrhythmias
+        { id: 54, text: "Infrequent PVCs (≤30/hr), no prior cardiac evaluation",
+          r: [["M",4],["R",2],["R",2],["R",2],["R",2],["R",1],["R",1],["A",8]] },
+        { id: 55, text: "Frequent PVCs (>30/hr) or nonsustained VT, no prior cardiac evaluation",
+          r: [["A",7],["A",7],["A",7],["A",7],["R",3],["M",6],["M",5],["M",4]] },
+        { id: 56, text: "Paroxysmal supraventricular tachycardia",
+          r: [["M",5],["R",2],["R",3],["R",3],["R",1],["R",2],["R",1],["M",5]] },
+        { id: 57, text: "New-onset atrial fibrillation / flutter",
+          r: [["M",5],["R",3],["R",3],["R",3],["R",2],["R",3],["R",1],["M",5]] },
+        { id: 58, text: "Prior to antiarrhythmic therapy in patients with high global CAD risk",
+          r: [["M",6],["A",7],["A",7],["A",7],["R",3],["A",7],["R",3],["R",3]] },
+        { id: 59, text: "Exercise-induced VT",
+          r: [["A",7],["A",7],["A",8],["A",7],["R",2],["A",7],["A",7],["R",1]] },
+        { id: 60, text: "Sustained VT",
+          r: [["A",7],["A",7],["A",7],["A",7],["R",2],["A",7],["A",7],["R",1]] },
+        { id: 61, text: "Ventricular fibrillation",
+          r: [["M",4],["A",7],["A",7],["A",7],["R",1],["A",7],["A",8],["R",1]] },
+        // Syncope
+        { id: 62, text: "Syncope: initial evaluation suggests CV abnormalities",
+          r: [["A",7],["A",7],["A",7],["A",7],["R",3],["M",6],["M",5],["R",3]] },
+        { id: 63, text: "Syncope: initial evaluation suggests other etiology",
+          r: [["M",4],["R",3],["M",4],["R",3],["R",2],["R",2],["R",1],["M",6]] },
+        // Cardio-oncology
+        { id: 64, text: "Prior chest radiation, no symptoms, >5 years ago",
+          r: [["M",4],["M",4],["M",6],["M",5],["M",6],["M",6],["R",2],["M",5]] },
+      ]
+    }
   };
 
-  const SCENARIOS_BY_SYM = {
-    yes: [
-      { key: "1.1", title: "No prior testing", sub: "Go to Table 1.1 (page 12)" },
-      { key: "1.2", title: "Prior testing w/o MI or revascularization", sub: "Go to Table 1.2 (page 12)" },
-      { key: "1.3", title: "Prior MI or revascularization", sub: "Go to Table 1.3 (page 13)" }
+  // Table groupings by symptom status
+  const TABLE_GROUPS = {
+    symptomatic: [
+      { key: "1.1", label: "Table 1.1 — No prior testing" },
+      { key: "1.2", label: "Table 1.2 — With prior testing" },
+      { key: "1.3", label: "Table 1.3 — Prior MI or Revascularization" },
     ],
-    no: [
-      { key: "2.1", title: "Testing for risk of ASCVD events", sub: "Go to Table 2.1 (page 13)" },
-      { key: "2.2", title: "Prior MI or revasc (e.g., rehab)", sub: "Go to Table 2.2 (page 13)" },
-      { key: "2.3", title: "Exercise Rx / Rehab", sub: "Go to Table 2.3 (page 14)" },
-      { key: "2.4", title: "Other CV conditions*", sub: "Go to Table 2.4 (page 14)" }
+    asymptomatic: [
+      { key: "2.1", label: "Table 2.1 — No known ASCVD (risk screening)" },
+      { key: "2.2", label: "Table 2.2 — Prior Revascularization or MI" },
+      { key: "2.3", label: "Table 2.3 — Exercise Program / Cardiac Rehab" },
+      { key: "2.4", label: "Table 2.4 — Other CV Conditions (HF, arrhythmia, syncope)" },
     ]
   };
 
-  const symptomRow = document.getElementById('symptomRow');
-  const scenarioRow = document.getElementById('scenarioRow');
-  const resultBox = document.getElementById('resultBox');
-  const resultLine = document.getElementById('resultLine');
-  const jumpBtn = document.getElementById('jumpBtn');
-  const openPdfNewTabBtn = document.getElementById('openPdfNewTabBtn');
+  const RATING_LABELS = {
+    A: "Appropriate",
+    M: "May Be Appropriate",
+    R: "Rarely Appropriate"
+  };
 
-  const voiceToggle = document.getElementById('voiceToggle');
+  const EMPHASIS_MAP = {
+    symptoms: "Focus on symptom classification and how symptom type/likelihood drives the testing decision in this scenario.",
+    testing: "Focus on the testing strategy: which modalities are appropriate, which are rarely appropriate, and the reasoning behind the hierarchy.",
+    both: "Provide a balanced summary covering both symptom classification and testing strategy, and how they interact.",
+    risk: "Emphasize how cardiovascular risk factors (traditional and risk-enhancing) influence testing decisions in this scenario.",
+    notest: "Focus on when testing can safely be deferred ('No Test' column), the evidence behind deferral, and shared decision-making."
+  };
 
-  const promptBox = document.getElementById('promptBox');
-  const copilotBtn = document.getElementById('copilotBtn');
-  const chatgptBtn = document.getElementById('chatgptBtn');
-  const claudeBtn  = document.getElementById('claudeBtn');
-  const geminiBtn  = document.getElementById('geminiBtn');
+  // ===================================================================
+  // DOM ELEMENTS
+  // ===================================================================
+  const sympSel = document.getElementById('sympSel');
+  const tableSel = document.getElementById('tableSel');
+  const scenarioSel = document.getElementById('scenarioSel');
+  const resultsTitle = document.getElementById('resultsTitle');
+  const scenarioDesc = document.getElementById('scenarioDesc');
+  const ratingsGrid = document.getElementById('ratingsGrid');
+  const tableNote = document.getElementById('tableNote');
+  const emphasisChips = document.getElementById('emphasisChips');
+  const freeEmphasis = document.getElementById('freeEmphasis');
+  const riskContext = document.getElementById('riskContext');
+  const buildBtn = document.getElementById('buildBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const promptOutput = document.getElementById('promptOutput');
 
-  const pdfPathEl = document.getElementById('pdfPath');
-  const pdfScroll = document.getElementById('pdfScroll');
-  const renderTablesBtn = document.getElementById('renderTablesBtn');
-  const renderAllBtn = document.getElementById('renderAllBtn');
+  // ===================================================================
+  // EMPHASIS STATE
+  // ===================================================================
+  let activeEmphasis = new Set();
 
-  const sitePdfUrlEl = document.getElementById('sitePdfUrl');
-  const directPdfLinkEl = document.getElementById('directPdfLink');
+  emphasisChips.addEventListener('click', e => {
+    const chip = e.target.closest('.emp-chip');
+    if (!chip) return;
+    const key = chip.dataset.emp;
+    if (activeEmphasis.has(key)) {
+      activeEmphasis.delete(key);
+      chip.classList.remove('active');
+    } else {
+      activeEmphasis.add(key);
+      chip.classList.add('active');
+    }
+  });
 
-  let selectedSym = null;
-  let selectedTableKey = null;
+  // ===================================================================
+  // POPULATE DROPDOWNS
+  // ===================================================================
+  function populateTables() {
+    const group = sympSel.value;
+    tableSel.innerHTML = '';
+    TABLE_GROUPS[group].forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t.key;
+      opt.textContent = t.label;
+      tableSel.appendChild(opt);
+    });
+    populateScenarios();
+  }
 
-  let pdfDoc = null;
-  let renderedPages = new Set();
+  function populateScenarios() {
+    const tableKey = tableSel.value;
+    const table = TABLES[tableKey];
+    scenarioSel.innerHTML = '';
+    table.scenarios.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = `#${s.id}. ${s.text}`;
+      scenarioSel.appendChild(opt);
+    });
+    renderRatings();
+  }
 
-  function toast(msg, ms=2600){
+  // ===================================================================
+  // RENDER RATINGS
+  // ===================================================================
+  function renderRatings() {
+    const tableKey = tableSel.value;
+    const table = TABLES[tableKey];
+    const scenarioId = parseInt(scenarioSel.value);
+    const scenario = table.scenarios.find(s => s.id === scenarioId);
+    if (!scenario) return;
+
+    resultsTitle.textContent = table.title;
+    scenarioDesc.textContent = `Scenario #${scenario.id}: ${scenario.text}`;
+    tableNote.textContent = table.note;
+
+    ratingsGrid.innerHTML = '';
+
+    // Sort ratings: A first (by score desc), then M (by score desc), then R (by score desc), NA last
+    const indexed = scenario.r.map((rating, i) => ({
+      modality: MODALITIES[i],
+      rating: rating // [letter, score] or null
+    }));
+
+    // Separate into buckets
+    const buckets = { A: [], M: [], R: [], NA: [] };
+    indexed.forEach(item => {
+      if (!item.rating) {
+        buckets.NA.push(item);
+      } else {
+        buckets[item.rating[0]].push(item);
+      }
+    });
+
+    // Sort each bucket by score descending
+    ['A', 'M', 'R'].forEach(k => {
+      buckets[k].sort((a, b) => b.rating[1] - a.rating[1]);
+    });
+
+    const sorted = [...buckets.A, ...buckets.M, ...buckets.R, ...buckets.NA];
+
+    sorted.forEach(item => {
+      const card = document.createElement('div');
+      const letter = item.rating ? item.rating[0] : 'NA';
+      const score = item.rating ? item.rating[1] : '—';
+      card.className = `rating-card ${letter}`;
+
+      card.innerHTML = `
+        <div class="modality">${item.modality}</div>
+        <div class="rating-badge">${letter === 'NA' ? '—' : letter}</div>
+        <div class="score">${letter === 'NA' ? 'N/A' : `Score: ${score}`}</div>
+        <div class="rating-label">${letter === 'NA' ? 'Not Applicable' : RATING_LABELS[letter]}</div>
+      `;
+      ratingsGrid.appendChild(card);
+    });
+  }
+
+  // ===================================================================
+  // BUILD PROMPT
+  // ===================================================================
+  function buildPrompt() {
+    const tableKey = tableSel.value;
+    const table = TABLES[tableKey];
+    const scenarioId = parseInt(scenarioSel.value);
+    const scenario = table.scenarios.find(s => s.id === scenarioId);
+    if (!scenario) return '';
+
+    // Build ratings summary for the prompt
+    const ratingSummary = scenario.r.map((r, i) => {
+      if (!r) return `  ${MODALITIES[i]}: N/A`;
+      return `  ${MODALITIES[i]}: ${r[0]} (${r[1]}) — ${RATING_LABELS[r[0]]}`;
+    }).join('\n');
+
+    // Emphasis
+    const emphParts = [];
+    activeEmphasis.forEach(key => {
+      emphParts.push(EMPHASIS_MAP[key]);
+    });
+    const freeText = freeEmphasis.value.trim();
+    if (freeText) emphParts.push(freeText);
+    const emphasisBlock = emphParts.length > 0
+      ? emphParts.join('\n')
+      : "Provide a general summary of the scenario and testing options.";
+
+    const patientCtx = riskContext.value.trim() || "(none provided)";
+
+    const prompt = `SYSTEM / ROLE
+You are an evidence-grounded medical education assistant. You must NOT give medical advice. Summarize what the paper says, cite the table/page, and urge the user to read the primary source.
+
+PRIMARY SOURCE
+ACC/AHA/ASE/ASNC/ASPC/HFSA/HRS/SCAI/SCCT/SCMR/STS 2023 Multimodality AUC for Chronic Coronary Disease
+JACC 2023;81(25):2445–2467
+ePDF: https://www.jacc.org/doi/epdf/10.1016/j.jacc.2023.03.410
+
+CLINICAL SCENARIO
+Table: ${table.title} (PDF page ${table.page})
+Scenario #${scenario.id}: ${scenario.text}
+
+RATINGS FROM THE TABLE
+${ratingSummary}
+
+PATIENT CONTEXT (for emphasis only — not a diagnosis)
+${patientCtx}
+
+TASK
+1. Summarize the clinical scenario and what the table is trying to guide.
+2. List the test modalities in order of appropriateness (Appropriate → May Be Appropriate → Rarely Appropriate).
+3. Highlight the key decision factors for this scenario.
+
+EMPHASIS / ANGLE
+${emphasisBlock}
+
+4. Include a "Caveats / Limitations" section.
+5. Include "Where in the Paper" citing Table ${tableKey}, page ${table.page}.
+6. End with: "This is not medical advice. Please read the primary source."`;
+
+    promptOutput.textContent = prompt;
+    return prompt;
+  }
+
+  // ===================================================================
+  // CLIPBOARD + TOAST
+  // ===================================================================
+  function toast(msg, ms = 2200) {
     const t = document.createElement('div');
     t.className = 'toast';
     t.textContent = msg;
     document.body.appendChild(t);
-    setTimeout(()=>t.remove(), ms);
+    setTimeout(() => t.remove(), ms);
   }
 
-  function speak(text){
-    if (!voiceToggle.checked) return;
-    if (!('speechSynthesis' in window)) return;
-    try{
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.rate = 1.06;
-      u.pitch = 1;
-      window.speechSynthesis.speak(u);
-    }catch(_){}
-  }
-
-  function setActiveChoice(container, predicate){
-    const choices = Array.from(container.querySelectorAll('.choice'));
-    choices.forEach(ch=>{
-      if (predicate(ch)) ch.classList.add('active');
-      else ch.classList.remove('active');
-    });
-  }
-
-  function buildScenarioChoices(sym){
-    scenarioRow.innerHTML = '';
-    const list = SCENARIOS_BY_SYM[sym] || [];
-    list.forEach(item=>{
-      const div = document.createElement('div');
-      div.className = 'choice';
-      div.tabIndex = 0;
-      div.setAttribute('role','button');
-      div.dataset.table = item.key;
-      div.innerHTML = `<div class="lbl">${item.title}</div><div class="sm">${item.sub}</div>`;
-      div.addEventListener('click', ()=>selectTable(item.key));
-      div.addEventListener('keydown', (e)=>{
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTable(item.key); }
-      });
-      scenarioRow.appendChild(div);
-    });
-  }
-
-  function selectSym(sym){
-    selectedSym = sym;
-    setActiveChoice(symptomRow, ch => ch.dataset.sym === sym);
-    buildScenarioChoices(sym);
-    selectedTableKey = null;
-    resultBox.style.display = 'none';
-    promptBox.textContent = "Select a scenario to generate a prompt…";
-    toast(`Selected: Symptoms of ischemia = ${sym.toUpperCase()}`);
-    speak(`Symptoms of ischemia: ${sym === 'yes' ? 'Yes' : 'No'}. Now choose a clinical scenario.`);
-  }
-
-  function getSelectedEmphasis(){
-    const emph = Array.from(document.querySelectorAll('.emph:checked')).map(x=>x.value);
-    return emph.length ? emph : ["decision impact (what changes)"];
-  }
-
-  function computeSitePdfUrl(){
-    const base = window.location.href.replace(/[#?].*$/, '').replace(/[^\/]*$/, '');
-    return base + "chestpaintest.pdf";
-  }
-
-  function buildAIPrompt(tableKey){
-    const t = TABLES[tableKey];
-    const emph = getSelectedEmphasis();
-    const sitePdf = computeSitePdfUrl();
-
-    return [
-`SYSTEM / SAFETY`,
-`- This is educational and NOT medical advice.`,
-`- You are an AI system and can make mistakes. If uncertain, say so.`,
-`- Only use what you can directly read in the PDF; do not guess AUC ratings.`,
-`- The user must read the table/footnotes. Encourage verification.`,
-``,
-`PRIMARY SOURCES (PDF)`,
-`- Site PDF (preferred if accessible): ${sitePdf}`,
-`- Publisher PDF: ${JACC_PDF}`,
-``,
-`WHERE TO LOOK`,
-`- Use ${t.label} on page ${t.page}.`,
-`- Scenario: ${t.scenario}`,
-``,
-`TASK`,
-`1) Open one of the PDF links above and navigate to page ${t.page}.`,
-`2) Find ${t.label} exactly and read the relevant rows AND footnotes.`,
-`3) Summarize ONLY what the table says for this scenario.`,
-`4) Include short direct quotes of the exact row(s) and the key footnote(s).`,
-`5) Emphasize: ${emph.join("; ")}.`,
-``,
-`OUTPUT FORMAT`,
-`- 2–4 sentence plain-language summary`,
-`- “Where to find it”: page ${t.page}, ${t.label}`,
-`- “Table excerpt”: quote the matching row(s) + footnote snippets (short)`,
-`- “Interpretation notes”: explain how you matched scenario → row(s)`,
-`- “Caveats”: remind user to verify in the PDF (AI may be wrong)`,
-``,
-`STOP CONDITION`,
-`If you cannot access the PDF or cannot locate ${t.label}, say so and stop. Do not guess.`
-    ].join("\n");
-  }
-
-  function selectTable(tableKey){
-    selectedTableKey = tableKey;
-    setActiveChoice(scenarioRow, ch => ch.dataset.table === tableKey);
-
-    const t = TABLES[tableKey];
-    resultLine.textContent = `${t.label} → page ${t.page}  |  ${t.scenario}`;
-    resultBox.style.display = 'block';
-
-    promptBox.textContent = buildAIPrompt(tableKey);
-
-    toast(`Selected ${t.label} (page ${t.page})`);
-    speak(`Selected ${t.label}. I will jump to page ${t.page} in the PDF viewer. Then scroll to the table and read the footnotes.`);
-    jumpToPage(t.page);
-  }
-
-  async function copyToClipboard(text){
-    try{
+  async function copyToClipboard(text) {
+    try {
       await navigator.clipboard.writeText(text);
       return true;
-    }catch(_){
-      return false;
-    }
+    } catch { return false; }
   }
 
-  async function copyPromptAndOpen(url, label){
-    if (!selectedTableKey){
-      toast("Select a scenario first (so the prompt knows which table).");
-      speak("Select a scenario first.");
-      return;
-    }
-    const prompt = promptBox.textContent || "";
-    const ok = await copyToClipboard(prompt);
-    if (ok){
-      toast(`Prompt copied. Opening ${label}…`);
-      window.open(url, "_blank");
-      speak(`Prompt copied. Opening ${label}. Paste with Control V or Command V. Then ask it to open the PDF and quote the table rows and footnotes. Verify in the PDF.`);
-    } else {
-      toast("Clipboard blocked. Select and copy the prompt manually, then open the model.");
-      window.open(url, "_blank");
-      speak("Clipboard blocked. Please copy the prompt manually, then paste it into the model.");
-    }
-  }
-
-  function clearPdf(){
-    pdfScroll.innerHTML = "";
-    renderedPages = new Set();
-  }
-
-  function showLoading(msg){
-    pdfScroll.innerHTML = "";
-    const d = document.createElement('div');
-    d.className = 'loading';
-    d.textContent = msg;
-    pdfScroll.appendChild(d);
-  }
-
-  async function loadPdf(){
-    const path = (pdfPathEl.value || "").trim() || LOCAL_PDF_DEFAULT;
-    showLoading("Loading PDF…");
-    try{
-      pdfDoc = await pdfjsLib.getDocument(path).promise;
-      toast(`Loaded PDF (${pdfDoc.numPages} pages).`);
-      return true;
-    }catch(err){
-      console.error(err);
-      pdfDoc = null;
-      showLoading("PDF failed to load. Check the PDF path (and that chestpaintest.pdf exists).");
-      toast("PDF failed to load.");
-      speak("PDF failed to load. Check the PDF file path.");
-      return false;
-    }
-  }
-
-  function computeScaleForWidth(pageViewportWidth){
-    const containerWidth = pdfScroll.clientWidth || 900;
-    const target = Math.max(320, containerWidth - 40);
-    let scale = target / pageViewportWidth;
-    scale = Math.max(0.6, Math.min(scale, 2.2));
-    return scale;
-  }
-
-  async function renderPage(pageNumber){
-    if (!pdfDoc) return;
-    if (renderedPages.has(pageNumber)) return;
-
-    const page = await pdfDoc.getPage(pageNumber);
-    const unscaled = page.getViewport({ scale: 1.0 });
-    const scale = computeScaleForWidth(unscaled.width);
-    const viewport = page.getViewport({ scale });
-
-    const card = document.createElement('div');
-    card.className = 'pageCard';
-    card.id = `pdf-page-${pageNumber}`;
-    card.dataset.page = String(pageNumber);
-
-    const hdr = document.createElement('div');
-    hdr.className = 'pageHdr';
-    hdr.innerHTML = `<div class="pageNum">Page ${pageNumber}</div><div class="pill">scroll target</div>`;
-    card.appendChild(hdr);
-
-    const wrap = document.createElement('div');
-    wrap.className = 'canvasWrap';
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d', { alpha: false });
-
-    canvas.width = Math.floor(viewport.width);
-    canvas.height = Math.floor(viewport.height);
-
-    wrap.appendChild(canvas);
-    card.appendChild(wrap);
-    pdfScroll.appendChild(card);
-
-    await page.render({ canvasContext: ctx, viewport }).promise;
-    renderedPages.add(pageNumber);
-  }
-
-  async function renderRange(startPage, endPage){
-    if (!pdfDoc){
-      const ok = await loadPdf();
-      if (!ok) return;
-    }
-    clearPdf();
-    showLoading(`Rendering pages ${startPage}–${endPage}…`);
-    clearPdf();
-    for (let p = startPage; p <= endPage; p++){
-      await renderPage(p);
-    }
-    toast(`Rendered pages ${startPage}–${endPage}.`);
-  }
-
-  async function renderAll(){
-    if (!pdfDoc){
-      const ok = await loadPdf();
-      if (!ok) return;
-    }
-    clearPdf();
-    showLoading("Rendering all pages…");
-    clearPdf();
-    for (let p = 1; p <= pdfDoc.numPages; p++){
-      await renderPage(p);
-      if (p % 3 === 0) await new Promise(r => setTimeout(r, 0));
-    }
-    toast("Rendered all pages.");
-  }
-
-  async function ensurePageRendered(pageNumber){
-    if (renderedPages.has(pageNumber)) return;
-    if (!pdfDoc){
-      const ok = await loadPdf();
-      if (!ok) return;
-    }
-    const start = Math.max(1, pageNumber - 1);
-    const end = Math.min(pdfDoc.numPages, pageNumber + 1);
-    await renderRange(start, end);
-  }
-
-  async function jumpToPage(pageNumber){
-    await ensurePageRendered(pageNumber);
-    const el = document.getElementById(`pdf-page-${pageNumber}`);
-    if (!el){
-      toast(`Page ${pageNumber} not rendered yet.`);
-      return;
-    }
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    toast(`Jumped to page ${pageNumber}. Scroll to the table.`);
-  }
-
-  function openPdfAtPage(pageNumber){
-    const base = computeSitePdfUrl();
-    window.open(`${base}#page=${pageNumber}`, "_blank");
-  }
-
-  Array.from(symptomRow.querySelectorAll('.choice')).forEach(ch=>{
-    ch.addEventListener('click', ()=>selectSym(ch.dataset.sym));
-    ch.addEventListener('keydown', (e)=>{
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectSym(ch.dataset.sym); }
-    });
+  buildBtn.addEventListener('click', () => {
+    buildPrompt();
+    toast('Prompt built.');
   });
 
-  jumpBtn.addEventListener('click', ()=>{
-    if (!selectedTableKey){
-      toast("Pick a scenario first.");
-      speak("Pick a scenario first.");
-      return;
+  copyBtn.addEventListener('click', async () => {
+    const text = promptOutput.textContent;
+    if (!text || text.startsWith('Select a scenario')) {
+      buildPrompt();
     }
-    jumpToPage(TABLES[selectedTableKey].page);
-    speak("Jumped. Scroll to the table and read the footnotes.");
+    const ok = await copyToClipboard(promptOutput.textContent);
+    toast(ok ? 'Copied to clipboard.' : 'Copy failed — select manually.');
   });
 
-  openPdfNewTabBtn.addEventListener('click', ()=>{
-    const page = selectedTableKey ? TABLES[selectedTableKey].page : 1;
-    openPdfAtPage(page);
-    speak(`Opened the PDF in a new tab at page ${page}.`);
-  });
+  // ===================================================================
+  // WIRE EVENTS
+  // ===================================================================
+  sympSel.addEventListener('change', populateTables);
+  tableSel.addEventListener('change', populateScenarios);
+  scenarioSel.addEventListener('change', renderRatings);
 
-  copilotBtn.addEventListener('click', ()=>copyPromptAndOpen(COPILOT_URL, "Copilot"));
-  chatgptBtn.addEventListener('click', ()=>copyPromptAndOpen(CHATGPT_URL, "ChatGPT"));
-  claudeBtn.addEventListener('click', ()=>copyPromptAndOpen(CLAUDE_URL, "Claude"));
-  geminiBtn.addEventListener('click', ()=>copyPromptAndOpen(GEMINI_URL, "Gemini"));
-
-  Array.from(document.querySelectorAll('.emph')).forEach(cb=>{
-    cb.addEventListener('change', ()=>{
-      if (selectedTableKey) promptBox.textContent = buildAIPrompt(selectedTableKey);
-    });
-  });
-
-  renderTablesBtn.addEventListener('click', async ()=>{
-    await loadPdf();
-    await renderRange(8, 14);
-    speak("Rendered pages eight through fourteen. Jumps will be fast now.");
-  });
-
-  renderAllBtn.addEventListener('click', async ()=>{
-    await loadPdf();
-    await renderAll();
-    speak("Rendered all pages. You can scroll the full document.");
-  });
-
-  // init
-  pdfPathEl.value = LOCAL_PDF_DEFAULT;
-
-  const sitePdf = computeSitePdfUrl();
-  sitePdfUrlEl.textContent = sitePdf;
-  directPdfLinkEl.textContent = sitePdf;
-
-  await loadPdf();
-  await renderRange(8, 14);
-  selectSym('yes');
+  // ===================================================================
+  // INIT
+  // ===================================================================
+  populateTables();
+})();
 </script>
 </body>
 </html>
