@@ -310,6 +310,8 @@
     .btn-primary:hover { background: var(--accent-dark); }
     .btn-secondary { background: #e5e7eb; color: var(--text); }
     .btn-secondary:hover { background: #d1d5db; }
+    .btn-dark { background: #1a1a2e; color: #fff; }
+    .btn-dark:hover { background: #2d2d4a; }
 
     .disclaimer {
       background: #eff6ff;
@@ -424,6 +426,7 @@
     <div class="btn-row">
       <button class="btn btn-primary" id="buildBtn">🧠 Build Prompt</button>
       <button class="btn btn-secondary" id="copyBtn">📋 Copy Prompt</button>
+      <button class="btn btn-dark" id="copilotBtn">🪟 Copy + Open Copilot (M365)</button>
     </div>
 
     <div class="prompt-output" id="promptOutput">Select a scenario and click "Build Prompt".</div>
@@ -685,7 +688,10 @@
   const riskContext = document.getElementById('riskContext');
   const buildBtn = document.getElementById('buildBtn');
   const copyBtn = document.getElementById('copyBtn');
+  const copilotBtn = document.getElementById('copilotBtn');
   const promptOutput = document.getElementById('promptOutput');
+
+  const COPILOT_URL = "https://m365.cloud.microsoft/chat/?fromCode=cmcv2&redirectId=ACB3DED96EE440709FB6B42BE2DCA492&internalredirect=CCM&auth=2";
 
   // ===================================================================
   // EMPHASIS STATE
@@ -881,6 +887,13 @@ ${emphasisBlock}
     }
     const ok = await copyToClipboard(promptOutput.textContent);
     toast(ok ? 'Copied to clipboard.' : 'Copy failed — select manually.');
+  });
+
+  copilotBtn.addEventListener('click', async () => {
+    const prompt = buildPrompt();
+    const ok = await copyToClipboard(prompt);
+    toast(ok ? 'Copied. Opening Copilot…' : 'Opening Copilot… (copy manually if needed)');
+    window.open(COPILOT_URL, "_blank", "noopener");
   });
 
   // ===================================================================
