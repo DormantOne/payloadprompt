@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pedigree → Prompt: Cancer Syndrome Risk Builder</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #f7f6f3;
+  --surface: #ffffff;
+  --surface-2: #f0efec;
+  --surface-3: #e8e7e3;
+  --border: #dddbd6;
+  --border-focus: #3a8f7d;
+  --text: #1a1a18;
+  --text-2: #555550;
+  --text-3: #8a8a82;
+  --primary: #1b7a68;
+  --primary-dark: #145c4f;
+  --primary-soft: #e4f3ef;
+  --primary-xsoft: #f2faf8;
+  --accent: #c95d2a;
+  --accent-soft: #fdf0e8;
+  --info: #2d6bc4;
+  --info-soft: #ebf2fc;
+  --purple: #6d3cc7;
+  --purple-soft: #f3effc;
+  --danger: #b83a2e;
+  --danger-soft: #fcedeb;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
+  --shadow: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --font-display: "Newsreader", Georgia, serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* ── HEADER ─────────────────────────────────────────── */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  max-width: 1440px; margin: 0 auto;
+  padding: 10px 20px;
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 14px; flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; box-shadow: var(--shadow-sm);
+}
+.brand h1 {
+  font-family: var(--font-display);
+  font-size: 1.1rem; font-weight: 600; margin: 0;
+}
+.brand p { margin: 1px 0 0; font-size: 0.76rem; color: var(--text-3); }
+
+.mode-toggle {
+  display: flex; background: var(--surface-2);
+  border-radius: 10px; padding: 3px; border: 1px solid var(--border);
+}
+.mode-btn {
+  padding: 7px 14px; border: none; background: transparent;
+  border-radius: 8px; font-size: 0.84rem; font-weight: 700;
+  color: var(--text-3); cursor: pointer; transition: all 0.2s var(--ease);
+  font-family: var(--font-body);
+}
+.mode-btn.active {
+  background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm);
+}
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── BUTTONS ────────────────────────────────────────── */
+.btn {
+  border: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px; padding: 8px 13px; border-radius: 10px;
+  font-weight: 700; font-size: 0.84rem;
+  font-family: var(--font-body);
+  transition: all 0.15s var(--ease); white-space: nowrap;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--primary); color: #fff; box-shadow: var(--shadow-sm); }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--surface-2); }
+.btn-accent { background: var(--accent); color: #fff; box-shadow: var(--shadow-sm); }
+.btn-accent:hover { filter: brightness(0.92); }
+.btn-danger { background: var(--danger-soft); color: var(--danger); }
+.btn-danger:hover { background: var(--danger); color: #fff; }
+.btn-sm { padding: 6px 10px; font-size: 0.8rem; }
+.btn-cta {
+  padding: 13px 24px; font-size: 0.95rem; border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.btn-cta:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+.btn-cta:active { transform: translateY(0); }
+
+/* ── LAYOUT ─────────────────────────────────────────── */
+.layout {
+  max-width: 1440px; margin: 0 auto;
+  padding: 18px 20px;
+  display: grid; grid-template-columns: 1fr 420px;
+  gap: 18px; align-items: start;
+}
+@media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+
+/* ── CARD ───────────────────────────────────────────── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+  overflow: hidden; margin-bottom: 14px;
+}
+.card-header {
+  padding: 14px 18px 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 10px;
+  cursor: pointer; user-select: none;
+}
+.card-header h2 {
+  font-family: var(--font-display);
+  font-size: 1rem; font-weight: 600; margin: 0;
+}
+.card-header .step {
+  width: 26px; height: 26px; border-radius: 8px;
+  background: var(--primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 800; flex-shrink: 0;
+}
+.card-header .left { display: flex; align-items: center; gap: 9px; }
+.card-header .chev {
+  font-size: 0.7rem; color: var(--text-3);
+  transition: transform 0.2s; display: inline-block;
+}
+.card-header.collapsed .chev { transform: rotate(-90deg); }
+.card-body { padding: 14px 18px 18px; }
+.card-body.collapsed { display: none; }
+.card-footer {
+  padding: 12px 18px; border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+/* ── FORM ───────────────────────────────────────────── */
+.fg { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field.full { grid-column: 1 / -1; }
+label { font-size: 0.82rem; font-weight: 700; }
+label .opt { font-weight: 500; color: var(--text-3); }
+input[type="text"], input[type="number"], select, textarea {
+  width: 100%; padding: 8px 11px; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 0.87rem;
+  font-family: var(--font-body); background: var(--surface);
+  color: var(--text); transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+textarea { min-height: 64px; resize: vertical; }
+.hint { font-size: 0.76rem; color: var(--text-3); line-height: 1.4; }
+
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 9px; border-radius: 999px;
+  font-size: 0.76rem; font-weight: 700;
+  border: 1px solid var(--border); background: var(--surface-2); color: var(--text-2);
+}
+.tag.primary { background: var(--primary-soft); border-color: rgba(27,122,104,0.2); color: var(--primary-dark); }
+.tag.accent { background: var(--accent-soft); border-color: rgba(201,93,42,0.2); color: var(--accent); }
+
+/* ── CHIPS ──────────────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; min-height: 26px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 9px; border-radius: 999px;
+  font-size: 0.76rem; font-weight: 600;
+  background: var(--info-soft); border: 1px solid rgba(45,107,196,0.15); color: var(--info);
+}
+.chip.gene { background: var(--purple-soft); border-color: rgba(109,60,199,0.15); color: var(--purple); }
+.chip.gene-pos { background: var(--danger-soft); border-color: rgba(184,58,46,0.15); color: var(--danger); }
+.chip.gene-neg { background: var(--primary-soft); border-color: rgba(27,122,104,0.15); color: var(--primary-dark); }
+.chip .x { cursor: pointer; opacity: 0.5; font-size: 0.65rem; }
+.chip .x:hover { opacity: 1; }
+
+/* ── RELATIVE ROW ───────────────────────────────────── */
+.rel-row {
+  display: grid;
+  grid-template-columns: 1.1fr 0.5fr 0.55fr 0.45fr auto;
+  gap: 8px; align-items: end;
+  padding: 10px 12px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  margin-bottom: 8px; transition: box-shadow 0.15s;
+}
+.rel-row:hover { box-shadow: var(--shadow-sm); }
+.rel-row .field { gap: 2px; }
+.rel-row label { font-size: 0.72rem; }
+.rel-row input, .rel-row select { padding: 6px 8px; font-size: 0.82rem; }
+.rel-extras {
+  grid-column: 1 / -1;
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding-top: 6px; align-items: center;
+}
+.rel-add-row {
+  grid-column: 1 / -1;
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  padding-top: 4px;
+}
+.rel-add-row input, .rel-add-row select {
+  padding: 5px 7px; font-size: 0.8rem; max-width: 150px;
+}
+
+/* ── PEDIGREE SVG ───────────────────────────────────── */
+.ped-wrap {
+  padding: 16px; background: var(--primary-xsoft);
+  border-radius: var(--radius); border: 1px solid rgba(27,122,104,0.12);
+  min-height: 180px; overflow-x: auto;
+}
+.ped-svg { display: block; margin: 0 auto; }
+.ped-svg .ped-line { stroke: #999; stroke-width: 1.5; fill: none; }
+.ped-svg .node-shape {
+  stroke: var(--text); stroke-width: 2.5;
+  fill: var(--surface); cursor: pointer;
+  transition: stroke 0.15s;
+}
+.ped-svg .node-shape.affected { fill: var(--text); }
+.ped-svg .node-shape.proband-ring { stroke: var(--primary); stroke-width: 3; }
+.ped-svg .node-shape:hover { stroke: var(--primary); stroke-width: 3; }
+.ped-svg .deceased-slash { stroke: var(--danger); stroke-width: 2.5; }
+.ped-svg .node-label {
+  font-family: var(--font-body); font-size: 10px; font-weight: 700;
+  fill: var(--text); text-anchor: middle;
+}
+.ped-svg .node-sub {
+  font-family: var(--font-body); font-size: 8.5px; font-weight: 600;
+  fill: var(--text-3); text-anchor: middle;
+}
+.ped-svg .gen-label {
+  font-family: var(--font-body); font-size: 9px; font-weight: 800;
+  fill: var(--text-3); text-anchor: start;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.ped-svg .arrow-head { fill: var(--primary); }
+.ped-svg .edge-label {
+  font-family: var(--font-body); font-size: 8px; font-weight: 600;
+  fill: #999; text-anchor: middle;
+}
+
+/* Tooltip */
+.ped-tooltip {
+  position: fixed; z-index: 999;
+  background: var(--text); color: #fff;
+  padding: 10px 14px; border-radius: 10px;
+  font-size: 0.78rem; line-height: 1.5;
+  box-shadow: var(--shadow-lg);
+  max-width: 280px; pointer-events: none;
+  opacity: 0; transition: opacity 0.15s;
+}
+.ped-tooltip.show { opacity: 1; }
+.ped-tooltip .tt-name { font-weight: 800; margin-bottom: 4px; font-size: 0.84rem; }
+.ped-tooltip .tt-cond { color: #87cefa; }
+.ped-tooltip .tt-gene { color: #d4a5ff; }
+.ped-tooltip .tt-none { opacity: 0.6; font-style: italic; }
+
+/* ── PROMPT PANEL ───────────────────────────────────── */
+.prompt-panel { position: sticky; top: 72px; }
+.prompt-preview {
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 0.76rem; line-height: 1.55;
+  background: #1a1a18; color: #e0dfd8;
+  padding: 14px; border-radius: var(--radius);
+  max-height: 52vh; overflow: auto;
+  white-space: pre-wrap; word-break: break-word;
+}
+.prompt-preview .hl-h { color: #6dd4b8; font-weight: 700; }
+.prompt-preview .hl-l { color: #c4956a; }
+.prompt-preview .hl-c { color: #87b5e5; }
+.prompt-preview .hl-g { color: #c4a5e5; }
+.prompt-preview .hl-m { color: #6a6a62; }
+
+/* ── GUIDE ──────────────────────────────────────────── */
+.guide {
+  display: flex; gap: 10px; padding: 12px 14px;
+  background: var(--accent-soft); border: 1px solid rgba(201,93,42,0.15);
+  border-radius: var(--radius); margin-bottom: 14px;
+}
+.guide-icon { font-size: 1.1rem; flex-shrink: 0; }
+.guide-text { font-size: 0.82rem; color: var(--text-2); line-height: 1.5; }
+.guide-text strong { color: var(--text); }
+
+/* ── TOAST ──────────────────────────────────────────── */
+.toast {
+  position: fixed; right: 18px; bottom: 18px;
+  padding: 11px 15px; border-radius: var(--radius);
+  font-size: 0.86rem; font-weight: 600; color: #fff;
+  background: var(--primary-dark); box-shadow: var(--shadow-lg);
+  z-index: 9999; opacity: 0; transform: translateY(10px);
+  transition: all 0.25s var(--ease); max-width: 360px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.error { background: var(--danger); }
+
+@media (max-width: 768px) {
+  .fg { grid-template-columns: 1fr; }
+  .rel-row { grid-template-columns: 1fr 1fr; }
+}
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark">🧬</div>
+      <div>
+        <h1>Pedigree → Prompt</h1>
+        <p>Cancer syndrome risk assessment builder</p>
+      </div>
+    </div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="quick">⚡ Quick</button>
+      <button class="mode-btn" data-mode="detailed">🔬 Detailed</button>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary btn-sm" id="btnExport">💾 Export</button>
+      <button class="btn btn-secondary btn-sm" id="btnImport">📂 Import</button>
+      <button class="btn btn-danger btn-sm" id="btnReset">🗑 Reset</button>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+<!-- ════════════════════ LEFT: FORM ════════════════════ -->
+<div id="formArea">
+
+  <div class="guide">
+    <div class="guide-icon">🧭</div>
+    <div class="guide-text">
+      <strong>Build a family cancer history, get a structured prompt.</strong>
+      Fill in who has had what cancer and at what age. The prompt on the right
+      builds in real-time — copy it and paste into <strong>OpenEvidence</strong> for
+      guideline-referenced risk assessment (NCCN, ACMG, USPSTF).
+    </div>
+  </div>
+
+  <!-- ── STEP 1: YOU ─────────────────────────────── -->
+  <div class="card">
+    <div class="card-header" onclick="tog(this)">
+      <div class="left"><div class="step">1</div><h2>You (the person being assessed)</h2></div>
+      <span class="chev">▼</span>
+    </div>
+    <div class="card-body" id="bodyProband">
+      <div class="fg">
+        <div class="field">
+          <label>Age</label>
+          <input type="number" id="pAge" min="0" max="120" placeholder="e.g., 42"/>
+        </div>
+        <div class="field">
+          <label>Sex</label>
+          <select id="pSex">
+            <option value="">— Select —</option>
+            <option value="F">Female</option>
+            <option value="M">Male</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Ancestry / Ethnicity <span class="opt">(affects risk models)</span></label>
+          <select id="pEth">
+            <option value="">— Select —</option>
+            <option>Ashkenazi Jewish</option>
+            <option>Northern European</option>
+            <option>Southern European / Mediterranean</option>
+            <option>Eastern European</option>
+            <option>African American</option>
+            <option>Sub-Saharan African</option>
+            <option>Hispanic / Latino</option>
+            <option>East Asian (Chinese, Japanese, Korean)</option>
+            <option>South Asian (Indian, Pakistani, Bangladeshi)</option>
+            <option>Southeast Asian (Filipino, Vietnamese, Thai)</option>
+            <option>Middle Eastern / North African</option>
+            <option>Pacific Islander / Native Hawaiian</option>
+            <option>Native American / Indigenous</option>
+            <option>Mixed / Multiple</option>
+            <option value="__custom">Other (type below)</option>
+          </select>
+          <input type="text" id="pEthCustom" placeholder="Specify..." style="display:none;margin-top:6px;"/>
+        </div>
+        <div class="field full">
+          <label>Personal cancer history</label>
+          <div class="chips" id="pCondChips"></div>
+          <div class="rel-add-row" style="padding-top:8px;">
+            <select id="pCondSel"><option value="">Select...</option></select>
+            <input type="number" id="pCondAge" placeholder="Age dx" min="0" style="max-width:70px;"/>
+            <button class="btn btn-secondary btn-sm" id="btnPC">+ Add</button>
+            <input type="text" id="pCondCustom" placeholder="or type custom..." style="max-width:140px;"/>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Genetic testing done <span class="opt">(if any)</span></label>
+          <div class="chips" id="pGeneChips"></div>
+          <div class="rel-add-row" style="padding-top:8px;">
+            <select id="pGeneSel"><option value="">Select test...</option></select>
+            <select id="pGeneRes" style="max-width:100px;">
+              <option value="">Result...</option>
+              <option>Positive</option>
+              <option>Negative</option>
+              <option>VUS</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" id="btnPG">+ Add</button>
+          </div>
+        </div>
+        <div class="field full" id="fConcern">
+          <label>Specific concern <span class="opt">(optional)</span></label>
+          <textarea id="pConcern" placeholder="e.g., Mother and aunt both had breast cancer young — should I get tested?"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: FIRST-DEGREE ────────────────────── -->
+  <div class="card">
+    <div class="card-header" onclick="tog(this)">
+      <div class="left"><div class="step">2</div><h2>Parents, Siblings, Children</h2></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="tag" id="cnt1">0</span><span class="chev">▼</span>
+      </div>
+    </div>
+    <div class="card-body" id="body1">
+      <div class="hint" style="margin-bottom:10px;">First-degree relatives. Cancer + age at diagnosis is the key info.</div>
+      <div id="list1"></div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="addR('Mother','F',-1,'maternal',1)">+ Mother</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Father','M',-1,'paternal',1)">+ Father</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Sister','F',0,'self',1)">+ Sister</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Brother','M',0,'self',1)">+ Brother</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Daughter','F',1,'self',1)">+ Daughter</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Son','M',1,'self',1)">+ Son</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: SECOND-DEGREE ───────────────────── -->
+  <div class="card">
+    <div class="card-header" onclick="tog(this)">
+      <div class="left"><div class="step">3</div><h2>Grandparents, Aunts, Uncles</h2></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="tag" id="cnt2">0</span><span class="chev">▼</span>
+      </div>
+    </div>
+    <div class="card-body" id="body2">
+      <div class="hint" style="margin-bottom:10px;">Second-degree relatives. Maternal vs. paternal side matters for pattern recognition.</div>
+      <div id="list2"></div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="addR('Mat. Grandmother','F',-2,'maternal',2)">+ Mat. Grandmother</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Mat. Grandfather','M',-2,'maternal',2)">+ Mat. Grandfather</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Pat. Grandmother','F',-2,'paternal',2)">+ Pat. Grandmother</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Pat. Grandfather','M',-2,'paternal',2)">+ Pat. Grandfather</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Mat. Aunt','F',-1,'maternal',2)">+ Mat. Aunt</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Mat. Uncle','M',-1,'maternal',2)">+ Mat. Uncle</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Pat. Aunt','F',-1,'paternal',2)">+ Pat. Aunt</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Pat. Uncle','M',-1,'paternal',2)">+ Pat. Uncle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: COUSINS / OTHER ─────────────────── -->
+  <div class="card">
+    <div class="card-header collapsed" onclick="tog(this)">
+      <div class="left"><div class="step">4</div><h2>Cousins & Other</h2></div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="tag" id="cnt3">0</span><span class="chev">▼</span>
+      </div>
+    </div>
+    <div class="card-body collapsed" id="body3">
+      <div class="hint" style="margin-bottom:10px;">Third-degree or more distant. Add if they have relevant cancer history.</div>
+      <div id="list3"></div>
+      <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="addR('Mat. Cousin','U',0,'maternal',3)">+ Mat. Cousin</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Pat. Cousin','U',0,'paternal',3)">+ Pat. Cousin</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Half-sibling','U',0,'unknown',2)">+ Half-sibling</button>
+        <button class="btn btn-secondary btn-sm" onclick="addR('Other','U',0,'unknown',3)">+ Other</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PEDIGREE VIZ ────────────────────────────── -->
+  <div class="card">
+    <div class="card-header" onclick="tog(this)">
+      <div class="left"><h2>📊 Pedigree Diagram</h2></div>
+      <span class="chev">▼</span>
+    </div>
+    <div class="card-body" id="bodyPed">
+      <div class="ped-wrap" id="pedWrap">
+        <div id="pedEmpty" style="text-align:center;padding:24px;color:var(--text-3);">
+          <div style="font-size:1.8rem;margin-bottom:6px;">🌳</div>
+          <p style="font-size:0.84rem;margin:0;">Add relatives above to see the pedigree</p>
+        </div>
+      </div>
+      <div class="hint" style="margin-top:8px;">
+        ◻ = male &nbsp; ◯ = female &nbsp; ◇ = unknown sex &nbsp; Filled = has cancer &nbsp;
+        <span style="color:var(--danger);">╲</span> = deceased &nbsp;
+        <span style="color:var(--primary);">▶</span> = you.
+        &nbsp;<strong>Hover any node</strong> for details.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ RIGHT: PROMPT ════════════════════ -->
+<div class="prompt-panel">
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-header" style="cursor:default;">
+      <div class="left"><h2>📋 Generated Prompt</h2></div>
+      <span class="tag accent" id="wc">0 words</span>
+    </div>
+    <div class="card-body" style="padding:10px;">
+      <div class="prompt-preview" id="promptPre">
+        <span class="hl-m">Enter family history on the left to build the prompt...</span>
+      </div>
+    </div>
+    <div class="card-footer" style="display:flex;flex-direction:column;gap:10px;">
+      <button class="btn btn-primary btn-cta" id="btnCopy" style="width:100%;">📋 Copy Prompt</button>
+      <button class="btn btn-accent btn-cta" id="btnOE" style="width:100%;">🔬 Open OpenEvidence & Paste</button>
+      <div class="hint" style="text-align:center;">
+        Copy → paste into OpenEvidence or any clinical AI.<br/>
+        Prompt auto-references NCCN, ACMG, USPSTF guidelines.
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <div class="card-header collapsed" onclick="tog(this)">
+      <div class="left"><h2>📖 Red Flags Cheatsheet</h2></div>
+      <span class="chev">▼</span>
+    </div>
+    <div class="card-body collapsed" id="bodyRef">
+      <div class="hint" style="line-height:1.65;">
+        <strong>BRCA / Hereditary Breast-Ovarian:</strong><br/>
+        — Breast cancer &lt; 50, or triple-negative &lt; 60<br/>
+        — Ovarian cancer at any age<br/>
+        — Male breast cancer<br/>
+        — Ashkenazi + breast/ovarian/pancreatic<br/>
+        — ≥ 2 breast cancers same side of family<br/><br/>
+        <strong>Lynch syndrome:</strong><br/>
+        — Colorectal or endometrial cancer &lt; 50<br/>
+        — ≥ 3 relatives with Lynch cancers (same lineage)<br/>
+        — Colorectal + another Lynch cancer same person<br/><br/>
+        <strong>Polyposis:</strong><br/>
+        — ≥ 10 adenomatous polyps<br/><br/>
+        <strong>Other red flags:</strong><br/>
+        — Known pathogenic variant in family<br/>
+        — Multiple primary cancers in one person<br/>
+        — Rare tumors (adrenocortical, pheo, medullary thyroid)
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="ped-tooltip" id="tooltip"></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileIn" accept=".json" style="display:none"/>
+
+<script>
+/* ============================================================
+   PEDIGREE → PROMPT  |  Cancer Syndrome Focused
+   ============================================================ */
+
+// ── CATALOGS ───────────────────────────────────────────────
+const CONDS_Q = [
+  "Breast cancer","Ovarian cancer","Colon cancer","Colon polyps (adenomatous)",
+  "Endometrial (uterine) cancer","Prostate cancer","Pancreatic cancer",
+  "Kidney cancer","Melanoma","Gastric (stomach) cancer",
+  "Bladder cancer","Multiple primary cancers"
+];
+const CONDS_D = [
+  ...CONDS_Q,
+  "Thyroid cancer","Sarcoma","Brain tumor / glioma","Leukemia / lymphoma",
+  "Small bowel cancer","Sebaceous neoplasm","Adrenocortical carcinoma","Male breast cancer"
+];
+
+const GENES_Q = [
+  "BRCA1","BRCA2","MLH1 (Lynch)","MSH2 (Lynch)","MSH6 (Lynch)",
+  "PMS2 (Lynch)","APC (FAP)","MUTYH","Hereditary cancer panel"
+];
+const GENES_D = [
+  ...GENES_Q,"PALB2","ATM","CHEK2","TP53 (Li-Fraumeni)",
+  "PTEN (Cowden)","CDH1","STK11 (Peutz-Jeghers)","EPCAM (Lynch)","SMAD4"
+];
+
+// ── STATE ──────────────────────────────────────────────────
+const SK = "ped_prompt_v4";
+let _n = 1;
+const S = {
+  mode: "quick",
+  p: { age:null, sex:"", eth:"", conds:[], genes:[], concern:"" },
+  rels: []
+};
+
+function uid() { return "r"+(_n++); }
+function save() { try { localStorage.setItem(SK, JSON.stringify(S)); } catch(e){} }
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(SK));
+    if (!d?.p) return false;
+    Object.assign(S.p, d.p); S.rels = d.rels||[]; S.mode = d.mode||"quick";
+    S.rels.forEach(r => { const x = parseInt(r.id?.replace("r","")); if(x>=_n)_n=x+1; });
+    return true;
+  } catch(e) { return false; }
+}
+
+const $ = id => document.getElementById(id);
+const esc = s => (s||"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+function toast(m,t) {
+  const e=$("toast"); e.textContent=m; e.className="toast show "+(t==="error"?"error":"");
+  clearTimeout(e._t); e._t=setTimeout(()=>e.classList.remove("show"),2400);
+}
+function cList() { return S.mode==="detailed" ? CONDS_D : CONDS_Q; }
+function gList() { return S.mode==="detailed" ? GENES_D : GENES_Q; }
+
+// ── TOGGLE ─────────────────────────────────────────────────
+function tog(hdr) {
+  const body = hdr.nextElementSibling;
+  if (!body) return;
+  const c = body.classList.contains("collapsed");
+  body.classList.toggle("collapsed", !c);
+  hdr.classList.toggle("collapsed", !c);
+}
+
+// ── POPULATE SELECTS ───────────────────────────────────────
+function popSel() {
+  $("pCondSel").innerHTML = `<option value="">Select...</option>` +
+    cList().map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  $("pGeneSel").innerHTML = `<option value="">Select test...</option>` +
+    gList().map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join("");
+}
+
+// ── PROBAND ────────────────────────────────────────────────
+function bindP() {
+  $("pAge").oninput = () => { S.p.age=$("pAge").value?+$("pAge").value:null; save(); rp(); };
+  $("pSex").onchange = () => { S.p.sex=$("pSex").value; save(); rp(); };
+  $("pEth").onchange = () => {
+    if($("pEth").value==="__custom"){ $("pEthCustom").style.display=""; $("pEthCustom").focus(); }
+    else { $("pEthCustom").style.display="none"; S.p.eth=$("pEth").value; save(); rp(); }
+  };
+  $("pEthCustom").oninput = () => { S.p.eth=$("pEthCustom").value; save(); rp(); };
+  $("pConcern").oninput = () => { S.p.concern=$("pConcern").value; save(); rp(); };
+
+  $("btnPC").onclick = () => {
+    let n = $("pCondSel").value || $("pCondCustom").value.trim();
+    if(!n) return;
+    S.p.conds.push({name:n, ageDx:$("pCondAge").value||""});
+    $("pCondSel").value=""; $("pCondCustom").value=""; $("pCondAge").value="";
+    save(); renderPC(); rp();
+  };
+  $("pCondCustom").onkeydown = e => { if(e.key==="Enter"){e.preventDefault();$("btnPC").click();} };
+
+  $("btnPG").onclick = () => {
+    const n=$("pGeneSel").value; if(!n) return;
+    S.p.genes.push({name:n, result:$("pGeneRes").value||"Unknown"});
+    $("pGeneSel").value=""; $("pGeneRes").value="";
+    save(); renderPG(); rp();
+  };
+}
+
+function renderPC() {
+  $("pCondChips").innerHTML = S.p.conds.map((c,i) => {
+    const a = c.ageDx ? ` @ age ${esc(c.ageDx)}` : "";
+    return `<span class="chip">🩺 ${esc(c.name)}${a} <span class="x" onclick="S.p.conds.splice(${i},1);save();renderPC();rp();">✕</span></span>`;
+  }).join("");
+}
+function renderPG() {
+  $("pGeneChips").innerHTML = S.p.genes.map((g,i) => {
+    const c = g.result==="Positive"?"gene-pos":g.result==="Negative"?"gene-neg":"gene";
+    return `<span class="chip ${c}">🧬 ${esc(g.name)}: ${esc(g.result)} <span class="x" onclick="S.p.genes.splice(${i},1);save();renderPG();rp();">✕</span></span>`;
+  }).join("");
+}
+function popP() {
+  $("pAge").value = S.p.age??"";
+  $("pSex").value = S.p.sex||"";
+  const opts = Array.from($("pEth").options).map(o=>o.value);
+  if(opts.includes(S.p.eth)) { $("pEth").value=S.p.eth; $("pEthCustom").style.display="none"; }
+  else if(S.p.eth) { $("pEth").value="__custom"; $("pEthCustom").style.display=""; $("pEthCustom").value=S.p.eth; }
+  $("pConcern").value = S.p.concern||"";
+  renderPC(); renderPG();
+}
+
+// ── RELATIVES ──────────────────────────────────────────────
+function addR(rel,sex,gen,side,deg) {
+  S.rels.push({id:uid(),relationship:rel,sex,age:null,status:"Alive",side,generation:gen,degree:deg,conds:[],genes:[]});
+  save(); renderR(); rp(); renderPed(); toast(`Added ${rel}`);
+}
+function rmR(id) { S.rels=S.rels.filter(r=>r.id!==id); save(); renderR(); rp(); renderPed(); }
+function upR(id,k,v) { const r=S.rels.find(x=>x.id===id); if(r){r[k]=v; save(); rp(); renderPed();} }
+
+function addRC(id) {
+  const r=S.rels.find(x=>x.id===id); if(!r)return;
+  const sel=document.getElementById(`cs_${id}`);
+  const cust=document.getElementById(`cc_${id}`);
+  const age=document.getElementById(`ca_${id}`);
+  const n = sel?.value || cust?.value?.trim(); if(!n)return;
+  r.conds.push({name:n, ageDx:age?.value||""});
+  if(sel)sel.value=""; if(cust)cust.value=""; if(age)age.value="";
+  save(); renderR(); rp(); renderPed();
+}
+function rmRC(id,i) { const r=S.rels.find(x=>x.id===id); if(r){r.conds.splice(i,1);save();renderR();rp();renderPed();} }
+
+function addRG(id) {
+  const r=S.rels.find(x=>x.id===id); if(!r)return;
+  const sel=document.getElementById(`gs_${id}`);
+  const res=document.getElementById(`gr_${id}`);
+  const n=sel?.value; if(!n)return;
+  r.genes.push({name:n, result:res?.value||"Unknown"});
+  if(sel)sel.value="";
+  save(); renderR(); rp(); renderPed();
+}
+function rmRG(id,i) { const r=S.rels.find(x=>x.id===id); if(r){r.genes.splice(i,1);save();renderR();rp();renderPed();} }
+
+function renderR() {
+  const f=S.rels.filter(r=>r.degree===1), s=S.rels.filter(r=>r.degree===2), t=S.rels.filter(r=>r.degree>=3);
+  rGroup($("list1"),f); rGroup($("list2"),s); rGroup($("list3"),t);
+  $("cnt1").textContent=f.length; $("cnt2").textContent=s.length; $("cnt3").textContent=t.length;
+}
+
+function rGroup(el, rels) {
+  if(!rels.length){ el.innerHTML=`<div style="padding:12px;color:var(--text-3);font-size:0.82rem;">None yet.</div>`; return; }
+  const co = cList().map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join("");
+  const go = gList().map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join("");
+
+  el.innerHTML = rels.map(r => {
+    const cc = r.conds.map((c,i) => {
+      const a=c.ageDx?` @${esc(c.ageDx)}`:"";
+      return `<span class="chip">🩺 ${esc(c.name)}${a} <span class="x" onclick="rmRC('${r.id}',${i})">✕</span></span>`;
+    }).join("");
+    const gc = r.genes.map((g,i) => {
+      const cls=g.result==="Positive"?"gene-pos":g.result==="Negative"?"gene-neg":"gene";
+      return `<span class="chip ${cls}">🧬 ${esc(g.name)}: ${esc(g.result)} <span class="x" onclick="rmRG('${r.id}',${i})">✕</span></span>`;
+    }).join("");
+
+    return `
+      <div class="rel-row">
+        <div class="field"><label>Relationship</label>
+          <input type="text" value="${esc(r.relationship)}" onchange="upR('${r.id}','relationship',this.value)"/></div>
+        <div class="field"><label>Age</label>
+          <input type="number" min="0" value="${r.age??''}" placeholder="~" onchange="upR('${r.id}','age',this.value?+this.value:null)"/></div>
+        <div class="field"><label>Status</label>
+          <select onchange="upR('${r.id}','status',this.value)">
+            <option ${r.status==="Alive"?"selected":""}>Alive</option>
+            <option ${r.status==="Deceased"?"selected":""}>Deceased</option>
+            <option ${r.status==="Unknown"?"selected":""}>Unknown</option>
+          </select></div>
+        <div class="field"><label>Sex</label>
+          <select onchange="upR('${r.id}','sex',this.value)">
+            <option value="F" ${r.sex==="F"?"selected":""}>F</option>
+            <option value="M" ${r.sex==="M"?"selected":""}>M</option>
+            <option value="U" ${r.sex==="U"?"selected":""}>?</option>
+          </select></div>
+        <div style="align-self:end;">
+          <button class="btn btn-danger btn-sm" onclick="rmR('${r.id}')" title="Remove">✕</button></div>
+        <div class="rel-extras">${cc}${gc}</div>
+        <div class="rel-add-row">
+          <select id="cs_${r.id}" style="max-width:140px;"><option value="">+ condition...</option>${co}</select>
+          <input type="text" id="cc_${r.id}" placeholder="or custom..." style="max-width:110px;"/>
+          <input type="number" id="ca_${r.id}" placeholder="age" min="0" style="max-width:55px;"/>
+          <button class="btn btn-secondary btn-sm" onclick="addRC('${r.id}')">+🩺</button>
+          ${S.mode==="detailed"?`
+            <select id="gs_${r.id}" style="max-width:120px;"><option value="">+ gene...</option>${go}</select>
+            <select id="gr_${r.id}" style="max-width:80px;">
+              <option value="Positive">Pos</option><option value="Negative">Neg</option><option value="VUS">VUS</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="addRG('${r.id}')">+🧬</button>`:""}
+        </div>
+      </div>`;
+  }).join("");
+
+  // Bind enter on custom condition inputs
+  rels.forEach(r => {
+    const ci = document.getElementById(`cc_${r.id}`);
+    if(ci) ci.onkeydown = e => { if(e.key==="Enter"){e.preventDefault();addRC(r.id);} };
+  });
+}
+
+// ── PEDIGREE SVG ───────────────────────────────────────────
+// Proper lines connecting relatives according to family structure.
+
+// Store all computed node data globally for tooltip access
+let _pedNodes = {};
+
+function renderPed() {
+  const wrap = $("pedWrap");
+  const empty = $("pedEmpty");
+
+  if (!S.rels.length && !S.p.conds.length) {
+    wrap.innerHTML = ""; wrap.appendChild(empty); empty.style.display = ""; return;
+  }
+  if (empty) empty.style.display = "none";
+
+  // Build node list
+  const probNode = {
+    _id:"__proband", label:"You", sex:S.p.sex||"U", affected:S.p.conds.length>0,
+    deceased:false, side:"self", generation:0, degree:0,
+    conds:S.p.conds, genes:S.p.genes, age:S.p.age, relationship:"You", isProband:true
+  };
+  const allN = [probNode, ...S.rels.map(r=>({
+    _id:r.id, label:r.relationship+(r.age?` (${r.age})`:""),
+    sex:r.sex, affected:r.conds.length>0, deceased:r.status==="Deceased",
+    side:r.side, generation:r.generation, degree:r.degree,
+    conds:r.conds, genes:r.genes, age:r.age, relationship:r.relationship, isProband:false
+  }))];
+  _pedNodes = {}; allN.forEach(n => _pedNodes[n._id]=n);
+
+  // Group by generation
+  const gm = {};
+  allN.forEach(n => { const g=n.generation; if(!gm[g])gm[g]=[]; gm[g].push(n); });
+
+  // Sort each row: maternal left, self/proband center, paternal right
+  const so = {maternal:0, self:1, unknown:1.5, paternal:2};
+  Object.values(gm).forEach(arr => {
+    arr.sort((a,b) => {
+      if(a.isProband) return 0; if(b.isProband) return 0;
+      return (so[a.side]??1.5) - (so[b.side]??1.5) || a.label.localeCompare(b.label);
+    });
+  });
+
+  // Compute positions
+  const nw=48, gx=32, gy=90;
+  const gks = Object.keys(gm).map(Number).sort((a,b)=>a-b);
+  const genW = {};
+  gks.forEach(g => { const n=gm[g].length; genW[g]=n*nw+(n-1)*gx; });
+  const maxW = Math.max(320, ...Object.values(genW)) + 80;
+
+  const pos = {};
+  gks.forEach((g,gi) => {
+    const row = gm[g];
+    const rw = row.length*nw + (row.length-1)*gx;
+    const sx = (maxW - rw)/2 + nw/2;
+    const y = 44 + gi*gy;
+    row.forEach((n,ni) => { pos[n._id] = { x: sx + ni*(nw+gx), y }; });
+  });
+  const totalH = 44 + gks.length*gy + 30;
+
+  // ── Build SVG ──
+  let svg = `<svg class="ped-svg" width="${maxW}" height="${totalH}" viewBox="0 0 ${maxW} ${totalH}">`;
+
+  // Gen labels
+  const gl = {"-2":"Grandparents","-1":"Parents / Aunts / Uncles","0":"You / Siblings","1":"Children"};
+  gks.forEach((g,gi) => {
+    const y = 44 + gi*gy;
+    svg += `<text class="gen-label" x="4" y="${y-20}">${esc(gl[g]||"Gen "+g)}</text>`;
+  });
+
+  // ── LINES ──
+  // Strategy: find logical parent for each node and draw elbowed connectors.
+  function findId(rel) { const n=allN.find(x=>x.relationship===rel); return n?n._id:null; }
+
+  function parentOf(node) {
+    if (node.isProband) return null;
+    const r = node.relationship;
+    // Parents connect DOWN to proband
+    if (["Mother","Father"].includes(r)) return "__proband";
+    // Siblings connect UP to a parent
+    if (["Sister","Brother","Half-sibling"].includes(r))
+      return findId("Mother") || findId("Father") || "__proband";
+    // Children connect DOWN from proband
+    if (["Daughter","Son"].includes(r)) return "__proband";
+    // Grandparents connect to relevant parent
+    if (r.startsWith("Mat. Grand")) return findId("Mother") || "__proband";
+    if (r.startsWith("Pat. Grand")) return findId("Father") || "__proband";
+    // Aunts/uncles connect to relevant parent (siblings of parent)
+    if (r.startsWith("Mat. Aunt") || r.startsWith("Mat. Uncle"))
+      return findId("Mother") || "__proband";
+    if (r.startsWith("Pat. Aunt") || r.startsWith("Pat. Uncle"))
+      return findId("Father") || "__proband";
+    // Cousins connect to aunts/uncles or fallback to parent
+    if (node.side==="maternal")
+      return findId("Mat. Aunt") || findId("Mat. Uncle") || findId("Mother") || "__proband";
+    if (node.side==="paternal")
+      return findId("Pat. Aunt") || findId("Pat. Uncle") || findId("Father") || "__proband";
+    return "__proband";
+  }
+
+  allN.forEach(node => {
+    if (node.isProband) return;
+    const pid = parentOf(node);
+    if (!pid || !pos[pid] || !pos[node._id]) return;
+    const p = pos[pid], c = pos[node._id];
+    const r = 22; // shape radius offset
+
+    if (Math.abs(p.y - c.y) < 5) {
+      // Same row: go through a midpoint above
+      const my = p.y - 32;
+      svg += `<path class="ped-line" d="M${p.x},${p.y-r} L${p.x},${my} L${c.x},${my} L${c.x},${c.y-r}"/>`;
+    } else if (p.y > c.y) {
+      // Parent below child (e.g., grandparent above parent, but parent ID is below)
+      // Node is above its connected node — draw down from node to connected
+      const my = (p.y + c.y)/2;
+      svg += `<path class="ped-line" d="M${c.x},${c.y+r} L${c.x},${my} L${p.x},${my} L${p.x},${p.y-r}"/>`;
+    } else {
+      // Normal: connected node is above, node is below
+      const my = (p.y + c.y)/2;
+      svg += `<path class="ped-line" d="M${p.x},${p.y+r} L${p.x},${my} L${c.x},${my} L${c.x},${c.y-r}"/>`;
+    }
+  });
+
+  // ── NODES ──
+  allN.forEach(node => {
+    const p = pos[node._id]; if(!p) return;
+    const {x,y} = p;
+    const r = 20;
+    const ac = node.affected ? " affected":"";
+    const pc = node.isProband ? " proband-ring":"";
+    const evts = `onmouseenter="showTT(event,'${node._id}')" onmouseleave="hideTT()" onclick="showTT(event,'${node._id}')"`;
+
+    if (node.sex==="F") {
+      svg += `<circle class="node-shape${ac}${pc}" cx="${x}" cy="${y}" r="${r}" ${evts}/>`;
+    } else if (node.sex==="M") {
+      svg += `<rect class="node-shape${ac}${pc}" x="${x-r}" y="${y-r}" width="${r*2}" height="${r*2}" rx="3" ${evts}/>`;
+    } else {
+      const d=r*0.85;
+      svg += `<polygon class="node-shape${ac}${pc}" points="${x},${y-d} ${x+d},${y} ${x},${y+d} ${x-d},${y}" ${evts}/>`;
+    }
+
+    if (node.deceased)
+      svg += `<line class="deceased-slash" x1="${x-r-3}" y1="${y+r+3}" x2="${x+r+3}" y2="${y-r-3}"/>`;
+
+    if (node.isProband)
+      svg += `<polygon class="arrow-head" points="${x-r-14},${y+5} ${x-r-14},${y-5} ${x-r-5},${y}"/>`;
+
+    const sl = node.relationship.length>14 ? node.relationship.slice(0,12)+"…" : node.relationship;
+    svg += `<text class="node-label" x="${x}" y="${y+r+14}">${esc(sl)}</text>`;
+    if (node.age) svg += `<text class="node-sub" x="${x}" y="${y+r+25}">age ~${node.age}</text>`;
+
+    // Show condition count on affected nodes
+    if (node.affected) {
+      const cnt = node.conds.length;
+      svg += `<text class="node-sub" x="${x}" y="${y+5}" text-anchor="middle" fill="#fff" font-size="9" font-weight="800">${cnt}</text>`;
+    }
+  });
+
+  svg += `</svg>`;
+  wrap.innerHTML = svg;
+}
+
+// ── TOOLTIP ────────────────────────────────────────────────
+function showTT(ev, nid) {
+  const node = _pedNodes[nid]; if(!node) return;
+  const tt = $("tooltip");
+  let h = `<div class="tt-name">${esc(node.relationship)}${node.age?`, age ~${node.age}`:""}</div>`;
+  h += `<div>${node.sex==="F"?"Female":node.sex==="M"?"Male":"Unknown sex"}${node.deceased?" • Deceased":""}</div>`;
+  if (node.conds.length) {
+    h += `<div style="margin-top:4px" class="tt-cond"><strong>Cancer history:</strong></div>`;
+    node.conds.forEach(c => {
+      const a=c.ageDx?` (dx ~age ${c.ageDx})`:"";
+      h += `<div class="tt-cond">• ${esc(c.name)}${a}</div>`;
+    });
+  }
+  if (node.genes?.length) {
+    h += `<div style="margin-top:4px" class="tt-gene"><strong>Genetic tests:</strong></div>`;
+    node.genes.forEach(g => { h += `<div class="tt-gene">• ${esc(g.name)}: ${esc(g.result)}</div>`; });
+  }
+  if (!node.conds.length && !node.genes?.length)
+    h += `<div class="tt-none">No cancer or tests recorded</div>`;
+
+  tt.innerHTML = h; tt.classList.add("show");
+  const pad=14;
+  let lx=ev.clientX+pad, ly=ev.clientY+pad;
+  if(lx+280>window.innerWidth) lx=ev.clientX-280-pad;
+  if(ly+200>window.innerHeight) ly=ev.clientY-200;
+  tt.style.left=lx+"px"; tt.style.top=ly+"px";
+}
+function hideTT() { $("tooltip").classList.remove("show"); }
+
+// ── PROMPT GENERATION ──────────────────────────────────────
+function genPrompt() {
+  const p=S.p;
+  if(!p.age && !p.sex && !p.conds.length && !S.rels.length) return "";
+
+  let t = "FAMILY HISTORY FOR CANCER SYNDROME RISK ASSESSMENT\n" + "═".repeat(52) + "\n\n";
+
+  const sx = p.sex==="F"?"female":p.sex==="M"?"male":"sex not specified";
+  const ag = p.age ? `${p.age}-year-old` : "Age unspecified";
+  t += `PERSON OF INTEREST: ${ag} ${sx}\n`;
+  if(p.eth) t += `Ancestry: ${p.eth}\n`;
+
+  if(p.conds.length) {
+    t += "\nPersonal cancer history:\n";
+    p.conds.forEach(c => { const a=c.ageDx?` (diagnosed ~age ${c.ageDx})`:""; t+=`  • ${c.name}${a}\n`; });
+  }
+  if(p.genes.length) {
+    t += "\nGenetic testing performed:\n";
+    p.genes.forEach(g => { t+=`  • ${g.name}: ${g.result}\n`; });
+  }
+
+  function fmtR(r) {
+    let s = `  ${r.relationship}`;
+    const d=[]; if(r.sex&&r.sex!=="U") d.push(r.sex==="F"?"female":"male");
+    if(r.age) d.push(`age ~${r.age}`); if(r.status==="Deceased") d.push("deceased");
+    if(d.length) s+=` (${d.join(", ")})`;
+    s+=":\n";
+    if(r.conds.length) r.conds.forEach(c=>{const a=c.ageDx?` (dx ~age ${c.ageDx})`:""; s+=`    – ${c.name}${a}\n`;});
+    else s+="    – No cancer reported\n";
+    if(r.genes.length) r.genes.forEach(g=>{s+=`    – Genetic test: ${g.name} → ${g.result}\n`;});
+    return s;
+  }
+
+  function renderDeg(label,rels) {
+    if(!rels.length) return "";
+    let s = "\n"+"─".repeat(40)+"\n"+label+"\n";
+    const m=rels.filter(r=>r.side==="maternal"), pa=rels.filter(r=>r.side==="paternal"),
+          o=rels.filter(r=>r.side!=="maternal"&&r.side!=="paternal");
+    if(m.length){s+="\n[Maternal side]\n"; m.forEach(r=>s+=fmtR(r));}
+    if(pa.length){s+="\n[Paternal side]\n"; pa.forEach(r=>s+=fmtR(r));}
+    if(o.length) o.forEach(r=>s+=fmtR(r));
+    return s;
+  }
+
+  t += renderDeg("FIRST-DEGREE RELATIVES", S.rels.filter(r=>r.degree===1));
+  t += renderDeg("SECOND-DEGREE RELATIVES", S.rels.filter(r=>r.degree===2));
+  t += renderDeg("THIRD-DEGREE & OTHER", S.rels.filter(r=>r.degree>=3));
+
+  t += "\n"+"═".repeat(52)+"\nANALYSIS REQUESTED\n\n";
+  if(p.concern) t+=`Patient concern: ${p.concern}\n\n`;
+
+  t += "Based on this family cancer pedigree, please assess:\n\n";
+  t += "1. PATTERN RECOGNITION: Does this pedigree suggest a hereditary cancer syndrome (HBOC/BRCA, Lynch/HNPCC, Li-Fraumeni, FAP, Cowden, Peutz-Jeghers)? What inheritance pattern?\n\n";
+  t += "2. GENETIC TESTING CRITERIA: Per NCCN Genetic/Familial High-Risk guidelines, does this person meet criteria for genetic testing? Which test(s)/panel(s)?\n\n";
+  t += "3. ENHANCED SCREENING: What cancer screening beyond standard population recommendations is warranted? Reference NCCN and USPSTF.\n\n";
+  t += "4. RISK ESTIMATES: Approximate lifetime cancer risks. Note if formal risk modeling (Tyrer-Cuzick, PREMM5, MMRpro, BRCAPRO) is indicated.\n\n";
+  t += "5. GENETIC COUNSELING REFERRAL: Recommended? What syndromes to discuss?\n\n";
+
+  if(p.eth && p.eth.toLowerCase().includes("ashkenazi"))
+    t += "NOTE: Ashkenazi Jewish ancestry — specifically address BRCA1/2 founder mutations and ancestry-specific risk.\n\n";
+
+  t += "Please cite specific guideline criteria (NCCN version, Amsterdam II, revised Bethesda, USPSTF grade) where applicable.\n";
+  return t;
+}
+
+function rp() {
+  const prompt = genPrompt();
+  const pre = $("promptPre");
+  if(!prompt){ pre.innerHTML=`<span class="hl-m">Enter family history on the left...</span>`; $("wc").textContent="0 words"; renderPed(); return; }
+
+  let h=esc(prompt);
+  h=h.replace(/^(FAMILY HISTORY.*|PERSON OF INTEREST:.*|FIRST-DEGREE.*|SECOND-DEGREE.*|THIRD-DEGREE.*|ANALYSIS REQUESTED)/gm,'<span class="hl-h">$1</span>');
+  h=h.replace(/(\[(?:Maternal|Paternal) side\])/g,'<span class="hl-l">$1</span>');
+  h=h.replace(/(  [•–] .+)/g,'<span class="hl-c">$1</span>');
+  h=h.replace(/(Genetic test:.+)/g,'<span class="hl-g">$1</span>');
+  pre.innerHTML=h;
+  $("wc").textContent=prompt.split(/\s+/).filter(Boolean).length+" words";
+  renderPed();
+}
+
+// ── COPY & OPENEVIDENCE ────────────────────────────────────
+$("btnCopy").onclick = () => {
+  const p=genPrompt(); if(!p){toast("Add history first","error");return;}
+  navigator.clipboard?.writeText(p).then(()=>toast("Prompt copied!")).catch(()=>{
+    const ta=document.createElement("textarea");ta.value=p;document.body.appendChild(ta);
+    ta.select();document.execCommand("copy");document.body.removeChild(ta);toast("Copied!");
+  });
+};
+$("btnOE").onclick = () => {
+  const p=genPrompt(); if(!p){toast("Add history first","error");return;}
+  navigator.clipboard?.writeText(p).then(()=>toast("Copied — paste into OpenEvidence!")).catch(()=>{});
+  window.open("https://www.openevidence.com/","_blank");
+};
+
+// ── EXPORT / IMPORT / RESET ────────────────────────────────
+$("btnExport").onclick = () => {
+  const blob=new Blob([JSON.stringify({app:"PedigreePrompt",v:4,p:S.p,rels:S.rels},null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download=`pedigree-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  URL.revokeObjectURL(a.href); toast("Exported");
+};
+$("btnImport").onclick = () => $("fileIn").click();
+$("fileIn").onchange = e => {
+  const f=e.target.files[0]; if(!f)return;
+  const rd=new FileReader();
+  rd.onload = ev => {
+    try {
+      const d=JSON.parse(ev.target.result); if(!d?.p) throw new Error("Invalid");
+      Object.assign(S.p,d.p); S.rels=d.rels||[];
+      S.rels.forEach(r=>{const n=parseInt(r.id?.replace("r",""));if(n>=_n)_n=n+1;});
+      save(); popP(); renderR(); rp(); renderPed(); toast("Imported!");
+    } catch(err){toast("Import failed","error");}
+  };
+  rd.readAsText(f); e.target.value="";
+};
+$("btnReset").onclick = () => {
+  if(!confirm("Clear everything?")) return;
+  S.p={age:null,sex:"",eth:"",conds:[],genes:[],concern:""}; S.rels=[]; _n=1;
+  localStorage.removeItem(SK); popP(); renderR(); rp(); renderPed(); toast("Reset");
+};
+
+// ── MODE TOGGLE ────────────────────────────────────────────
+document.querySelectorAll(".mode-btn").forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll(".mode-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active"); S.mode=btn.dataset.mode;
+    save(); popSel(); renderR(); rp();
+    if(S.mode==="detailed") {
+      document.querySelectorAll(".card-body.collapsed").forEach(el=>el.classList.remove("collapsed"));
+      document.querySelectorAll(".card-header.collapsed").forEach(el=>el.classList.remove("collapsed"));
+    }
+  };
+});
+
+// ── BOOT ───────────────────────────────────────────────────
+(function boot() {
+  load(); popSel(); popP(); bindP(); renderR(); rp(); renderPed();
+  document.querySelectorAll(".mode-btn").forEach(b=>b.classList.toggle("active",b.dataset.mode===S.mode));
+})();
+</script>
+</body>
+</html>
