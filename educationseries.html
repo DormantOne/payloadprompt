@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -420,8 +419,12 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
         </div>
       </fieldset>
 
+      <div style="margin-top:10px; font-size:.82rem; color:#92400e; background:rgba(245,158,11,.12); border:1px solid rgba(245,158,11,.45); border-radius:10px; padding:9px 11px; line-height:1.4;">
+        <strong>💡 Tip:</strong> After Copilot opens, select <strong>"Think Deeper"</strong> mode <em>before</em> pasting for the best analysis.
+      </div>
+
       <div class="meta">
-        After Copilot opens, click in the chat box and press
+        Then click in the chat box and press
         <strong>Ctrl+V</strong> (Windows) or <strong>⌘+V</strong> (Mac) to paste the payload.
       </div>
     </section>
@@ -471,6 +474,18 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
     t.textContent = msg;
     document.body.appendChild(t);
     setTimeout(()=>t.remove(), ms);
+  }
+
+  // 🔊 Talk-it-through (speech synthesis) — ported from biller
+  function speak(text){
+    try{
+      if(!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.05;
+      u.pitch = 1;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
   }
 
   function fillTemplate(tpl, vars){
@@ -685,7 +700,12 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
 
     copyToClipboard(prompt, () => {
       toast("Payload copied. Opening Copilot…", 2200);
-      window.open(catalog.launcher.copilot_url, "_blank", "noopener");
+      // 🔊 Talk-it-through narration — remind about Think Deeper + paste
+      speak("Payload copied. Opening Copilot. Remember to select Think Deeper mode, then click in the chat box and paste the prompt with Control V or Command V.");
+      // Small delay so the speech has a chance to start before the tab switches focus
+      setTimeout(() => {
+        window.open(catalog.launcher.copilot_url, "_blank", "noopener");
+      }, 1200);
     });
   }
 
