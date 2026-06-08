@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>UPMC Antibiogram Finder</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 720px;
+      margin: 40px auto;
+      padding: 20px;
+      color: #222;
+      line-height: 1.4;
+    }
+
+    .top-verify {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      text-align: center;
+      padding: 0.9rem;
+      margin-bottom: 1.5rem;
+      border-radius: 8px;
+      background: #d6a800;
+      color: #222;
+      text-decoration: none;
+      font-weight: bold;
+      border: 2px solid #a98200;
+    }
+
+    h1 {
+      color: #4d104a;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      color: #555;
+      margin-bottom: 2rem;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    select {
+      width: 100%;
+      font-size: 1.1rem;
+      padding: 0.85rem;
+      border: 1px solid #bbb;
+      border-radius: 6px;
+      background: white;
+    }
+
+    .note {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #fff7d6;
+      border-left: 5px solid #d6a800;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <a
+    class="top-verify"
+    href="https://infonet.upmc.com/infonet/ls/search/antibiogram"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    If the antibiogram is not the latest year, verify last updated on Infonet
+  </a>
+
+  <h1>Antibiogram Finder</h1>
+
+  <div class="subtitle">
+    Select a hospital to open the official Infonet antibiogram.
+  </div>
+
+  <label for="hospitalSelect">Hospital</label>
+
+  <select id="hospitalSelect">
+    <option value="">Choose a hospital...</option>
+
+    <optgroup label="Pittsburgh">
+      <option value="https://infonet.upmc.com/infonet/ls/content/1077026015149973/prsh-presbyterian-antibiogram-pdf-1764800431">UPMC Presbyterian</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/8370955861871479/prsh-shadyside-antibiogram-pdf-1764800561">UPMC Shadyside</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/5561005690021085/mer-antibiogram-pdf-1764800523">UPMC Mercy</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/8133785657737189/mer-icu-antibiogram-pdf-1764800593">UPMC Mercy ICU</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/4657516174429285/mer-candida-antibiogram-pdf-1764800509">UPMC Mercy Candida</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/1350917897485087/mwh-antibiogram-pdf-1764800452">UPMC Magee-Womens</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/3655161124581587/chp-antibiogram-pdf-1764800417">UPMC Children’s Hospital of Pittsburgh</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/913368558005085/chp-microbiology-laboratory-antibiogram-pdf-1764799182">CHP Microbiology Laboratory</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/6110983840375075/pass-antibiogram-pdf-1764800430">UPMC Passavant</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/6246797981339617/mck-antibiogram-pdf-1764800439">UPMC McKeesport</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/185926139650145/east-antibiogram-pdf-1764800609">UPMC East</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/7185321551805539/smh-antibiogram-pdf-1764800592">UPMC St. Margaret</option>
+    </optgroup>
+
+    <optgroup label="Western / Northwestern Pennsylvania">
+      <option value="https://infonet.upmc.com/infonet/ls/content/9006541959777993/nw-antibiogram-pdf-1764800730">UPMC Northwest</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/7572498613958331/ham-antibiogram-pdf-1764800578">UPMC Hamot</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/3044806121553843/kane-antibiogram-pdf-1764800426">UPMC Kane</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/4164917673369365/jam-antibiogram-pdf-1764800574">UPMC Jameson</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/2209491436102803/hrz-antibiogram-pdf-1764800527">UPMC Horizon</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/8786881466999459/cole-antibiogram-pdf-1764800574">UPMC Cole</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/8262246128772839/cole-annual-hospital-antibiogram-pdf-1764799844">UPMC Cole Annual Hospital Antibiogram</option>
+    </optgroup>
+
+    <optgroup label="Central Pennsylvania">
+      <option value="https://infonet.upmc.com/infonet/ls/content/8870632067975839/alt-antibiogram-pdf-1764800508">UPMC Altoona</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/7905799838698299/bdf-antibiogram-pdf-1764800680">UPMC Bedford</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/6322849167494757/pin-antibiogram-outpatient-pdf-1764800494">UPMC Central PA Outpatient</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/6618047482183261/pin-antibiogram-inpatient-pdf-1764800612">UPMC Central PA Inpatient</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/7546912167494105/lh-mun-wmsp-antibiogram-pdf-1764800557">Lock Haven / Muncy / Williamsport</option>
+      <option value="https://infonet.upmc.com/infonet/ls/content/3450832736771275/well-antibiogram-pdf-1764800536">UPMC Wellsboro</option>
+    </optgroup>
+
+    <optgroup label="Maryland">
+      <option value="https://infonet.upmc.com/infonet/ls/content/4311453908421967/wm-antibiogram-pdf-1764800684">UPMC Western Maryland</option>
+    </optgroup>
+
+    <optgroup label="New York">
+      <option value="https://infonet.upmc.com/infonet/ls/content/6514978382394179/chq-antibiogram-pdf-1764800737">UPMC Chautauqua</option>
+    </optgroup>
+  </select>
+
+  <div class="note">
+    Use the official Infonet document for clinical decisions. Check the year printed inside the antibiogram itself. If the year is not current, use the yellow verification button above to confirm the latest Infonet listing and last modified date.
+  </div>
+
+  <script>
+    document.getElementById("hospitalSelect").addEventListener("change", function () {
+      const url = this.value;
+      if (!url) return;
+
+      window.open(url, "_blank", "noopener,noreferrer");
+      this.value = "";
+    });
+  </script>
+
+</body>
+</html>
