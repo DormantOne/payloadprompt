@@ -1,0 +1,346 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>POCUS Voice Coach — ChatGPT Payload Builder</title>
+  <style>
+    :root{
+      --bg:#f4f7fb; --panel:#ffffff; --ink:#111827; --muted:#64748b;
+      --accent:#0f766e; --accent2:#0d9488; --blue:#2563eb; --red:#b91c1c;
+      --amber:#92400e; --good:#166534; --border:#d4dbe7;
+      --shadow:0 14px 32px rgba(15,23,42,.12); --r:18px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);min-height:100vh;background:radial-gradient(circle at top left,#ccfbf1 0,#eff6ff 36%,#f8fafc 100%);padding:16px}
+    .wrap{max-width:1280px;margin:0 auto}
+    .header,.panel,.card,.phoneGate{background:rgba(255,255,255,.95);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
+    .header{padding:16px 18px;position:sticky;top:8px;z-index:20;background:linear-gradient(135deg,#ffffff,#ecfeff)}
+    .top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap}
+    .title{font-size:1.18rem;font-weight:950;letter-spacing:.04em;text-transform:uppercase;color:#0f766e}
+    .subtitle,.hint,.meta{color:var(--muted);font-size:.87rem;line-height:1.4;margin-top:6px}
+    .badge{display:inline-flex;align-items:center;gap:7px;border-radius:999px;border:1px solid rgba(15,118,110,.22);background:rgba(15,118,110,.08);color:#0f766e;font-weight:900;padding:7px 11px;font-size:.78rem;white-space:nowrap}
+    .dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.22)}
+    .layout{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.18fr);gap:16px;margin-top:16px}
+    @media(max-width:980px){.layout{grid-template-columns:1fr}.header{position:static}}
+    .panel{padding:14px;min-width:0}
+    .panelTitle{font-weight:950;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+    .step{width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;color:#fff;background:var(--accent);font-weight:950;flex:none}
+    fieldset{border:1px solid var(--border);background:#f8fafc;border-radius:14px;padding:11px;margin-top:10px;min-width:0}
+    legend{font-size:.76rem;font-weight:950;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 6px}
+    label{font-size:.82rem;font-weight:800;color:#334155}
+    select,input,textarea{width:100%;margin-top:6px;padding:9px 10px;border:1px solid var(--border);border-radius:10px;background:#fff;font:inherit;color:var(--ink)}
+    textarea{min-height:102px;max-height:260px;resize:vertical;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
+    select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(20,184,166,.18)}
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    @media(max-width:740px){.row2,.row3{grid-template-columns:1fr}}
+    .procedures{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+    @media(max-width:760px){.procedures{grid-template-columns:1fr}}
+    .card{box-shadow:none;padding:11px;cursor:pointer;transition:.15s;border:1px solid var(--border);background:#fff}
+    .card:hover{transform:translateY(-1px);border-color:rgba(15,118,110,.5);box-shadow:0 8px 20px rgba(15,23,42,.08)}
+    .card.active{border-color:var(--accent);background:linear-gradient(135deg,#ecfeff,#fff);box-shadow:0 0 0 3px rgba(20,184,166,.16)}
+    .card .ct{font-weight:950;color:#0f172a}.card .cs{color:var(--muted);font-size:.82rem;line-height:1.35;margin-top:4px}
+    .pillRow{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+    .pill{font-size:.72rem;font-weight:900;border-radius:999px;padding:4px 7px;background:#ecfeff;color:#0f766e;border:1px solid rgba(15,118,110,.16)}
+    .btnRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn,.ghost,.mini{border:none;border-radius:12px;padding:10px 12px;font-weight:950;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px}.btn{flex:1;min-width:170px}.primary{background:var(--accent);color:#fff}.primary:hover{background:#115e59}.secondary{background:#e2e8f0;color:#0f172a}.secondary:hover{background:#cbd5e1}.blue{background:var(--blue);color:#fff}.blue:hover{background:#1d4ed8}.ghost{border:1px solid rgba(15,118,110,.3);background:#fff;color:#0f766e;border-radius:999px;padding:9px 11px}.ghost:hover{background:#ecfeff}.mini{background:#0f172a;color:#e2e8f0;padding:8px 10px;border-radius:999px;font-size:.8rem}
+    .previewPanel{position:sticky;top:104px;max-height:calc(100vh - 120px);display:flex;flex-direction:column;overflow:hidden}.previewPanel fieldset{display:flex;flex-direction:column;min-height:0;overflow:hidden;flex:1}.out{background:#0f172a;color:#e2e8f0;border-radius:13px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:.82rem;line-height:1.5;min-height:390px;max-height:calc(100vh - 290px);overflow-y:auto;overflow-x:hidden;white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere}.notice{margin-top:10px;border-radius:12px;padding:10px 12px;line-height:1.4;font-size:.84rem}.notice.safe{border:1px solid rgba(22,101,52,.22);background:rgba(22,163,74,.09);color:#14532d}.notice.warn{border:1px solid rgba(245,158,11,.40);background:#fffbeb;color:#78350f}.notice.danger{border:1px solid rgba(185,28,28,.28);background:#fef2f2;color:#7f1d1d}.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;border-radius:12px;padding:11px 16px;font-weight:900;box-shadow:0 12px 30px rgba(0,0,0,.34);z-index:9999;max-width:90vw}.splitTop{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.small{font-size:.8rem}.copyStatus{font-weight:900;color:#0f766e;font-size:.82rem}.phoneGate{display:none;margin-bottom:14px;background:#fff7ed;border-color:rgba(245,158,11,.45);padding:14px}.phoneGateTitle{font-weight:950;color:#92400e}.phoneGate p{margin-top:5px;color:#7c2d12;line-height:1.45}.voiceBox{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.voiceText{min-height:64px}.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f1f5f9;border:1px solid #cbd5e1;padding:1px 5px;border-radius:5px;font-size:.78rem}details.help{margin-top:10px;border-radius:12px;border:1px solid var(--border);background:#fff;overflow:hidden}details.help summary{cursor:pointer;padding:10px 12px;font-weight:950;color:#0f766e}details.help .helpBody{padding:0 12px 12px;color:#334155;font-size:.88rem;line-height:1.45}.helpBody ol{padding-left:22px;margin-top:6px}.helpBody li{margin-top:5px}@media(max-width:980px){.previewPanel{position:static;max-height:none}.out{max-height:64vh}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <section class="phoneGate" id="phoneGate">
+    <div class="phoneGateTitle">Best used from a computer next to the ultrasound machine.</div>
+    <p>This page can still copy prompts on a phone, but the intended workflow is desktop browser → paste into ChatGPT → start Voice Mode.</p>
+  </section>
+
+  <header class="header">
+    <div class="top">
+      <div>
+        <div class="title">POCUS Voice Coach — ChatGPT Payload Builder</div>
+        <div class="subtitle">Builds a clipboard payload, opens ChatGPT, and sets the stage for hands-free, stepwise ultrasound coaching.</div>
+        <div class="meta"><strong>Training/supervision tool only.</strong> No PHI. Clinician remains responsible. Follow local credentialing, documentation, sterile technique, and escalation policy.</div>
+      </div>
+      <div class="btnRow" style="margin-top:0;align-items:center">
+        <span class="badge"><span class="dot"></span> Voice payload launcher</span>
+        <button class="ghost" id="readIntroBtn" type="button">🔊 Read intro</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <section class="panel">
+      <div class="panelTitle"><span class="step">1</span> Choose payload</div>
+
+      <fieldset>
+        <legend>Procedure</legend>
+        <div class="procedures" id="procedureCards"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Session details</legend>
+        <div class="row3">
+          <div>
+            <label>Setting</label>
+            <select id="setting">
+              <option>Outpatient clinic</option><option>Hospital ward</option><option>ED / urgent care</option><option>Procedure room</option><option>Teaching lab / simulation</option>
+            </select>
+          </div>
+          <div>
+            <label>User experience</label>
+            <select id="experience">
+              <option>Trained clinician; wants voice checklist</option><option>Clinician learning under supervision</option><option>Simulation / practice only</option>
+            </select>
+          </div>
+          <div>
+            <label>Voice style</label>
+            <select id="voiceStyle">
+              <option>Calm, brief, one step at a time</option><option>Extra teaching explanations</option><option>Very terse checklist mode</option>
+            </select>
+          </div>
+        </div>
+        <div class="row2" style="margin-top:10px">
+          <div>
+            <label>Machine / probe notes</label>
+            <input id="machine" placeholder="e.g., Butterfly, GE Venue, Sonosite; linear/phased/curvilinear available">
+          </div>
+          <div>
+            <label>Local policy reminders</label>
+            <input id="policy" placeholder="e.g., save images, sterile cover for procedures, albumin protocol">
+          </div>
+        </div>
+        <label style="display:block;margin-top:10px">Clinical context / target question — no identifiers</label>
+        <textarea id="context" placeholder="e.g., dyspnea/edema, suspected venous congestion; diagnostic tap for new ascites; difficult IV after 2 failed attempts..."></textarea>
+      </fieldset>
+
+      <fieldset>
+        <legend>Voice workflow</legend>
+        <div class="notice safe"><b>Open-loop safety:</b> The payload forces ChatGPT to ask: “Where are you now, what are you doing, and what do you see?” before coaching. It should then give one instruction, wait, and confirm.</div>
+        <div class="voiceBox" style="margin-top:8px">
+          <div>
+            <label>Local dictated note scratchpad</label>
+            <textarea class="voiceText" id="dictationBox" placeholder="Optional: click Dictate here to test browser speech-to-text. This does not talk to ChatGPT."></textarea>
+          </div>
+          <button class="mini" id="dictateBtn" type="button">🎙 Dictate</button>
+        </div>
+        <details class="help">
+          <summary>How to use with ChatGPT voice</summary>
+          <div class="helpBody">
+            <ol>
+              <li>Click <b>Build & Open ChatGPT</b>. The payload is copied to your clipboard.</li>
+              <li>Paste into ChatGPT and send.</li>
+              <li>On desktop web, click the <b>Voice</b> icon on the right side of the prompt window and allow microphone access.</li>
+              <li>On mobile, tap the <b>Voice</b> icon near the message bar. You can mute/unmute with the microphone icon.</li>
+              <li>Say what step you are on. The first expected phrase is: <span class="kbd">I am at the bedside with the probe in hand...</span></li>
+            </ol>
+          </div>
+        </details>
+      </fieldset>
+
+      <div class="btnRow">
+        <button class="btn primary" id="seeBtn" type="button">👁 Build Prompt</button>
+        <button class="btn blue" id="openBtn" type="button">🚀 Build & Open ChatGPT</button>
+        <button class="btn secondary" id="clearBtn" type="button">🧹 Clear notes</button>
+      </div>
+    </section>
+
+    <section class="panel previewPanel">
+      <div class="splitTop">
+        <div class="panelTitle" style="margin-bottom:0"><span class="step">2</span> Payload preview</div>
+        <div class="btnRow" style="margin-top:0">
+          <button class="ghost" id="copyBtn" type="button">📋 Copy</button>
+          <button class="ghost" id="speakFirstBtn" type="button">🔊 Speak first line</button>
+          <span class="copyStatus" id="copyStatus"></span>
+        </div>
+      </div>
+      <fieldset>
+        <legend>Generated ChatGPT payload</legend>
+        <div class="out" id="output">Choose a payload, then click “Build Prompt” or “Build & Open ChatGPT.”</div>
+      </fieldset>
+      <div class="notice danger"><b>Hard stop language is built in:</b> stop if the user is untrained/unsupervised for invasive procedures, cannot maintain sterility, cannot identify anatomy, patient is unstable, or image findings conflict with the plan.</div>
+      <div class="notice warn"><b>JVP/IJV default:</b> the prompt uses IJV respiratory variation/distensibility &lt;30% as a venous congestion/elevated RAP clue, not as a standalone volume diagnosis.</div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const CHATGPT_URL = "https://chatgpt.com/";
+  const $ = id => document.getElementById(id);
+  const els = {
+    cards: $("procedureCards"), setting: $("setting"), experience: $("experience"), voiceStyle: $("voiceStyle"),
+    machine: $("machine"), policy: $("policy"), context: $("context"), output: $("output"), copyStatus: $("copyStatus"),
+    seeBtn: $("seeBtn"), openBtn: $("openBtn"), copyBtn: $("copyBtn"), clearBtn: $("clearBtn"),
+    readIntroBtn: $("readIntroBtn"), speakFirstBtn: $("speakFirstBtn"), dictateBtn: $("dictateBtn"), dictationBox: $("dictationBox"), phoneGate: $("phoneGate")
+  };
+  let selected = "jvp";
+
+  const PROCEDURES = {
+    jvp: {
+      title:"JVP / IJV volume assessment",
+      subtitle:"Neck/IJV POCUS, Valsalva/distensibility, venous congestion clue",
+      pills:["linear probe","carotid/vascular preset","45° HOB"],
+      first:"Where are you now, what are you doing, and what do you see on the ultrasound screen?",
+      setup:[
+        "Confirm you are a trained clinician or supervised learner; this is a voice checklist and teaching aid, not autonomous medical direction.",
+        "Wash hands. Introduce the scan. Confirm the patient can sit at about 45 degrees and breathe comfortably.",
+        "Wipe/disinfect the probe per local policy. Use a high-frequency linear probe and carotid/vascular preset.",
+        "Place the patient at roughly 45 degrees. Keep the head neutral or only slightly turned away; avoid tensing the SCM.",
+        "At the base of the neck in the sternocleidomastoid triangle just above the clavicle, place the probe gently in short axis. Use minimal pressure so you do not collapse the IJV.",
+        "Follow local orientation convention. For this training payload, if using the user’s preferred orientation, point the probe dot toward the back of the neck and confirm screen orientation before interpreting.",
+        "Identify the IJV next to the carotid. Confirm vein by compressibility, respiratory variation, and Doppler if needed; do not press hard. Keep carotid safety in mind.",
+        "Observe during quiet breathing first. Capture maximal and minimal AP diameter or area if the image is stable.",
+        "For Valsalva: say to the patient, ‘Take a normal breath in. Now close your mouth and gently bear down as if you are having a bowel movement for about five seconds. Keep it gentle, and stop if you feel dizzy, short of breath, or uncomfortable.’",
+        "Watch whether the IJV expands/distends. Estimate or measure distensibility/respiratory variation. Default formula: respiratory variation = (Dmax - Dmin) / Dmax × 100, unless local protocol uses a different denominator.",
+        "Interpret cautiously: IJV-RVD/distensibility less than about 30% suggests elevated right atrial pressure/venous congestion in the right clinical context. More distensible IJV favors lower RAP/less venous congestion, but does not prove euvolemia. Correlate with heart/lung/IVC/kidney exam and clinical picture.",
+        "Wipe gel from patient, clean probe, save/document images and interpretation according to local policy."
+      ],
+      stops:["cannot identify IJV vs carotid", "patient becomes dizzy, dyspneic, hypotensive, or uncomfortable", "neck mass/line/wound makes the exam unsafe", "image quality is too poor for interpretation"]
+    },
+    cardiac: {
+      title:"Focused cardiac POCUS",
+      subtitle:"Goal-directed views: PLAX, PSAX, apical/subxiphoid, IVC as relevant",
+      pills:["phased array","cardiac preset","focused question"],
+      first:"Where are you now, what is the clinical question, and which cardiac view are you trying to obtain?",
+      setup:[
+        "Confirm trained clinician/supervised learner. Focused cardiac POCUS is an adjunct to exam, not a comprehensive echo.",
+        "Wash hands, introduce the focused scan, obtain consent as appropriate, and avoid patient identifiers in the conversation.",
+        "Use phased-array probe and cardiac preset. Optimize depth, gain, and sector width. Save clips if used for care.",
+        "Start with the clinical question: gross LV systolic function, RV dilation/strain, pericardial effusion/tamponade physiology, gross volume status, or post-procedure complication screen.",
+        "Parasternal long-axis: patient supine or left lateral; probe near left sternal border; indicator generally toward the right shoulder by common convention. Ask the user what is visible before coaching adjustment.",
+        "Parasternal short-axis: rotate 90 degrees from PLAX; sweep from base/mitral level to papillary muscles and apex. Ask for LV shape, septal flattening, and global squeeze if relevant.",
+        "Apical four-chamber: probe near point of maximal impulse; assess relative RV/LV size, gross biventricular function, and pericardial fluid if visible.",
+        "Subxiphoid/subcostal: useful for pericardial effusion and when other windows are poor. Keep patient comfort and abdominal tenderness in mind.",
+        "IVC view only if relevant and technically adequate; interpret with limitations, especially mechanical ventilation, high intra-abdominal pressure, severe TR/RV failure, or poor windows.",
+        "Use binary/qualitative language unless trained and equipped for quantification: normal vs reduced LV function, RV not dilated vs dilated, effusion absent/present, tamponade concern absent/present/uncertain.",
+        "Escalate to formal echo/cardiology or emergency pathway when findings are abnormal, uncertain, discordant, or clinically high risk."
+      ],
+      stops:["unstable patient needing immediate hands-on care", "suspected tamponade/shock/PE with high-risk physiology", "poor windows with high clinical concern", "user wants definitive valve/wall-motion quantification beyond focused scope"]
+    },
+    para: {
+      title:"US-guided paracentesis",
+      subtitle:"Pocket selection, Doppler vessel avoidance, sterile procedural checklist",
+      pills:["curvilinear probe","sterile technique","Doppler site check"],
+      first:"Where are you now in the paracentesis workflow: pre-scan, site marking, sterile setup, needle phase, drainage, or post-procedure?",
+      setup:[
+        "Confirm this is a trained clinician or supervised learner performing within local policy. If not, stop and get qualified help.",
+        "Time-out: indication, diagnostic vs therapeutic intent, consent, allergies, anticoagulant/bleeding risk review per local policy, available assistance, specimen tubes, and albumin/large-volume plan if applicable.",
+        "Position patient with head of bed about 30–45 degrees. Consider slight lateral tilt to pool fluid. Confirm bladder considerations per local policy.",
+        "Wash hands. Use curvilinear or phased probe for survey. Clean probe before scanning. Scan multiple abdominal areas to confirm ascites and find the safest pocket.",
+        "Choose a pocket based on fluid depth, abdominal wall thickness, distance from bowel/organs/bladder, patient comfort, and ability to maintain position. Avoid scars, infection, engorged superficial veins, surgical sites, and areas where bowel is close or floating into the path.",
+        "Use color Doppler over the anticipated needle path to identify and avoid abdominal wall vessels, including inferior epigastric or collateral vessels.",
+        "Evaluate the site in two planes. If marking rather than real-time guidance, mark immediately before the procedure and keep the patient in the same position.",
+        "For sterile phase: sterile prep/drape, sterile gloves, sterile gel and covered probe if using real-time ultrasound, local anesthetic per policy, sharps plan, specimen labels ready.",
+        "During the needle phase, do not advance unless anatomy remains clear, the patient is still, and sterility is preserved. If real-time guidance is used, keep the needle tip and target pocket understood at all times.",
+        "After drainage: monitor patient, manage symptoms, send studies for diagnostic tap as ordered, apply dressing, clean gel, disinfect probe, document volume/appearance/site/complications and saved images."
+      ],
+      stops:["no safe fluid pocket", "bowel/bladder/organ/vessel in or near path", "cannot maintain sterile field", "patient unstable or severe pain", "operator not credentialed or not supervised", "unexpected bloody fluid or complication"]
+    },
+    iv: {
+      title:"Ultrasound-guided peripheral IV",
+      subtitle:"Difficult access, vein selection, dynamic needle-tip tracking",
+      pills:["linear probe","vascular preset","needle tip discipline"],
+      first:"Where are you now in the IV workflow: surveying veins, prepping, needle entry, tracking the tip, threading, flushing, or securing?",
+      setup:[
+        "Confirm trained clinician/supervised learner and local policy. Use ultrasound-guided PIV especially for difficult access after usual attempts or when a deeper vein is the safest option.",
+        "Wash hands. Explain to patient. Apply tourniquet. Use high-frequency linear probe and vascular preset. Clean probe and skin per local policy.",
+        "Survey veins before opening supplies. Choose a compressible vein, ideally straight, not adjacent to artery or nerve, with enough diameter and length. Avoid sites near infection, fistula/graft, mastectomy side per policy, thrombosis, or painful anatomy.",
+        "Estimate depth and catheter length. A deeper vein requires a longer catheter so enough catheter remains inside the vessel after threading.",
+        "Decide short-axis/out-of-plane or long-axis/in-plane. Short-axis dynamic guidance is common; the key is to track the needle tip, not the shaft.",
+        "Prep skin. Use cover/gel practice required by local infection-control policy. Keep the probe hand stable and align the center of the probe with the target vein.",
+        "For short-axis dynamic technique: advance a millimeter, stop, slide/tilt the probe until the bright needle tip is seen, then repeat. Never advance when you cannot account for the tip.",
+        "When the tip enters the vein, look for tenting release, intraluminal tip, and blood return if present. Advance catheter/needle unit sufficiently into the vein before threading, then thread without force.",
+        "Release tourniquet, connect, flush while watching for swelling/pain/extravasation, secure line, label/date per policy, clean patient and probe, and document."
+      ],
+      stops:["artery/nerve too close", "cannot see needle tip", "patient has severe pain, paresthesia, swelling, or arterial pulsatile blood", "failed attempts accumulating", "loss of sterility or local policy exceeded"]
+    }
+  };
+
+  function esc(s){ return String(s ?? "").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+  function toast(msg, ms){ const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(), ms||2600); }
+  function speak(text){ try{ if(!("speechSynthesis" in window)){toast("Speech synthesis not available in this browser."); return;} window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.rate=1.02; u.pitch=1; window.speechSynthesis.speak(u); }catch(e){toast("Speech blocked by browser.");} }
+  function copyText(text){ if(navigator.clipboard && navigator.clipboard.writeText){ return navigator.clipboard.writeText(text); } return new Promise((resolve,reject)=>{ try{ const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.left="-9999px"; document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand("copy"); ta.remove(); resolve(); }catch(e){ reject(e); } }); }
+  function selectedProcedure(){ return PROCEDURES[selected] || PROCEDURES.jvp; }
+  function renderCards(){ els.cards.innerHTML = Object.entries(PROCEDURES).map(([k,p]) => `<div class="card ${k===selected?'active':''}" data-k="${k}" tabindex="0" role="button" aria-label="${esc(p.title)}"><div class="ct">${esc(p.title)}</div><div class="cs">${esc(p.subtitle)}</div><div class="pillRow">${p.pills.map(x=>`<span class="pill">${esc(x)}</span>`).join("")}</div></div>`).join(""); els.cards.querySelectorAll(".card").forEach(c=>{ c.addEventListener("click",()=>{ selected=c.dataset.k; renderCards(); buildPrompt(); }); c.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); selected=c.dataset.k; renderCards(); buildPrompt(); } }); }); }
+  function optLines(arr){ return arr.map((x,i)=>`${i+1}. ${x}`).join("\n"); }
+  function stopLines(arr){ return arr.map(x=>`- ${x}`).join("\n"); }
+  function field(id, fallback){ const v=els[id].value.trim(); return v || fallback; }
+  function buildPrompt(){
+    const p = selectedProcedure();
+    const setting = els.setting.value;
+    const experience = els.experience.value;
+    const voiceStyle = els.voiceStyle.value;
+    const machine = field("machine", "not specified");
+    const policy = field("policy", "follow local institutional policy");
+    const context = field("context", "not specified; ask me for the clinical target question before proceeding");
+    const prompt = `ROLE
+You are ChatGPT acting as a voice-guided POCUS/procedure coach for a trained clinician. This is bedside cognitive support, not a substitute for clinical judgment, credentialing, supervision, local policy, or emergency care.
+
+PROCEDURE MODULE
+${p.title}
+
+SESSION CONTEXT
+Setting: ${setting}
+User experience: ${experience}
+Preferred voice style: ${voiceStyle}
+Machine/probe notes: ${machine}
+Local policy reminders: ${policy}
+Clinical context / target question, with no identifiers: ${context}
+
+ABSOLUTE INTERACTION RULES
+- Start by asking exactly: “${p.first}”
+- Then wait for my answer. Do not dump the full protocol at once.
+- Give one action or one question per turn.
+- Use closed-loop coaching: ask what I see, let me answer, then adjust.
+- Keep the patient safe and comfortable. Tell me when to pause, reposition, clean, or stop.
+- Never ask for patient identifiers.
+- If I describe instability, severe symptoms, uncertainty about anatomy, loss of sterility, or being untrained/unsupervised for an invasive procedure, tell me to stop and get local expert help.
+- Do not make definitive diagnoses from POCUS alone. Frame findings as focused, limited, and clinically correlated.
+- Prompt me to save images/clips and document according to local policy when the scan/procedure is used for care.
+
+OPENING STAGE DIRECTIONS
+${optLines(p.setup)}
+
+HARD STOP CONDITIONS
+${stopLines(p.stops)}
+
+HOW TO SPEAK TO ME
+- Use short bedside language.
+- Ask, “What do you see now?” frequently.
+- If I say “stuck,” help with probe position, depth, gain, and anatomy recognition.
+- If I say “next,” advance exactly one step.
+- If I say “summarize,” give a brief documentation phrase and safety caveats.
+- If I say “reset,” return to hand hygiene, probe cleaning, patient positioning, and target-question confirmation.
+
+BEGIN NOW by asking the required opening question only.`;
+    els.output.textContent = prompt;
+    els.copyStatus.textContent = "";
+    return prompt;
+  }
+  async function copyPrompt(){ const prompt = buildPrompt(); try{ await copyText(prompt); els.copyStatus.textContent="Copied"; toast("Payload copied."); setTimeout(()=>els.copyStatus.textContent="",2500); return true; }catch(e){ toast("Clipboard blocked. Select and copy manually."); return false; } }
+  async function openChatGPT(){ const ok = await copyPrompt(); if(ok){ speak("Payload copied. ChatGPT is opening. Paste the prompt, send it, then start Voice Mode with the voice icon and allow microphone access."); setTimeout(()=>window.open(CHATGPT_URL,"_blank","noopener"),900); } }
+  function clearNotes(){ els.machine.value=""; els.policy.value=""; els.context.value=""; els.dictationBox.value=""; buildPrompt(); toast("Notes cleared."); }
+  function readIntro(){ speak("This builds a ChatGPT voice coach payload for bedside ultrasound. Choose the module, enter the context without identifiers, then click build and open ChatGPT. Paste the prompt, send it, and start voice mode. The coach will ask where you are now, what you are doing, and what you see."); }
+  function speakFirstLine(){ speak(selectedProcedure().first); }
+  function dictate(){ const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if(!SR){ toast("Browser speech recognition not available. Use ChatGPT Voice Mode after opening ChatGPT."); return; } const rec = new SR(); rec.lang = "en-US"; rec.interimResults = false; rec.maxAlternatives = 1; rec.onstart = () => toast("Listening…"); rec.onerror = () => toast("Dictation stopped or blocked."); rec.onresult = e => { const text = e.results[0][0].transcript; els.dictationBox.value = (els.dictationBox.value ? els.dictationBox.value + "\n" : "") + text; }; rec.start(); }
+  function isLikelyPhone(){ const ua=navigator.userAgent||""; return /iPhone|iPod|Android.*Mobile|Windows Phone|Mobile Safari/i.test(ua) || ((navigator.maxTouchPoints||0)>1 && window.innerWidth<760); }
+  function applyDevice(){ els.phoneGate.style.display = isLikelyPhone() ? "block" : "none"; }
+
+  els.seeBtn.addEventListener("click",()=>{ buildPrompt(); toast("Payload built."); });
+  els.openBtn.addEventListener("click",openChatGPT);
+  els.copyBtn.addEventListener("click",copyPrompt);
+  els.clearBtn.addEventListener("click",clearNotes);
+  els.readIntroBtn.addEventListener("click",readIntro);
+  els.speakFirstBtn.addEventListener("click",speakFirstLine);
+  els.dictateBtn.addEventListener("click",dictate);
+  [els.setting,els.experience,els.voiceStyle,els.machine,els.policy,els.context].forEach(el=>el.addEventListener("input",buildPrompt));
+  window.addEventListener("resize",applyDevice);
+  renderCards();
+  buildPrompt();
+  applyDevice();
+})();
+</script>
+</body>
+</html>
