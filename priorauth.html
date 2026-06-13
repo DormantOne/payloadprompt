@@ -1,4 +1,6 @@
 
+
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -99,10 +101,10 @@ textarea{min-height:118px;resize:vertical;font-family:ui-monospace,SFMono-Regula
     </section>
   </div>
 
-  <div class="footer-note">Loads your GitHub coverage.json by default. Supports both the newer pathway schema and the older Auth Prep schema through client-side conversion.</div>
+  <div class="footer-note">JSON schema includes deep-research instructions. Demonstration rows are not payer determinations.</div>
 </div>
 <script>
-const DEFAULT_DATA_URL = new URLSearchParams(location.search).get('data') || 'https://dormantone.github.io/payloadprompt/coverage.json';
+const DEFAULT_DATA_URL = new URLSearchParams(location.search).get('data') || 'glp1-coverage-criteria-checker.json';
 let DATA = null;
 const $ = s => document.querySelector(s);
 function showLoadError(message){
@@ -113,11 +115,117 @@ function showLoadError(message){
   if(meta) meta.textContent = DEFAULT_DATA_URL;
   if(box) box.innerHTML = `<div class="empty">${message}<br><br>Place the JSON file next to this HTML file on a web server, or open with ?data=https://example.com/coverage.json. Local file:// loading may be blocked by the browser.</div>`;
 }
+const FALLBACK_STATUS_DEFINITIONS = {
+  covered: {label:'Covered', short_label:'Covered', color:'green'},
+  covered_with_criteria: {label:'Covered with criteria', short_label:'Covered with criteria', color:'green'},
+  covered_with_authorization: {label:'Covered with authorization', short_label:'Authorization', color:'yellow'},
+  covered_with_authorization_and_prior_trial: {label:'Authorization + prior trial/step', short_label:'Auth + prior trial', color:'orange'},
+  unknown_or_verify: {label:'Unknown / verify with plan', short_label:'Verify', color:'gray'},
+  not_covered: {label:'Not covered', short_label:'Not covered', color:'red'},
+
+  // Backward-compatible names from earlier criteria-checker JSON.
+  covered_no_prior_authorization: {label:'Covered — no authorization listed', short_label:'Covered', color:'green'},
+  covered_with_conditions_no_authorization: {label:'Covered if criteria documented — no authorization listed', short_label:'Covered with criteria', color:'green'},
+  covered_with_authorization_and_prior_trials: {label:'Covered with authorization + prior trial/step', short_label:'Auth + prior trial', color:'orange'}
+};
+
+function normalizeCoverageData(raw){
+  if(!raw || typeof raw !== 'object') throw new Error('Invalid JSON: expected an object.');
+
+  // Common mistake: loading the whole research answer instead of the inner coverage JSON.
+  if(raw.coverage_json && typeof raw.coverage_json === 'object') raw = raw.coverage_json;
+  if(raw.coverage && typeof raw.coverage === 'object' && Array.isArray(raw.coverage.policies)) raw = raw.coverage;
+  if(raw.data && typeof raw.data === 'object' && Array.isArray(raw.data.policies)) raw = raw.data;
+
+  // Native schema used by this app: payers + policies + criteria_library.
+  if(Array.isArray(raw.payers) && Array.isArray(raw.policies)){
+    raw.criteria_library = raw.criteria_library || {};
+    raw.status_definitions = {...FALLBACK_STATUS_DEFINITIONS, ...(raw.status_definitions || {})};
+    raw.policies.forEach(p => {
+      p.agents = p.agents || [];
+      p.agents.forEach(a => { a.pathways = a.pathways || []; });
+    });
+    return raw;
+  }
+
+  // Flat fallback: pathways[] rows. This is less rich, but lets the page open.
+  if(Array.isArray(raw.pathways)){
+    return wrapFlatPathways(raw);
+  }
+
+  throw new Error('Unsupported JSON schema. Expected native criteria-checker JSON with payers[] and policies[], an object with coverage_json, or flat pathways[].');
+}
+
+function wrapFlatPathways(raw){
+  const criteria_library = raw.criteria_library || {};
+  const status_definitions = {...FALLBACK_STATUS_DEFINITIONS, ...(raw.status_definitions || {})};
+  const payerMap = new Map();
+  const policyMap = new Map();
+
+  function ensurePlan(payer_id, payer_name, plan_type_id, plan_type_name){
+    if(!payerMap.has(payer_id)){
+      payerMap.set(payer_id, {id:payer_id, name:payer_name || payer_id, plan_types:[]});
+    }
+    const payer = payerMap.get(payer_id);
+    if(!payer.plan_types.some(pt => pt.id === plan_type_id)){
+      payer.plan_types.push({id:plan_type_id, name:plan_type_name || plan_type_id});
+    }
+  }
+
+  for(const row of raw.pathways){
+    const payer_id = row.payer_id || row.payer || 'unknown_payer';
+    const plan_type_id = row.plan_type_id || row.plan_type || 'unknown';
+    ensurePlan(payer_id, row.payer_name || row.payer, plan_type_id, row.plan_type_name || row.plan_type);
+
+    const polKey = `${payer_id}::${plan_type_id}`;
+    if(!policyMap.has(polKey)){
+      policyMap.set(polKey, {
+        payer_id,
+        plan_type_id,
+        policy_name: row.policy_name || 'Imported flat coverage pathways',
+        verification_status: row.verification_status || row.confidence || 'unknown',
+        source_name: row.source_name || '',
+        source_url: row.source_url || '',
+        effective_date: row.effective_date || '',
+        retrieved_date: row.retrieved_date || row.date_accessed || '',
+        agents: []
+      });
+    }
+    const policy = policyMap.get(polKey);
+    const drug = row.drug || 'Unknown drug';
+    let agent = policy.agents.find(a => a.drug === drug);
+    if(!agent){
+      agent = {drug, ingredient: row.ingredient || '', class: row.class || row.drug_class || '', pathways: []};
+      policy.agents.push(agent);
+    }
+    agent.pathways.push({
+      id: row.id || `${drug}_${row.indication || 'pathway'}`.toLowerCase().replace(/[^a-z0-9]+/g,'_'),
+      indication: row.indication || '',
+      status: row.status || 'unknown_or_verify',
+      criteria: row.criteria || {},
+      prior_trials: row.prior_trials || row.prior_trial || {},
+      target_values_summary: row.target_values_summary || row.exact_criteria || '',
+      notes: row.notes || row.caveats || '',
+      source_refs: row.source_refs || [],
+      evidence_tier: row.evidence_tier || row.confidence || ''
+    });
+  }
+
+  return {
+    schema_version: 'wrapped_flat_pathways_v1',
+    status_definitions,
+    criteria_library,
+    payers: [...payerMap.values()],
+    policies: [...policyMap.values()]
+  };
+}
+
 async function loadCoverageData(){
   try{
     const response = await fetch(DEFAULT_DATA_URL, {cache:'no-store'});
     if(!response.ok) throw new Error(`HTTP ${response.status}`);
-    DATA = normalizeCoverageData(await response.json());
+    const raw = await response.json();
+    DATA = normalizeCoverageData(raw);
     const foot = document.querySelector('.footer-note');
     if(foot) foot.textContent = `Loaded coverage JSON from ${DEFAULT_DATA_URL}. Demonstration rows are not payer determinations.`;
     init();
@@ -127,192 +235,12 @@ async function loadCoverageData(){
   }
 }
 
-
-function normalizeCoverageData(raw){
-  if(raw && raw.status_definitions && raw.criteria_library && Array.isArray(raw.policies) && raw.policies.some(p=>Array.isArray(p.agents))){
-    return raw;
-  }
-  if(raw && Array.isArray(raw.policies) && Array.isArray(raw.payers) && Array.isArray(raw.drugs)){
-    return convertLegacyAuthPrepSchema(raw);
-  }
-  throw new Error('Unsupported JSON schema. Expected pathway schema or legacy Auth Prep schema.');
-}
-function sanitizeId(s){ return String(s||'item').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'') || 'item'; }
-function opSymbol(op){ return ({ge:'≥',gt:'>',le:'≤',lt:'<',eq:'='})[op] || op || ''; }
-const SEARCH_HINTS = {
-  diagnosis: {
-    t2dm: {icd10:['E11.9','E11.65','E11.8','E11.22'], terms:['type 2 diabetes','T2DM','diabetes mellitus type 2','E11'], prompt:'Diagnosis date / ICD-10 / problem-list evidence'},
-    obesity: {icd10:['E66.9','E66.811','E66.812','E66.813','E66.01','Z68.30','Z68.31','Z68.32','Z68.33','Z68.34','Z68.35','Z68.36','Z68.37','Z68.38','Z68.39','Z68.41','Z68.42','Z68.43','Z68.44','Z68.45'], terms:['BMI','body mass index','obesity','overweight','weight management','Z68','E66'], prompt:'BMI / weight / obesity diagnosis evidence'},
-    weight_related_comorbidity: {icd10:['I10','E78.5','G47.33','E11.9','M17.0'], terms:['hypertension','hyperlipidemia','sleep apnea','OSA','osteoarthritis','prediabetes','weight-related comorbidity'], prompt:'Comorbidity and date documented'},
-    ascvd: {icd10:['I25.10','I25.2','I63.9','I70.9'], terms:['ASCVD','coronary artery disease','myocardial infarction','stroke','peripheral arterial disease'], prompt:'ASCVD diagnosis / event date'},
-    hf: {icd10:['I50.9','I50.22','I50.32','I50.33'], terms:['heart failure','HFrEF','HFpEF','ejection fraction','I50'], prompt:'Heart failure diagnosis / EF evidence'},
-    ckd: {icd10:['N18.2','N18.3','N18.30','N18.31','N18.32','N18.4'], terms:['CKD','chronic kidney disease','eGFR','albuminuria','N18'], prompt:'CKD stage / eGFR / albuminuria evidence'}
-  },
-  prior_therapy: {
-    metformin: {icd10:[], terms:['metformin','Glucophage','metformin intolerance','metformin trial'], prompt:'Medication trial dates / intolerance / failure'},
-    sulfonylurea: {icd10:[], terms:['glipizide','glyburide','glimepiride','sulfonylurea'], prompt:'Medication trial dates / intolerance / failure'},
-    sglt2: {icd10:[], terms:['Jardiance','empagliflozin','Farxiga','dapagliflozin','Invokana','canagliflozin','SGLT2'], prompt:'Medication trial dates / intolerance / failure'},
-    glp1: {icd10:[], terms:['Ozempic','Wegovy','Trulicity','Victoza','Saxenda','Mounjaro','Zepbound','GLP-1'], prompt:'Medication trial dates / intolerance / failure'},
-    lifestyle: {icd10:[], terms:['lifestyle program','nutrition counseling','dietitian','weight management program','exercise program','calorie restriction'], prompt:'Lifestyle program dates / documentation'}
-  },
-  contraindication: {
-    mtc_men2: {icd10:[], terms:['medullary thyroid carcinoma','MTC','MEN2','multiple endocrine neoplasia'], prompt:'Safety documentation / absence documented'},
-    pancreatitis: {icd10:['K85.90','K86.1'], terms:['pancreatitis','history of pancreatitis'], prompt:'Safety documentation'},
-    renal_severe: {icd10:['N18.4','N18.5','N18.6'], terms:['severe renal impairment','eGFR','ESRD','dialysis'], prompt:'Renal status documentation'}
-  },
-  lab: {
-    a1c: {icd10:[], terms:['HbA1c','A1c','hemoglobin A1c','glycohemoglobin'], prompt:'Most recent HbA1c value and date'},
-    bmi: {icd10:['Z68.27','Z68.28','Z68.29','Z68.30','Z68.31','Z68.32','Z68.33','Z68.34','Z68.35','Z68.36','Z68.37','Z68.38','Z68.39','Z68.41','Z68.42','Z68.43','Z68.44','Z68.45'], terms:['BMI','body mass index','height','weight'], prompt:'BMI value and date'},
-    egfr: {icd10:[], terms:['eGFR','estimated GFR','creatinine','renal function'], prompt:'eGFR value and date'},
-    ldl: {icd10:[], terms:['LDL','LDL-C','lipid panel','cholesterol'], prompt:'LDL-C value and date'}
-  }
-};
-function hintForLeaf(leaf){
-  if(!leaf || !leaf.type) return {icd10:[],terms:[],prompt:'Value / date / chart evidence'};
-  if(leaf.type==='lab') return SEARCH_HINTS.lab[leaf.key] || {icd10:[],terms:[leaf.key],prompt:'Value and date'};
-  return (SEARCH_HINTS[leaf.type] && SEARCH_HINTS[leaf.type][leaf.needs]) || {icd10:[],terms:[leaf.needs || leaf.label || leaf.type],prompt:'Chart evidence'};
-}
-function leafCriterionId(leaf){
-  if(leaf.type==='lab') return sanitizeId(`lab_${leaf.key}_${leaf.op}_${leaf.value}`);
-  if(leaf.type==='contraindication' && leaf.absent) return sanitizeId(`no_${leaf.needs}`);
-  return sanitizeId(`${leaf.type}_${leaf.needs || leaf.label}`);
-}
-function leafTarget(leaf, raw){
-  if(leaf.type==='lab'){
-    const lab = raw.vocab?.labs?.[leaf.key];
-    return `${lab?.label || leaf.key} ${opSymbol(leaf.op)} ${leaf.value}${lab?.unit ? ' '+lab.unit : ''}`;
-  }
-  if(leaf.type==='contraindication' && leaf.absent) return 'Documented absent / screened negative';
-  if(leaf.type==='prior_therapy') return 'Prior trial/failure/intolerance documented';
-  if(leaf.type==='diagnosis') return 'Diagnosis documented';
-  return 'Documented in chart';
-}
-function registerCriterion(leaf, raw, lib){
-  const id = leafCriterionId(leaf);
-  if(!lib[id]){
-    const h = hintForLeaf(leaf);
-    lib[id] = {
-      label: leaf.label || id,
-      target_value: leafTarget(leaf, raw),
-      icd10_codes: h.icd10 || [],
-      epic_terms: h.terms || [],
-      value_prompt: h.prompt || 'Value / date / chart evidence',
-      legacy_source: {type:leaf.type || '', needs:leaf.needs || '', key:leaf.key || '', op:leaf.op || '', value:leaf.value ?? null}
-    };
-  }
-  return id;
-}
-function convertClause(clause, raw, lib, mode){
-  if(!clause) return null;
-  if(Array.isArray(clause)){
-    const parts = clause.map(c=>convertClause(c,raw,lib,mode)).filter(Boolean);
-    return parts.length ? {all_of: parts} : null;
-  }
-  if(clause.any_of){
-    const parts = clause.any_of.map(c=>convertClause(c,raw,lib,mode)).filter(Boolean);
-    return parts.length ? {any_of: parts} : null;
-  }
-  if(clause.all_of){
-    const parts = clause.all_of.map(c=>convertClause(c,raw,lib,mode)).filter(Boolean);
-    return parts.length ? {all_of: parts} : null;
-  }
-  const isPrior = clause.type === 'prior_therapy';
-  if(mode==='prior' && !isPrior) return null;
-  if(mode==='criteria' && isPrior) return null;
-  return registerCriterion(clause, raw, lib);
-}
-function hasLeafType(clause, type){
-  if(!clause) return false;
-  if(Array.isArray(clause)) return clause.some(c=>hasLeafType(c,type));
-  if(clause.type===type) return true;
-  return (clause.any_of||[]).some(c=>hasLeafType(c,type)) || (clause.all_of||[]).some(c=>hasLeafType(c,type));
-}
-function cleanLogic(logic){
-  if(!logic) return {};
-  if(typeof logic==='string') return logic;
-  if(Array.isArray(logic)){
-    const parts=logic.map(cleanLogic).filter(x=>x && !(typeof x==='object' && !Object.keys(x).length));
-    return parts.length ? {all_of:parts} : {};
-  }
-  if(logic.all_of){
-    const parts=logic.all_of.map(cleanLogic).filter(x=>x && !(typeof x==='object' && !Object.keys(x).length));
-    return parts.length ? {all_of:parts} : {};
-  }
-  if(logic.any_of){
-    const parts=logic.any_of.map(cleanLogic).filter(x=>x && !(typeof x==='object' && !Object.keys(x).length));
-    return parts.length ? {any_of:parts} : {};
-  }
-  return logic;
-}
-function pathwayStatus(policy, hasPrior){
-  if(policy.formulary_status==='not_covered') return 'not_covered';
-  if(policy.formulary_status==='covered' && !policy.pa_required){
-    return (policy.criteria||[]).length ? 'covered_with_conditions_no_authorization' : 'covered_no_prior_authorization';
-  }
-  if(policy.formulary_status==='step_therapy' || hasPrior) return 'covered_with_authorization_and_prior_trials';
-  return 'covered_with_authorization';
-}
-function convertLegacyAuthPrepSchema(raw){
-  const lib = {};
-  const status_definitions = {
-    covered_no_prior_authorization:{label:'Covered — no authorization listed',short_label:'Covered',color:'green'},
-    covered_with_conditions_no_authorization:{label:'Covered if criteria documented — no authorization listed',short_label:'Covered with criteria',color:'green'},
-    covered_with_authorization:{label:'Covered with authorization',short_label:'Covered with authorization',color:'yellow'},
-    covered_with_authorization_and_prior_trials:{label:'Covered with authorization + prior trial/step',short_label:'Authorization + prior trial',color:'orange'},
-    not_covered:{label:'Not covered',short_label:'Not covered',color:'red'}
-  };
-  const glpDrugIds = new Set(raw.drugs.filter(d => /glp|semaglutide|dulaglutide|liraglutide|tirzepatide|exenatide|ozempic|wegovy|rybelsus|mounjaro|zepbound|trulicity|victoza|saxenda|byetta|bydureon/i.test(`${d.class||''} ${d.generic||''} ${d.name||''}`)).map(d=>d.id));
-  const drugById = Object.fromEntries(raw.drugs.map(d=>[d.id,d]));
-  const payers = raw.payers.map(p=>({id:p.id, name:p.name, plan_types:(p.lines||[]).map(l=>({id:l,name: l==='ma'?'Medicare Advantage': l.charAt(0).toUpperCase()+l.slice(1)}))}));
-  const grouped = new Map();
-  (raw.policies||[]).filter(p=>glpDrugIds.has(p.drug_id)).forEach(p=>{
-    const key=`${p.payer_id}||${p.line_of_business}`;
-    if(!grouped.has(key)) grouped.set(key, {payer_id:p.payer_id, plan_type_id:p.line_of_business, policy_name:'Legacy Auth Prep GLP coverage map', verification_status:raw._meta?.data_status || 'legacy_schema_converted', source_name:'Converted from legacy coverage.json', source_url:'https://dormantone.github.io/payloadprompt/coverage.json', effective_date:'', retrieved_date:raw._meta?.last_reviewed || '', notes_on_limits:'Converted client-side from older Auth Prep JSON schema. Use the newer pathway JSON schema for deep research.', agents:[]});
-    const dest = grouped.get(key);
-    const d=drugById[p.drug_id] || {name:p.drug_id,generic:'',class:''};
-    let agent = dest.agents.find(a=>a.drug===d.name);
-    if(!agent){ agent={drug:d.name, ingredient:d.generic || '', class:d.class || '', notes:'', pathways:[]}; dest.agents.push(agent); }
-    const hasPrior = (p.criteria||[]).some(c=>hasLeafType(c,'prior_therapy')) || p.formulary_status==='step_therapy';
-    const criteriaParts = (p.criteria||[]).map(c=>convertClause(c, raw, lib, 'criteria')).filter(Boolean);
-    const priorParts = (p.criteria||[]).map(c=>convertClause(c, raw, lib, 'prior')).filter(Boolean);
-    const criteriaLogic = cleanLogic(criteriaParts.length ? {all_of:criteriaParts} : {});
-    const priorLogic = cleanLogic(priorParts.length ? {all_of:priorParts} : {});
-    const ids = [];
-    function collect(x){ if(!x) return; if(typeof x==='string') ids.push(x); else if(Array.isArray(x)) x.forEach(collect); else { (x.all_of||[]).forEach(collect); (x.any_of||[]).forEach(collect); } }
-    collect(criteriaLogic); collect(priorLogic);
-    const targetSummary = ids.length ? [...new Set(ids)].map(id=>`${lib[id].label}${lib[id].target_value?` (${lib[id].target_value})`:''}`).join('; ') : 'No formal criteria listed in legacy JSON.';
-    agent.pathways.push({
-      id: sanitizeId(`${d.name}_${p.payer_id}_${p.line_of_business}_${p.formulary_status}`),
-      indication: (d.indications||[]).join(' / ') || 'Indication not specified',
-      status: pathwayStatus(p, hasPrior),
-      criteria: criteriaLogic,
-      prior_trials: priorLogic,
-      target_values_summary: targetSummary,
-      notes: [p.quantity_limit?`Quantity limit: ${p.quantity_limit}`:'', p.appeal_notes||'', p.source?.name?`Source: ${p.source.name}`:''].filter(Boolean).join(' · '),
-      source_refs: [],
-      evidence_tier:'legacy_converted'
-    });
-  });
-  return {
-    _instructions:'Client-side compatible conversion of legacy Auth Prep coverage.json. For deep research, prefer the native pathway schema: payer -> plan_type -> agents -> pathways -> criteria_library with target values, ICD-10 codes, Epic terms, and source URLs.',
-    schema_version:'2.0-compatible-from-legacy',
-    created:new Date().toISOString().slice(0,10),
-    verification_notice: raw._meta?.data_status || 'Legacy illustrative data converted; verify before use.',
-    status_definitions,
-    source_register:[],
-    criteria_library:lib,
-    payers,
-    policies:[...grouped.values()],
-    updated:new Date().toISOString().slice(0,10)
-  };
-}
-
 const payerSelect = $('#payerSelect'), planSelect = $('#planSelect');
 const checked = new Set();
 const criterionStatus = {}; // id -> yes/no/unsure
 const criterionValue = {};  // id -> free text value/evidence
-function statusDef(s){return DATA.status_definitions[s] || {label:s, short_label:s, color:'gray'};}
-function criterion(id){return DATA.criteria_library[id] || {label:id,target_value:'',icd10_codes:[],epic_terms:[]};}
+function statusDef(s){return (DATA.status_definitions && DATA.status_definitions[s]) || FALLBACK_STATUS_DEFINITIONS[s] || {label:s || 'Unknown / verify', short_label:s || 'Verify', color:'gray'};}
+function criterion(id){return (DATA.criteria_library && DATA.criteria_library[id]) || {label:id,target_value:'',value_prompt:'Value / date / evidence note',icd10_codes:[],epic_terms:[]};}
 function esc(s){return String(s ?? '').replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));}
 function uniq(a){return [...new Set(a.filter(Boolean))];}
 function walkLogic(logic){
@@ -332,7 +260,7 @@ function logicText(logic){
 function selectedPolicy(){ return DATA.policies.find(p => p.payer_id===payerSelect.value && p.plan_type_id===planSelect.value) || null; }
 function allPathways(policy){
   let out=[]; if(!policy) return out;
-  policy.agents.forEach((ag, ai)=>ag.pathways.forEach((pw, pi)=>out.push({agent:ag,pathway:pw,key:`${ai}:${pi}`})));
+  (policy.agents || []).forEach((ag, ai)=>(ag.pathways || []).forEach((pw, pi)=>out.push({agent:ag,pathway:pw,key:`${ai}:${pi}`})));
   return out;
 }
 function selectedPathways(){ const pol=selectedPolicy(); return allPathways(pol).filter(x => checked.has(x.key)); }
@@ -354,7 +282,7 @@ function populatePlans(){
   const payer = DATA.payers.find(p=>p.id===payerSelect.value) || DATA.payers[0];
   planSelect.innerHTML = (payer.plan_types||[]).map(pt=>`<option value="${esc(pt.id)}">${esc(pt.name)}</option>`).join('');
 }
-function renderLegend(){ $('#legend').innerHTML = Object.entries(DATA.status_definitions).map(([k,d])=>`<span class="badge ${esc(d.color)}">${esc(d.short_label)}</span>`).join(''); }
+function renderLegend(){ $('#legend').innerHTML = Object.entries(DATA.status_definitions || FALLBACK_STATUS_DEFINITIONS).map(([k,d])=>`<span class="badge ${esc(d.color || 'gray')}">${esc(d.short_label || d.label || k)}</span>`).join(''); }
 function render(){ renderPathways(); renderEpicBlocks(); renderCriteriaChecks(); renderSummary(); }
 function renderPathways(){
   const pol=selectedPolicy(); const box=$('#pathways');
@@ -461,11 +389,13 @@ function renderSummary(){
         lines.push('   Bottom line: DOES NOT CURRENTLY MEET listed pathway criteria. Not met: '+need.join('; ')+'.');
       } else if(anyUnsure){
         lines.push('   Bottom line: POSSIBLE PATHWAY if chart documentation confirms: '+need.join('; ')+'.');
-      } else if(pathway.status==='covered_no_prior_authorization' || pathway.status==='covered_with_conditions_no_authorization'){
-        lines.push('   Bottom line: Criteria checked YES. Appears covered/no authorization pathway if current payer data and member benefit are verified.');
+      } else if(pathway.status==='unknown_or_verify'){
+        lines.push('   Bottom line: COVERAGE UNKNOWN. Use this to ask the plan/PBM and prepare chart evidence if PA/step therapy is reported.');
+      } else if(pathway.status==='covered' || pathway.status==='covered_no_prior_authorization' || pathway.status==='covered_with_criteria' || pathway.status==='covered_with_conditions_no_authorization'){
+        lines.push('   Bottom line: Criteria checked YES. Appears to support the listed covered/criteria pathway if current payer data and member benefit are verified.');
       } else if(pathway.status==='covered_with_authorization'){
         lines.push('   Bottom line: Criteria checked YES. Appears to support authorization submission.');
-      } else if(pathway.status==='covered_with_authorization_and_prior_trials'){
+      } else if(pathway.status==='covered_with_authorization_and_prior_trial' || pathway.status==='covered_with_authorization_and_prior_trials'){
         lines.push('   Bottom line: Criteria and prior-trial items checked YES. Appears to support authorization submission with step/prior-trial documentation.');
       } else {
         lines.push('   Bottom line: Criteria checked YES for listed pathway; verify current payer requirements.');
