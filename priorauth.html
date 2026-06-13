@@ -1,787 +1,302 @@
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
-<meta name="theme-color" content="#f7f4ee" />
-<title>Auth Prep</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GLP-1 Coverage Criteria</title>
 <style>
 :root{
-  --bg:#f7f4ee; --paper:#fff; --paper-2:#f1ece2;
-  --ink:#15181f; --ink-soft:#474e5e; --muted:#8a8f9c;
-  --line:#e7e1d4; --line-strong:#d6cebc;
-  --accent:#4f46e5; --accent-soft:#e9e7fb; --accent-ink:#312e81;
-  --ok:#0f7a45; --ok-soft:#dcf5e6; --ok-border:#9be3b8;
-  --warn:#b45309; --warn-soft:#fbe8cc; --warn-border:#f3c98b;
-  --block:#c01345; --block-soft:#fbe1e8; --block-border:#f3b6c6;
-  --pnl:#14171f; --pnl-2:#1b202b; --pnl-text:#eceae1; --pnl-muted:#9aa0ad;
-  --pnl-line:rgba(255,255,255,.09); --pnl-accent:#a5b4fc;
-  --d-ok:#34d399; --d-warn:#fbbf24; --d-block:#fb7185;
-  --display:"Iowan Old Style",Georgia,serif;
-  --body:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
-  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
-  --r-sm:10px; --r:14px; --r-lg:22px;
-  --shadow-sm:0 1px 2px rgba(21,24,31,.04);
-  --shadow:0 6px 24px rgba(21,24,31,.07);
-  --shadow-lg:0 18px 50px rgba(21,24,31,.16);
+  --bg:#f6f8fb; --panel:#ffffff; --ink:#111827; --muted:#5b6473; --line:#d9e1ec;
+  --blue:#1d4ed8; --blue-soft:#eaf1ff; --green:#0b6b3a; --green-soft:#e7f7ef;
+  --yellow:#7a5a00; --yellow-soft:#fff6d6; --orange:#9a3f00; --orange-soft:#fff0e2;
+  --red:#8a1c1c; --red-soft:#fde8e8; --gray:#4b5563; --gray-soft:#eef1f5;
+  --shadow:0 10px 30px rgba(15,23,42,.08); --radius:18px;
 }
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0}
-body{ font-family:var(--body); background:var(--bg); color:var(--ink); font-size:16px; line-height:1.45; min-height:100vh; padding-bottom:env(safe-area-inset-bottom); -webkit-font-smoothing:antialiased; }
-:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:6px; }
-.sticky-top{ position:sticky; top:0; z-index:30; background:rgba(247,244,238,.93); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border-bottom:1px solid var(--line); }
-header.app{ padding:max(env(safe-area-inset-top),10px) 18px 8px; }
-.brand{ display:flex; align-items:center; justify-content:space-between; gap:10px; max-width:860px; margin:0 auto; }
-.brand-id h1{ margin:0; font-family:var(--display); font-weight:500; font-size:1.32rem; letter-spacing:-.015em; }
-.brand-id h1 em{ font-style:italic; color:var(--accent); }
-.brand-id .tag{ font-size:.74rem; color:var(--muted); font-weight:500; margin-top:1px; }
-.brand-actions{ display:flex; gap:8px; }
-.icon-btn{ background:var(--paper); border:1px solid var(--line); border-radius:999px; height:36px; padding:0 14px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; color:var(--ink-soft); font-family:var(--body); font-size:.82rem; font-weight:600; }
-.icon-btn:hover{ border-color:var(--accent); color:var(--accent); }
-.disclaimer{ max-width:860px; margin:8px auto 0; padding:10px 12px; background:var(--block-soft); border:1px solid var(--block-border); color:#7a0e2f; border-radius:var(--r); font-size:.84rem; line-height:1.4; display:none; }
-.disclaimer.show{ display:block; }
-.disclaimer b{ color:#7a0e2f; }
-.databar{ max-width:860px; margin:8px auto 0; padding:7px 12px; background:var(--warn-soft); border:1px solid var(--warn-border); color:#7a3d06; border-radius:999px; font-size:.76rem; font-weight:600; text-align:center; }
-.top-cta{ padding:8px 18px 12px; }
-.top-cta-inner{ max-width:860px; margin:0 auto; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
-.cta-status{ flex:1 1 230px; min-width:0; }
-.cta-line{ font-size:.86rem; font-weight:600; color:var(--ink-soft); }
-.cta-line .v{ font-family:var(--mono); font-size:.78rem; }
-.verdict-chip{ display:inline-flex; align-items:center; gap:6px; font-size:.78rem; font-weight:700; border-radius:999px; padding:3px 11px; border:1px solid; margin-bottom:4px; }
-.verdict-chip::before{ content:''; width:7px; height:7px; border-radius:999px; background:currentColor; }
-.verdict-chip.ok{ background:var(--ok-soft); border-color:var(--ok-border); color:#0c5a32; }
-.verdict-chip.warn{ background:var(--warn-soft); border-color:var(--warn-border); color:#7a3d06; }
-.verdict-chip.block{ background:var(--block-soft); border-color:var(--block-border); color:#7a0e2f; }
-.verdict-chip.none{ background:var(--paper-2); border-color:var(--line-strong); color:var(--muted); }
-.cta-btn{ flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:var(--body); font-weight:700; font-size:.95rem; border:none; border-radius:var(--r); padding:12px 18px; min-height:48px; cursor:pointer; background:var(--accent); color:#fff; box-shadow:0 8px 22px rgba(79,70,229,.26); transition:transform .08s,filter .15s; }
-.cta-btn:hover{ filter:brightness(1.07); }
-.cta-btn:active{ transform:scale(.98); }
-.cta-btn.locked{ background:var(--line-strong); box-shadow:none; cursor:not-allowed; }
-@media(max-width:540px){ .cta-btn{ width:100%; } }
-main{ max-width:860px; margin:0 auto; padding:14px 18px 60px; }
-.panel{ background:var(--paper); border:1.5px solid var(--line); border-radius:var(--r-lg); padding:18px; margin-bottom:13px; box-shadow:var(--shadow-sm); }
-.panel-head{ display:flex; align-items:center; gap:11px; margin-bottom:15px; }
-.idx{ font-family:var(--mono); font-size:.72rem; font-weight:600; color:var(--accent); background:var(--accent-soft); border-radius:7px; padding:3px 7px; flex-shrink:0; }
-.panel-title{ font-family:var(--display); font-weight:500; font-size:1.08rem; letter-spacing:-.01em; }
-.panel-req{ font-size:.64rem; font-weight:700; color:var(--accent-ink); background:var(--accent-soft); padding:2px 8px; border-radius:999px; margin-left:auto; text-transform:uppercase; letter-spacing:.06em; }
-.panel-note{ font-size:.78rem; color:var(--muted); margin:-8px 0 14px; line-height:1.4; }
-.field{ margin-bottom:12px; } .field:last-child{ margin-bottom:0; }
-.field label{ display:block; font-size:.82rem; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
-.input,.select{ width:100%; font-family:var(--body); font-size:1rem; font-weight:500; color:var(--ink); background:var(--paper-2); border:1px solid var(--line); border-radius:var(--r); padding:12px 14px; outline:none; appearance:none; -webkit-appearance:none; min-height:48px; transition:border-color .15s,background .15s,box-shadow .15s; }
-.input:focus,.select:focus{ border-color:var(--accent); background:var(--paper); box-shadow:0 0 0 4px rgba(79,70,229,.1); }
-.input::placeholder{ color:var(--muted); font-weight:400; }
-input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-input[type=number]{ -moz-appearance:textfield; appearance:textfield; }
-.select{ background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23474e5e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:38px; }
-.row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.chip-group{ margin-bottom:16px; } .chip-group:last-child{ margin-bottom:0; }
-.grp-head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.grp-label{ font-size:.82rem; font-weight:600; color:var(--ink-soft); }
-.need-badge{ display:none; font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:#fff; background:var(--block); border-radius:999px; padding:2px 8px; }
-.need-badge.on{ display:inline-block; animation:needpulse 1.8s ease-in-out infinite; }
-.chips{ display:flex; flex-wrap:wrap; gap:8px; }
-.chip{ display:inline-flex; align-items:center; gap:8px; background:var(--paper-2); border:1px solid var(--line); border-radius:999px; padding:8px 14px; cursor:pointer; font-size:.86rem; font-weight:500; color:var(--ink-soft); min-height:40px; user-select:none; transition:all .12s; }
-.chip input{ appearance:none; -webkit-appearance:none; width:16px; height:16px; border:1.5px solid var(--line-strong); border-radius:5px; background:var(--paper); position:relative; cursor:pointer; margin:0; }
-.chip input:checked{ background:var(--accent); border-color:var(--accent); }
-.chip input:checked::after{ content:''; position:absolute; left:4px; top:1px; width:5px; height:9px; border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg); }
-.chip:has(input:checked){ background:var(--accent-soft); border-color:var(--accent); color:var(--accent-ink); }
-.chip.none-chip:has(input:checked){ background:var(--paper-2); border-color:var(--line-strong); color:var(--ink-soft); }
-.chip.needed{ border-color:var(--block); box-shadow:0 0 0 3px var(--block-soft); animation:needpulse 1.8s ease-in-out infinite; }
-.lab-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-@media(max-width:520px){ .lab-grid{ grid-template-columns:1fr 1fr; } }
-.lab-cell label{ font-size:.74rem; color:var(--muted); margin:0 0 4px; font-weight:500; display:block; }
-.lab-cell.needed .lab-input{ border-color:var(--block); box-shadow:0 0 0 3px var(--block-soft); }
-.facts-empty{ text-align:center; padding:18px; color:var(--muted); font-family:var(--display); font-style:italic; }
-.verdict-panel{ position:relative; overflow:hidden; border:none; border-radius:var(--r-lg); padding:0; margin-bottom:13px; background:radial-gradient(120% 120% at 0% 0%, #1c2230 0%, #14171f 55%, #101319 100%); box-shadow:var(--shadow); }
-.vp-top{ height:4px; width:100%; background:linear-gradient(90deg,var(--pnl-accent),transparent); opacity:.7; }
-.vp-inner{ padding:18px; color:var(--pnl-text); }
-.vp-empty{ text-align:center; padding:34px 16px; color:var(--pnl-muted); font-family:var(--display); font-style:italic; }
-.vp-eyebrow{ font-family:var(--mono); font-size:.66rem; letter-spacing:.22em; text-transform:uppercase; color:var(--pnl-muted); margin-bottom:8px; }
-.vp-status{ display:flex; align-items:flex-start; gap:14px; }
-.vp-dot{ width:14px; height:14px; border-radius:999px; margin-top:9px; flex-shrink:0; box-shadow:0 0 0 5px rgba(255,255,255,.05); }
-.vp-status.ok .vp-dot{ background:var(--d-ok); box-shadow:0 0 16px var(--d-ok),0 0 0 5px rgba(52,211,153,.12); }
-.vp-status.warn .vp-dot{ background:var(--d-warn); box-shadow:0 0 16px var(--d-warn),0 0 0 5px rgba(251,191,36,.12); }
-.vp-status.block .vp-dot{ background:var(--d-block); box-shadow:0 0 16px var(--d-block),0 0 0 5px rgba(251,113,133,.12); }
-.vp-big{ font-family:var(--display); font-weight:500; font-size:1.7rem; line-height:1.05; letter-spacing:-.01em; }
-.vp-status.ok .vp-big{ color:var(--d-ok); } .vp-status.warn .vp-big{ color:var(--d-warn); } .vp-status.block .vp-big{ color:var(--d-block); }
-.vp-sub{ font-size:.86rem; color:var(--pnl-muted); margin-top:4px; line-height:1.4; }
-.vp-pills{ display:flex; flex-wrap:wrap; gap:7px; margin:14px 0; }
-.vp-pill{ font-size:.74rem; font-weight:600; color:var(--pnl-text); background:rgba(255,255,255,.06); border:1px solid var(--pnl-line); border-radius:999px; padding:4px 11px; }
-.vp-pill b{ color:#fff; }
-.vp-pill.fresh-ok{ color:var(--d-ok); } .vp-pill.fresh-warn{ color:var(--d-warn); } .vp-pill.fresh-bad{ color:var(--d-block); }
-.vp-crit-head{ font-family:var(--mono); font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--pnl-muted); margin:16px 0 8px; }
-.vp-crit{ display:flex; align-items:flex-start; gap:11px; padding:11px 13px; border-radius:var(--r); border:1px solid var(--pnl-line); background:rgba(255,255,255,.03); margin-bottom:7px; opacity:0; transform:translateY(6px); animation:rise .4s ease forwards; }
-.vp-crit:last-child{ margin-bottom:0; }
-.vp-cmark{ width:21px; height:21px; border-radius:999px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.74rem; font-weight:800; margin-top:1px; color:#14171f; }
-.vp-crit.met .vp-cmark{ background:var(--d-ok); } .vp-crit.unknown .vp-cmark{ background:var(--d-warn); } .vp-crit.unmet .vp-cmark{ background:var(--d-block); }
-.vp-crit.met{ border-color:rgba(52,211,153,.35); } .vp-crit.unmet{ border-color:rgba(251,113,133,.4); }
-.vp-clabel{ font-size:.9rem; font-weight:500; color:var(--pnl-text); }
-.vp-cstat{ font-size:.74rem; margin-top:2px; }
-.vp-crit.met .vp-cstat{ color:var(--d-ok); } .vp-crit.unknown .vp-cstat{ color:var(--d-warn); } .vp-crit.unmet .vp-cstat{ color:var(--d-block); }
-.vp-verdict{ margin-top:14px; padding:13px 14px; border-radius:var(--r); font-size:.89rem; font-weight:500; line-height:1.45; color:var(--pnl-text); background:rgba(255,255,255,.05); border:1px solid var(--pnl-line); }
-.vp-foot{ margin-top:16px; padding-top:15px; border-top:1px solid var(--pnl-line); }
-.vp-foot-h{ font-family:var(--mono); font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--pnl-muted); margin-bottom:8px; }
-.alt-pill{ display:inline-block; font-size:.78rem; font-weight:600; color:#dfe0ff; background:rgba(129,140,248,.16); border:1px solid rgba(129,140,248,.35); border-radius:999px; padding:5px 12px; margin:0 6px 6px 0; }
-.class-line{ font-size:.78rem; color:var(--pnl-muted); margin-top:8px; line-height:1.5; }
-.class-line .mem{ color:#cfd2da; } .class-line .mem.sel{ color:#fff; font-weight:600; }
-.vp-src{ font-family:var(--mono); font-size:.7rem; color:var(--pnl-muted); margin-top:12px; word-break:break-word; }
-.prompt-box{ font-family:var(--mono); font-size:.8rem; line-height:1.55; background:var(--paper-2); border:1px solid var(--line); border-radius:var(--r); padding:14px; max-height:340px; overflow:auto; white-space:pre-wrap; color:var(--ink-soft); margin:0; }
-.btn{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; font-family:var(--body); font-weight:700; font-size:.92rem; border-radius:var(--r); border:none; padding:12px 16px; cursor:pointer; min-height:48px; transition:transform .08s,filter .15s; }
-.btn:active{ transform:scale(.98); }
-.btn-secondary{ background:var(--paper); border:1px solid var(--line-strong); color:var(--ink); }
-.btn-accent{ background:var(--accent); color:#fff; } .btn-accent:hover{ filter:brightness(1.07); }
-.btn-row{ display:flex; gap:8px; margin-top:10px; }
-.epic-head{ display:flex; align-items:center; gap:11px; margin-bottom:14px; }
-.console{ background:#11141b; border:1px solid #262c38; border-radius:var(--r); padding:13px; }
-.console-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-.console-row:last-child{ margin-bottom:0; }
-.console-q{ flex:1; min-width:0; font-family:var(--mono); font-size:.82rem; color:#cde9ff; background:#0c0f15; border:1px solid #232a36; border-radius:9px; padding:10px 12px; overflow-x:auto; white-space:nowrap; }
-.console-q .pfx{ color:#5b8fb0; user-select:none; }
-.copybtn{ flex:0 0 auto; background:rgba(129,140,248,.16); border:1px solid rgba(129,140,248,.4); color:#cdd1ff; font-family:var(--body); font-weight:700; font-size:.76rem; border-radius:9px; padding:9px 12px; cursor:pointer; }
-.copybtn:hover{ background:rgba(129,140,248,.28); }
-.console-label{ font-family:var(--mono); font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:#6b7280; margin:14px 0 8px; }
-.console-label:first-child{ margin-top:0; }
-.term-chips{ display:flex; flex-wrap:wrap; gap:7px; }
-.term-chip{ font-family:var(--mono); font-size:.76rem; color:#cde9ff; background:#0c0f15; border:1px solid #232a36; border-radius:999px; padding:6px 12px; cursor:pointer; }
-.term-chip:hover{ border-color:#3a82a8; color:#fff; }
-.meta-strip{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:.74rem; color:var(--muted); font-family:var(--mono); margin-top:14px; padding:8px 12px; background:var(--paper); border:1px solid var(--line); border-radius:var(--r-sm); }
-.meta-strip .dot{ display:inline-block; width:6px; height:6px; background:var(--warn); border-radius:999px; margin-right:6px; }
-.toast{ position:fixed; bottom:calc(20px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--bg); padding:12px 20px; border-radius:999px; font-size:.88rem; font-weight:600; opacity:0; transition:opacity .2s,transform .2s; z-index:50; pointer-events:none; box-shadow:var(--shadow-lg); max-width:90vw; text-align:center; }
-.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-.toast.warn{ background:var(--block); }
-@keyframes needpulse{ 0%,100%{ box-shadow:0 0 0 3px var(--block-soft); } 50%{ box-shadow:0 0 0 5px rgba(192,19,69,.22); } }
-@keyframes rise{ to{ opacity:1; transform:none; } }
-@media(min-width:600px){ .brand-id h1{ font-size:1.45rem; } .vp-big{ font-size:1.95rem; } }
-@media(prefers-reduced-motion:reduce){ *{ animation:none !important; transition:none !important; } .vp-crit{ opacity:1; transform:none; } }
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#eef4ff 0,#f6f8fb 240px);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;line-height:1.4}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 18px 64px}
+.hero{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.title h1{margin:0;font-size:clamp(28px,4vw,44px);letter-spacing:-.04em}
+.title p{margin:.45rem 0 0;color:var(--muted);max-width:860px}
+.notice{border:1px solid #b7c7e6;background:#f8fbff;color:#23416f;border-radius:14px;padding:10px 12px;font-size:13px;max-width:380px}
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:13px;font-weight:700;color:#2b3442;margin:0 0 6px}
+select,input,textarea{width:100%;border:1px solid #cfd8e6;border-radius:12px;padding:10px 11px;font:inherit;background:#fff;color:var(--ink)}
+textarea{min-height:118px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+.policy-head{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.policy-title{font-weight:800}.small{font-size:12.5px;color:var(--muted)}
+.status-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.agent{border:1px solid var(--line);border-radius:16px;margin:12px 0;padding:12px;background:#fbfcff}
+.agent h3{margin:0 0 8px;font-size:17px}.agent-sub{font-size:12.5px;color:var(--muted);margin-top:-4px;margin-bottom:8px}
+.pathway{display:grid;grid-template-columns:auto 1fr;gap:10px;border-top:1px solid #edf1f6;padding:11px 0}.pathway:first-of-type{border-top:0}
+.pathway input[type="checkbox"]{width:19px;height:19px;margin-top:3px}.path-main{min-width:0}
+.path-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0}.indication{font-weight:750;min-width:0}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-height:26px;max-width:100%;padding:5px 9px;border-radius:999px;border:1px solid transparent;font-size:12px;font-weight:800;line-height:1.2;white-space:normal;overflow-wrap:anywhere;text-align:center;flex:0 1 auto}
+.badge.green{background:var(--green-soft);color:var(--green);border-color:#bfe7d2}.badge.yellow{background:var(--yellow-soft);color:var(--yellow);border-color:#f1dd8c}.badge.orange{background:var(--orange-soft);color:var(--orange);border-color:#ffcfa3}.badge.red{background:var(--red-soft);color:var(--red);border-color:#f4b5b5}.badge.gray{background:var(--gray-soft);color:var(--gray);border-color:#cfd5dd}
+.criteria{margin-top:7px;display:flex;flex-wrap:wrap;gap:6px;min-width:0}.criterion-chip{max-width:100%;border:1px solid #d7e0ec;background:#fff;border-radius:999px;padding:4px 8px;font-size:12px;color:#334155;white-space:normal;overflow-wrap:anywhere}.criterion-chip.prior{background:#fff7ed;border-color:#fed7aa;color:#8a3c00}
+.target{margin-top:6px;font-size:12.5px;color:#374151}.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.criteria-checks{display:grid;gap:10px}.check-card{border:1px solid #dae3ef;border-radius:14px;background:#fbfdff;padding:10px}.check-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.check-title{font-weight:800}.target-line{font-size:12.5px;color:#374151;margin:4px 0 8px}.radio-row{display:flex;gap:7px;flex-wrap:wrap}.radio-pill{display:inline-flex;align-items:center;gap:5px;border:1px solid #cfd8e6;border-radius:999px;padding:5px 8px;font-size:12px;font-weight:750;background:#fff}.radio-pill input{width:14px;height:14px;padding:0}
+.button-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn{border:1px solid #c7d2e2;background:#fff;border-radius:12px;padding:9px 12px;font-weight:750;cursor:pointer}.btn.primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8}.btn:hover{filter:brightness(.98)}
+.summary{border:1px solid #cbd5e1;background:#f8fafc;border-radius:14px;padding:12px;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;min-height:120px}.empty{color:var(--muted);padding:18px;text-align:center;border:1px dashed #cbd5e1;border-radius:14px;background:#f8fafc}.footer-note{font-size:12px;color:var(--muted);margin-top:18px}
+@media(max-width:760px){.controls,.split{grid-template-columns:1fr}.hero{display:block}.notice{max-width:100%;margin-top:12px}.path-top{display:block}.path-top .badge{margin-top:6px}}
 </style>
 </head>
 <body>
-<div class="sticky-top">
-  <header class="app">
-    <div class="brand">
-      <div class="brand-id">
-        <h1>Auth <em>Prep</em></h1>
-        <div class="tag">PA readiness &mdash; what does the payer seem to require?</div>
-      </div>
-      <div class="brand-actions">
-        <button class="icon-btn" id="clear-btn">Clear</button>
-        <button class="icon-btn" id="info-btn" aria-label="About">&#9432;</button>
-      </div>
+<div class="wrap">
+  <div class="hero">
+    <div class="title">
+      <h1>GLP-1 Coverage Criteria</h1>
+      <p>Insurance + plan → covered pathways, target criteria, Epic keyword/ICD-10 search blocks, and a yes/no/unsure criteria summary.</p>
     </div>
-    <div class="disclaimer" id="disclaimer">
-      <b>Not a coverage determination and not medical advice.</b> Prepares a request and a verification prompt to confirm against the member's actual plan and discuss with a clinician. Coverage is plan-specific and changes constantly. The loaded policy data is <b>illustrative</b> &mdash; replace it with deep-researched, sourced, dated payer policy before any real use.
-    </div>
-    <div class="databar" id="databar">Loading data&hellip;</div>
-  </header>
-  <div class="top-cta">
-    <div class="top-cta-inner">
-      <div class="cta-status">
-        <div id="cta_chip"></div>
-        <div class="cta-line" id="cta_line">Loading policy data&hellip;</div>
-      </div>
-      <button class="cta-btn locked" id="cta_main">Start in CoverMyMeds &rarr;</button>
-    </div>
+    <div class="notice"><strong>Clinical operations note:</strong> This frames policy pathways only. Verify exact member benefit, current formulary, and payer source before submission.</div>
   </div>
+
+  <div class="panel">
+    <div class="controls">
+      <div><label for="payerSelect">Insurance</label><select id="payerSelect"></select></div>
+      <div><label for="planSelect">Plan type</label><select id="planSelect"></select></div>
+    </div>
+    <div class="status-legend" id="legend"></div>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="policy-head"><div><div class="policy-title" id="policyTitle">Coverage pathways</div><div class="small" id="policyMeta"></div></div><button class="btn" id="clearChecks">Clear selected pathways</button></div>
+      <div id="pathways"></div>
+    </section>
+
+    <section class="panel">
+      <h2 style="margin:0 0 8px;font-size:20px">Paste into Epic</h2>
+      <div class="small">Generated only from checked pathway criteria. Search blocks are separated so ICD-10 codes do not pollute keyword search.</div>
+      <div class="split" style="margin-top:12px">
+        <div>
+          <h3 style="margin:0 0 8px;font-size:16px">Keywords / evidence terms</h3>
+          <textarea id="keywordBlock" readonly></textarea>
+          <div class="button-row"><button class="btn primary" data-copy="keywordBlock">Copy keywords</button></div>
+        </div>
+        <div>
+          <h3 style="margin:0 0 8px;font-size:16px">ICD-10 codes</h3>
+          <textarea id="icdBlock" readonly></textarea>
+          <div class="button-row"><button class="btn primary" data-copy="icdBlock">Copy ICD-10</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2 style="margin:0 0 8px;font-size:20px">Criteria check</h2>
+      <div class="small">Default is unsure. Mark yes only when evidence meets the target; mark no when it is known not to meet the target.</div>
+      <div id="criteriaChecks" class="criteria-checks" style="margin-top:12px"></div>
+    </section>
+
+    <section class="panel">
+      <h2 style="margin:0 0 8px;font-size:20px">Coverage summary</h2>
+      <div class="small">Simple status statement from selected pathways and checked criteria.</div>
+      <div id="summary" class="summary" style="margin-top:12px"></div>
+      <div class="button-row"><button class="btn primary" data-copy="summary">Copy summary</button></div>
+    </section>
+  </div>
+
+  <div class="footer-note">JSON schema includes deep-research instructions. Demonstration rows are not payer determinations.</div>
 </div>
-<main id="main">
-  <div class="panel">
-    <div class="panel-head"><span class="idx">01</span><div class="panel-title">The request</div><span class="panel-req">Required</span></div>
-    <div class="field"><label>Drug requested</label><select class="select" id="f_drug"><option value="">Choose a drug&hellip;</option></select></div>
-    <div class="row">
-      <div class="field"><label>Payer</label><select class="select" id="f_payer"><option value="">Choose&hellip;</option></select></div>
-      <div class="field"><label>Plan type</label><select class="select" id="f_lob">
-        <option value="commercial">Commercial</option>
-        <option value="ma">Medicare Advantage</option>
-        <option value="medicaid">Medicaid</option>
-      </select></div>
-    </div>
-  </div>
-  <div class="panel">
-    <div class="panel-head"><span class="idx">02</span><div class="panel-title">Clinical facts</div></div>
-    <div class="panel-note">These change to match what the selected drug's policy actually requires. Anything required but missing turns <b style="color:var(--block)">red</b> &mdash; that's your gap list. "Documented absent" and "not checked / unknown" are deliberately separate.</div>
-    <div id="facts_body"><div class="facts-empty">Pick a drug to see the facts this request needs.</div></div>
-  </div>
-  <div class="verdict-panel"><div class="vp-top"></div><div class="vp-inner" id="verdict_body">
-    <div class="vp-empty">Pick a drug, payer, and plan type to see PA readiness.</div>
-  </div></div>
-  <div class="panel" id="patient_section" style="display:none">
-    <div class="panel-head"><span class="idx">03</span><div class="panel-title">Message for the patient</div></div>
-    <div class="panel-note">Plain-language, no jargon, no promises it can't keep. Review before sending.</div>
-    <pre class="prompt-box" id="patient_box"></pre>
-    <button class="btn btn-secondary" id="copy_patient" style="margin-top:10px">Copy patient message</button>
-  </div>
-  <div class="panel" id="epic_section" style="display:none">
-    <div class="epic-head"><span class="idx">04</span><div class="panel-title">Epic chart search</div></div>
-    <div class="panel-note">Drop these into Chart Search to pull the documentation this PA needs. Starting points &mdash; tune to your build.</div>
-    <div id="epic_body"></div>
-  </div>
-  <div class="panel" id="letter_section" style="display:none">
-    <div class="panel-head"><span class="idx">05</span><div class="panel-title">Prescriber justification</div></div>
-    <div class="panel-note">Built only from facts you entered. Gaps are flagged, not filled &mdash; never assert anything that is not in the record.</div>
-    <pre class="prompt-box" id="letter_box"></pre>
-    <button class="btn btn-secondary" id="copy_letter" style="margin-top:10px">Copy justification</button>
-  </div>
-
-  <div class="panel" id="packet_section" style="display:none">
-    <div class="panel-head"><span class="idx">06</span><div class="panel-title">PA packet / denial-prevention checklist</div></div>
-    <div class="panel-note">Operational next steps: what to attach, what to confirm, and what could drive a denial.</div>
-    <pre class="prompt-box" id="packet_box"></pre>
-    <button class="btn btn-secondary" id="copy_packet" style="margin-top:10px">Copy PA packet</button>
-  </div>
-  <div class="panel" id="verify_section" style="display:none">
-    <div class="panel-head"><span class="idx">07</span><div class="panel-title">Verify &amp; refresh the data</div></div>
-    <div class="panel-note">On-file criteria can be stale or illustrative. Send this prompt to verify the current rule &mdash; or hand back the whole data file and request an updated one in the same format.</div>
-    <pre class="prompt-box" id="verify_box"></pre>
-    <div class="btn-row">
-      <button class="btn btn-accent" id="open_oe">Copy &amp; open OpenEvidence &rarr;</button>
-      <button class="btn btn-secondary" id="copy_dataset">Copy full data file to refresh</button>
-    </div>
-  </div>
-  <div class="meta-strip">
-    <span><span class="dot"></span>Data: <b id="data_status">&mdash;</b></span>
-    <span>Seed: <b id="rev_date">&mdash;</b></span>
-  </div>
-</main>
-<div class="toast" id="toast">Copied</div>
-<!-- Coverage data is loaded live from GitHub Pages. No embedded JSON in this build. -->
 <script>
-const $ = id => document.getElementById(id);
-const $$ = (s,r=document) => Array.from(r.querySelectorAll(s));
-const STORAGE_KEY = 'auth-prep-v3';
-const LEGACY_STORAGE_KEYS = ['auth-prep-v2','auth-prep-v1'];
-const CMM_URL = 'https://www.covermymeds.com/main/';
-const OE_URL  = 'https://www.openevidence.com/';
-/* Data source: GitHub Pages coverage.json by default. Override with ?data=<raw-json-url>. */
-const DEFAULT_DATA_URL = 'https://dormantone.github.io/payloadprompt/coverage.json';
-const DATA_URL = new URLSearchParams(location.search).get('data') || DEFAULT_DATA_URL;
-const USING_EXTERNAL_DATA = true;
-
-let DATA=null, RAW='';
-const LOB_LABEL = { commercial:'Commercial', ma:'Medicare Advantage', medicaid:'Medicaid' };
-const GRP_LABEL = {
-  dx:'Diagnosis on file',
-  tried:'Therapies already tried / failed / not tolerated',
-  contra:'Contraindications / safety screens'
-};
-const NONE_LABEL = {
-  dx:'No matching diagnosis documented',
-  tried:'No trial/intolerance documented',
-  contra:'Documented absent / screened clear'
-};
-const UNKNOWN_LABEL = {
-  dx:'Not checked / unknown',
-  tried:'Not checked / unknown',
-  contra:'Not checked / unknown'
-};
-
-const EPIC_TERMS = {
-  dx:{
-    t2dm:['type 2 diabetes','E11'], obesity:['obesity','BMI'], weight_related_comorbidity:['hypertension','dyslipidemia','sleep apnea','prediabetes','weight related comorbidity'],
-    ascvd:['atherosclerotic','coronary','myocardial infarction'], hf:['heart failure','ejection fraction'], ckd:['chronic kidney disease','eGFR'],
-    ra:['rheumatoid arthritis'], afib:['atrial fibrillation'], fh_chol:['familial hypercholesterolemia']
-  },
-  tried:{ metformin:['metformin'], sulfonylurea:['glipizide','glimepiride'], sglt2:['empagliflozin','dapagliflozin'], glp1:['semaglutide','GLP-1'], statin_high:['atorvastatin','rosuvastatin'], ezetimibe:['ezetimibe'], methotrexate:['methotrexate'], lifestyle:['weight management','dietitian'] },
-  contra:{ mtc_men2:['medullary thyroid','MEN2'], pancreatitis:['pancreatitis'], tb:['tuberculosis','QuantiFERON','PPD'], renal_severe:['creatinine','eGFR'] },
-  labs:{ a1c:['A1c','hemoglobin A1c'], bmi:['BMI'], egfr:['eGFR'], ldl:['LDL'] }
-};
-
-const state = {
-  drug_id:'', payer_id:'', lob:'commercial',
-  dx:new Set(), dx_none:false, dx_unknown:false,
-  tried:new Set(), tried_none:false, tried_unknown:false,
-  contra:new Set(), contra_none:false, contra_unknown:false,
-  labs:{}
-};
-let factsSig = '';
-
-async function load(){
+const DEFAULT_DATA_URL = new URLSearchParams(location.search).get('data') || 'glp1-coverage-criteria-checker.json';
+let DATA = null;
+const $ = s => document.querySelector(s);
+function showLoadError(message){
+  const title = document.querySelector('#policyTitle');
+  const meta = document.querySelector('#policyMeta');
+  const box = document.querySelector('#pathways');
+  if(title) title.textContent = 'Coverage JSON not loaded';
+  if(meta) meta.textContent = DEFAULT_DATA_URL;
+  if(box) box.innerHTML = `<div class="empty">${message}<br><br>Place the JSON file next to this HTML file on a web server, or open with ?data=https://example.com/coverage.json. Local file:// loading may be blocked by the browser.</div>`;
+}
+async function loadCoverageData(){
   try{
-    const r = await fetch(DATA_URL,{cache:'no-cache'});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    RAW = await r.text();
-    DATA = JSON.parse(RAW);
-  }catch(e){
-    const embedded = document.getElementById('coverage-data');
-    if(embedded && embedded.textContent.trim()){
-      RAW = embedded.textContent.trim();
-      DATA = JSON.parse(RAW);
-      return;
-    }
-    showLoadError(e); throw e;
+    const response = await fetch(DEFAULT_DATA_URL, {cache:'no-store'});
+    if(!response.ok) throw new Error(`HTTP ${response.status}`);
+    DATA = await response.json();
+    const foot = document.querySelector('.footer-note');
+    if(foot) foot.textContent = `Loaded coverage JSON from ${DEFAULT_DATA_URL}. Demonstration rows are not payer determinations.`;
+    init();
+  }catch(err){
+    console.error(err);
+    showLoadError(`Could not load coverage JSON: ${err.message}`);
   }
-}
-function showLoadError(err){
-  const isFile = location.protocol==='file:';
-  $('main').innerHTML = '<div class="panel" style="border-color:var(--block)"><div class="panel-title" style="color:#7a0e2f">Can\'t load '+esc(DATA_URL)+'</div><div class="panel-note" style="color:#7a0e2f;margin-top:8px">'+(isFile
-      ? 'Could not fetch the GitHub Pages JSON. Check the URL, network access, and CORS. You can override the source with <code>?data=&lt;raw-json-url&gt;</code>.'
-      : 'Tried '+esc(DATA_URL)+' &mdash; '+esc(err.message||String(err))+'. Check the GitHub Pages JSON URL or pass <code>?data=&lt;url&gt;</code>.')+'</div></div>';
-  $('databar').textContent='Data failed to load';
 }
 
-const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const uniq = arr => [...new Set(arr.filter(Boolean))];
-const drug  = () => DATA.drugs.find(d=>d.id===state.drug_id) || null;
-const payer = () => DATA.payers.find(p=>p.id===state.payer_id) || null;
-function findPolicy(){
-  if(!state.drug_id||!state.payer_id) return null;
-  return DATA.policies.find(p=>p.drug_id===state.drug_id && p.payer_id===state.payer_id && p.line_of_business===state.lob) || null;
+const payerSelect = $('#payerSelect'), planSelect = $('#planSelect');
+const checked = new Set();
+const criterionStatus = {}; // id -> yes/no/unsure
+const criterionValue = {};  // id -> free text value/evidence
+function statusDef(s){return DATA.status_definitions[s] || {label:s, short_label:s, color:'gray'};}
+function criterion(id){return DATA.criteria_library[id] || {label:id,target_value:'',icd10_codes:[],epic_terms:[]};}
+function esc(s){return String(s ?? '').replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]));}
+function uniq(a){return [...new Set(a.filter(Boolean))];}
+function walkLogic(logic){
+  let out=[]; if(!logic) return out;
+  if(typeof logic==='string') return [logic];
+  if(Array.isArray(logic)){ logic.forEach(x=>out.push(...walkLogic(x))); return out; }
+  if(typeof logic==='object'){ ['all_of','any_of'].forEach(k => (logic[k]||[]).forEach(x=>out.push(...walkLogic(x)))); }
+  return out;
 }
-function relatedPolicies(){
-  if(!state.drug_id||!state.payer_id) return [];
-  return DATA.policies.filter(p=>p.drug_id===state.drug_id && p.payer_id===state.payer_id && p.line_of_business!==state.lob);
+function logicText(logic){
+  if(!logic || Object.keys(logic).length===0) return 'None listed';
+  let parts=[];
+  if(logic.all_of?.length) parts.push('All: '+logic.all_of.map(x=>criterion(x).label).join(' + '));
+  if(logic.any_of?.length) parts.push('Any: '+logic.any_of.map(x=>criterion(x).label).join(' OR '));
+  return parts.join('; ') || 'None listed';
 }
-function leavesOf(c){
-  if(!c) return [];
-  if(c.any_of) return c.any_of.flatMap(leavesOf);
-  if(c.all_of) return c.all_of.flatMap(leavesOf);
-  return [c];
+function selectedPolicy(){ return DATA.policies.find(p => p.payer_id===payerSelect.value && p.plan_type_id===planSelect.value) || null; }
+function allPathways(policy){
+  let out=[]; if(!policy) return out;
+  policy.agents.forEach((ag, ai)=>ag.pathways.forEach((pw, pi)=>out.push({agent:ag,pathway:pw,key:`${ai}:${pi}`})));
+  return out;
 }
-function clauseLabel(c){
-  return c.label || leavesOf(c).map(l=>l.label).filter(Boolean).join(' / ') || 'Policy criterion';
-}
-function collectNeeds(pol){
-  const n={dx:new Set(),tried:new Set(),contra:new Set(),labs:new Set()};
-  (pol.criteria||[]).forEach(c=>leavesOf(c).forEach(l=>{
-    if(l.type==='diagnosis') n.dx.add(l.needs);
-    else if(l.type==='prior_therapy') n.tried.add(l.needs);
-    else if(l.type==='contraindication') n.contra.add(l.needs);
-    else if(l.type==='lab') n.labs.add(l.key);
-  }));
-  return n;
-}
-function unionNeeds(drug_id){
-  const n={dx:new Set(),tried:new Set(),contra:new Set(),labs:new Set()};
-  DATA.policies.filter(p=>p.drug_id===drug_id).forEach(p=>{ const c=collectNeeds(p); ['dx','tried','contra','labs'].forEach(k=>c[k].forEach(x=>n[k].add(x))); });
-  return n;
-}
-function currentNeeds(){
-  const pol=findPolicy();
-  if(pol) return collectNeeds(pol);
-  if(state.drug_id) return unionNeeds(state.drug_id);
-  return {dx:new Set(),tried:new Set(),contra:new Set(),labs:new Set()};
-}
-function selectedSet(kind){ return kind==='dx'?state.dx:kind==='tried'?state.tried:state.contra; }
-function vocabMap(kind){ return kind==='dx'?DATA.vocab.diagnoses:kind==='tried'?DATA.vocab.therapies:DATA.vocab.contraindications; }
-function kindForLeaf(c){ return c.type==='diagnosis'?'dx':c.type==='prior_therapy'?'tried':c.type==='contraindication'?'contra':null; }
-
-function evalLeaf(c){
-  if(c.type==='lab'){
-    const v=state.labs[c.key];
-    if(v==null) return {status:'unknown',detail:'not entered',unknownLeaves:[c],unmetLeaves:[]};
-    const ok=c.op==='ge'?v>=c.value:c.op==='le'?v<=c.value:c.op==='gt'?v>c.value:v<c.value;
-    const m=(DATA.vocab.labs[c.key]||{});
-    return {status:ok?'met':'unmet',detail:(m.label||c.key)+' '+v+(m.unit?' '+m.unit:''),unknownLeaves:[],unmetLeaves:ok?[]:[c]};
-  }
-  const kind=kindForLeaf(c);
-  if(kind==='dx' || kind==='tried'){
-    const set=selectedSet(kind);
-    if(set.has(c.needs)) return {status:'met',detail:kind==='dx'?'recorded':'documented',unknownLeaves:[],unmetLeaves:[]};
-    if(state[kind+'_none'] || set.size>0) return {status:'unmet',detail:state[kind+'_none']?'documented absent':'not on file',unknownLeaves:[],unmetLeaves:[c]};
-    return {status:'unknown',detail:'not checked / not documented',unknownLeaves:[c],unmetLeaves:[]};
-  }
-  if(kind==='contra'){
-    const absent=c.absent!==false;
-    const present=state.contra.has(c.needs);
-    if(present){
-      const ok=!absent;
-      return {status:ok?'met':'unmet',detail:absent?'present — safety blocker':'present',unknownLeaves:[],unmetLeaves:ok?[]:[c]};
-    }
-    if(state.contra_none){
-      const ok=absent;
-      return {status:ok?'met':'unmet',detail:absent?'documented absent / clear':'not present',unknownLeaves:[],unmetLeaves:ok?[]:[c]};
-    }
-    return {status:'unknown',detail:'not checked / not documented',unknownLeaves:[c],unmetLeaves:[]};
-  }
-  return {status:'unknown',detail:'unknown criterion type',unknownLeaves:[c],unmetLeaves:[]};
-}
-function evalClause(c){
-  if(c.any_of){
-    const kids=c.any_of.map(evalClause);
-    const met=kids.find(k=>k.status==='met');
-    if(met) return {label:clauseLabel(c),status:'met',detail:'satisfied: '+met.label+(met.detail?' — '+met.detail:''),unknownLeaves:[],unmetLeaves:[]};
-    const unknownLeaves=kids.flatMap(k=>k.unknownLeaves||[]);
-    if(unknownLeaves.length) return {label:clauseLabel(c),status:'unknown',detail:'confirm one acceptable option',unknownLeaves,unmetLeaves:kids.flatMap(k=>k.unmetLeaves||[])};
-    return {label:clauseLabel(c),status:'unmet',detail:'no acceptable option documented',unknownLeaves:[],unmetLeaves:kids.flatMap(k=>k.unmetLeaves||leavesOf(c))};
-  }
-  if(c.all_of){
-    const kids=c.all_of.map(evalClause);
-    const unmet=kids.filter(k=>k.status==='unmet');
-    const unknown=kids.filter(k=>k.status==='unknown');
-    if(unmet.length) return {label:clauseLabel(c),status:'unmet',detail:unmet.map(k=>k.label).join('; '),unknownLeaves:unknown.flatMap(k=>k.unknownLeaves||[]),unmetLeaves:unmet.flatMap(k=>k.unmetLeaves||[])};
-    if(unknown.length) return {label:clauseLabel(c),status:'unknown',detail:'confirm remaining required items',unknownLeaves:unknown.flatMap(k=>k.unknownLeaves||[]),unmetLeaves:[]};
-    return {label:clauseLabel(c),status:'met',detail:'all required items documented',unknownLeaves:[],unmetLeaves:[]};
-  }
-  const r=evalLeaf(c); return {label:clauseLabel(c),status:r.status,detail:r.detail,unknownLeaves:r.unknownLeaves,unmetLeaves:r.unmetLeaves};
-}
-function evalPolicy(pol){
-  const rows=(pol.criteria||[]).map(evalClause);
-  const overall=rows.some(r=>r.status==='unmet')?'unmet':rows.some(r=>r.status==='unknown')?'unknown':'met';
-  return {rows,overall};
-}
-function unknownNeeds(pol,ev){
-  const n={dx:new Set(),tried:new Set(),contra:new Set(),labs:new Set()};
-  (ev.rows||[]).forEach(r=>{
-    if(r.status!=='unknown') return;
-    (r.unknownLeaves&&r.unknownLeaves.length?r.unknownLeaves:[]).forEach(l=>{
-      if(l.type==='diagnosis')n.dx.add(l.needs);
-      else if(l.type==='prior_therapy')n.tried.add(l.needs);
-      else if(l.type==='contraindication')n.contra.add(l.needs);
-      else if(l.type==='lab')n.labs.add(l.key);
+function selectedPathways(){ const pol=selectedPolicy(); return allPathways(pol).filter(x => checked.has(x.key)); }
+function init(){
+  payerSelect.innerHTML = DATA.payers.map(p=>`<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+  payerSelect.addEventListener('change', ()=>{populatePlans(); checked.clear(); render();});
+  planSelect.addEventListener('change', ()=>{checked.clear(); render();});
+  $('#clearChecks').addEventListener('click', ()=>{checked.clear(); render();});
+  document.body.addEventListener('click', e => {
+    const btn=e.target.closest('[data-copy]'); if(!btn) return;
+    const el=$('#'+btn.dataset.copy);
+    navigator.clipboard?.writeText(el.innerText || el.value || '').then(()=>{
+      const old=btn.textContent; btn.textContent='Copied'; setTimeout(()=>btn.textContent=old,900);
     });
   });
-  return n;
+  populatePlans(); renderLegend(); render();
 }
-
-function freshness(pol){
-  if(!pol.last_researched) return {txt:'unverified', cls:'fresh-bad', stale:true};
-  const then=new Date(pol.last_researched+'T00:00:00'); if(isNaN(then)) return {txt:'date unknown',cls:'fresh-warn',stale:true};
-  const days=Math.floor((Date.now()-then.getTime())/86400000);
-  const cls = days>180?'fresh-bad':days>90?'fresh-warn':'fresh-ok';
-  const ago = days<=0?'today':days===1?'1 day ago':days+' days ago';
-  return {txt:'researched '+ago, cls, stale:days>90};
+function populatePlans(){
+  const payer = DATA.payers.find(p=>p.id===payerSelect.value) || DATA.payers[0];
+  planSelect.innerHTML = (payer.plan_types||[]).map(pt=>`<option value="${esc(pt.id)}">${esc(pt.name)}</option>`).join('');
 }
-function sourceConfidence(pol){
-  const status=(DATA._meta&&DATA._meta.data_status||'').toLowerCase();
-  const src=pol.source||{};
-  const name=(src.name||'').toLowerCase();
-  if(status.includes('illustrative') || name.includes('illustrative') || name.includes('sample')) return {txt:'source: illustrative only',cls:'fresh-bad',warn:true};
-  if(!pol.last_researched || name.includes('unverified') || pol.note) return {txt:'source: unverified',cls:'fresh-bad',warn:true};
-  if(!src.url) return {txt:'source: no link',cls:'fresh-warn',warn:true};
-  return {txt:'source linked',cls:'fresh-ok',warn:false};
+function renderLegend(){ $('#legend').innerHTML = Object.entries(DATA.status_definitions).map(([k,d])=>`<span class="badge ${esc(d.color)}">${esc(d.short_label)}</span>`).join(''); }
+function render(){ renderPathways(); renderEpicBlocks(); renderCriteriaChecks(); renderSummary(); }
+function renderPathways(){
+  const pol=selectedPolicy(); const box=$('#pathways');
+  if(!pol){ $('#policyTitle').textContent='No exact policy row'; $('#policyMeta').textContent='No data for this exact insurance + plan type.'; box.innerHTML='<div class="empty">No exact policy row. Add a payer_id + plan_type_id row to the JSON.</div>'; return; }
+  $('#policyTitle').textContent = pol.policy_name || 'Coverage pathways';
+  $('#policyMeta').textContent = `${pol.verification_status || ''} · ${pol.source_name || ''} · retrieved ${pol.retrieved_date || ''}`;
+  box.innerHTML = pol.agents.map((ag, ai)=>{
+    const paths = ag.pathways.map((pw, pi)=>{
+      const key=`${ai}:${pi}`; const sd=statusDef(pw.status);
+      const critIds=uniq(walkLogic(pw.criteria)); const priorIds=uniq(walkLogic(pw.prior_trials));
+      const chips = critIds.map(id=>`<span class="criterion-chip">${esc(criterion(id).label)} — ${esc(criterion(id).target_value||'')}</span>`).join('') + priorIds.map(id=>`<span class="criterion-chip prior">Prior: ${esc(criterion(id).label)} — ${esc(criterion(id).target_value||'')}</span>`).join('');
+      return `<div class="pathway">
+        <input type="checkbox" data-key="${esc(key)}" ${checked.has(key)?'checked':''} aria-label="Select pathway">
+        <div class="path-main">
+          <div class="path-top"><div class="indication">${esc(pw.indication)}</div><span class="badge ${esc(sd.color)}">${esc(sd.label)}</span></div>
+          <div class="target"><strong>Target:</strong> ${esc(pw.target_values_summary || logicText(pw.criteria))}</div>
+          <div class="criteria">${chips || '<span class="criterion-chip">No formal criteria listed</span>'}</div>
+          ${pw.notes?`<div class="small" style="margin-top:6px">${esc(pw.notes)}</div>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="agent"><h3>${esc(ag.drug)}</h3><div class="agent-sub">${esc(ag.ingredient)} · ${esc(ag.class || '')}</div>${paths}</div>`;
+  }).join('');
+  box.querySelectorAll('input[type=checkbox][data-key]').forEach(cb=>cb.addEventListener('change', e=>{ if(e.target.checked) checked.add(e.target.dataset.key); else checked.delete(e.target.dataset.key); render(); }));
 }
-
-function chipGroupHTML(kind,ids){
-  const map = vocabMap(kind), set = selectedSet(kind);
-  const chips = ids.map(id=>'<label class="chip" data-chipid="'+esc(id)+'" data-kind="'+kind+'"><input type="checkbox" data-'+kind+'="'+esc(id)+'" '+(set.has(id)?'checked':'')+'> '+esc(map[id]||id)+'</label>').join('');
-  return '<div class="chip-group" data-group="'+kind+'"><div class="grp-head"><span class="grp-label">'+GRP_LABEL[kind]+'</span><span class="need-badge" data-needbadge="'+kind+'">needed</span></div><div class="chips">'+chips+
-    '<label class="chip none-chip"><input type="checkbox" data-'+kind+'-none="1" '+(state[kind+'_none']?'checked':'')+'> '+esc(NONE_LABEL[kind])+'</label>'+ 
-    '<label class="chip none-chip"><input type="checkbox" data-'+kind+'-unknown="1" '+(state[kind+'_unknown']?'checked':'')+'> '+esc(UNKNOWN_LABEL[kind])+'</label></div></div>';
+function selectedCriterionIds(){
+  const ids=[]; selectedPathways().forEach(({pathway})=>{ ids.push(...walkLogic(pathway.criteria), ...walkLogic(pathway.prior_trials)); }); return uniq(ids);
 }
-function labGroupHTML(keys){
-  const cells = keys.map(k=>{ const m=DATA.vocab.labs[k]||{label:k,unit:''};
-    return '<div class="lab-cell" data-labcell="'+esc(k)+'"><label>'+esc(m.label)+(m.unit?' ('+esc(m.unit)+')':'')+'</label><input type="number" step="0.1" inputmode="decimal" class="input lab-input" data-lab="'+esc(k)+'" value="'+(state.labs[k]==null?'':state.labs[k])+'" placeholder="—"></div>'; }).join('');
-  return '<div class="chip-group"><div class="grp-head"><span class="grp-label">Labs &amp; measures</span></div><div class="lab-grid">'+cells+'</div></div>';
+function renderEpicBlocks(){
+  const ids=selectedCriterionIds();
+  const codeSet=[], termSet=[];
+  ids.forEach(id=>{ const c=criterion(id); (c.icd10_codes||[]).forEach(x=>codeSet.push(x)); (c.epic_terms||[]).forEach(x=>termSet.push(x)); });
+  const codes=uniq(codeSet), terms=uniq(termSet);
+  $('#keywordBlock').value = terms.length ? terms.join(' OR ') : '';
+  $('#icdBlock').value = codes.length ? codes.join(' OR ') : '';
 }
-function renderFactsStructure(){
-  const n=currentNeeds();
-  const sig = JSON.stringify({d:state.drug_id,p:state.payer_id,l:state.lob,dx:[...n.dx],tr:[...n.tried],co:[...n.contra],la:[...n.labs]});
-  if(sig===factsSig) return;
-  factsSig=sig;
-  const body=$('facts_body');
-  if(!state.drug_id){ body.innerHTML='<div class="facts-empty">Pick a drug to see the facts this request needs.</div>'; return; }
-  let html='';
-  if(!findPolicy()) html+='<div class="panel-note" style="margin:0 0 12px;color:var(--warn)">No exact policy is on file for this payer + plan type. These are broad drug-related fields from related policies, not criteria for the selected plan.</div>';
-  if(n.dx.size) html+=chipGroupHTML('dx',[...n.dx]);
-  if(n.tried.size) html+=chipGroupHTML('tried',[...n.tried]);
-  if(n.contra.size) html+=chipGroupHTML('contra',[...n.contra]);
-  if(n.labs.size) html+=labGroupHTML([...n.labs]);
-  if(!html) html='<div class="facts-empty">'+(findPolicy()?'No clinical criteria on file for this combination.':'No criteria found for this drug yet.')+'</div>';
-  body.innerHTML=html;
-  bindFacts();
+function renderCriteriaChecks(){
+  const ids=selectedCriterionIds(); const box=$('#criteriaChecks');
+  if(!ids.length){ box.innerHTML='<div class="empty">Check one or more pathways to generate criterion checks.</div>'; return; }
+  box.innerHTML = ids.map(id=>{ const c=criterion(id); const st=criterionStatus[id] || 'unsure'; return `<div class="check-card">
+    <div class="check-top"><div><div class="check-title">${esc(c.label)}</div><div class="target-line"><strong>Target:</strong> ${esc(c.target_value || '')}</div></div>
+      <div class="radio-row" role="radiogroup" aria-label="${esc(c.label)} status">
+        ${['yes','no','unsure'].map(v=>`<label class="radio-pill"><input type="radio" name="crit_${esc(id)}" data-status-id="${esc(id)}" value="${v}" ${st===v?'checked':''}> ${v}</label>`).join('')}
+      </div>
+    </div>
+    <input data-value-id="${esc(id)}" value="${esc(criterionValue[id] || '')}" placeholder="${esc(c.value_prompt || 'Value / date / evidence note')}">
+  </div>`; }).join('');
+  box.querySelectorAll('[data-status-id]').forEach(r=>r.addEventListener('change', e=>{ criterionStatus[e.target.dataset.statusId]=e.target.value; renderSummary(); }));
+  box.querySelectorAll('[data-value-id]').forEach(inp=>inp.addEventListener('input', e=>{ criterionValue[e.target.dataset.valueId]=e.target.value; renderSummary(); }));
 }
-function clearKind(kind){ selectedSet(kind).clear(); state[kind+'_none']=false; state[kind+'_unknown']=false; }
-function bindFacts(){
-  ['dx','tried','contra'].forEach(kind=>{
-    $$('#facts_body input[data-'+kind+']').forEach(inp=>inp.addEventListener('change',()=>{
-      const set=selectedSet(kind);
-      if(inp.checked){ set.add(inp.dataset[kind]); state[kind+'_none']=false; state[kind+'_unknown']=false; const nb=$('#facts_body input[data-'+kind+'-none]'); const ub=$('#facts_body input[data-'+kind+'-unknown]'); if(nb)nb.checked=false; if(ub)ub.checked=false; }
-      else set.delete(inp.dataset[kind]);
-      refresh();
-    }));
-    const none=$('#facts_body input[data-'+kind+'-none]');
-    if(none) none.addEventListener('change',()=>{
-      if(none.checked){ clearKind(kind); state[kind+'_none']=true; $$('#facts_body input[data-'+kind+']').forEach(c=>c.checked=false); const ub=$('#facts_body input[data-'+kind+'-unknown]'); if(ub)ub.checked=false; }
-      else state[kind+'_none']=false;
-      refresh();
-    });
-    const unk=$('#facts_body input[data-'+kind+'-unknown]');
-    if(unk) unk.addEventListener('change',()=>{
-      if(unk.checked){ clearKind(kind); state[kind+'_unknown']=true; $$('#facts_body input[data-'+kind+']').forEach(c=>c.checked=false); const nb=$('#facts_body input[data-'+kind+'-none]'); if(nb)nb.checked=false; }
-      else state[kind+'_unknown']=false;
-      refresh();
-    });
+function logicSatisfied(logic){
+  if(!logic || Object.keys(logic).length===0) return {state:'yes', missing:[], unsure:[], no:[]};
+  if(typeof logic === 'string'){
+    const st = criterionStatus[logic] || 'unsure';
+    if(st==='yes') return {state:'yes', missing:[], unsure:[], no:[]};
+    if(st==='no') return {state:'no', missing:[], unsure:[], no:[criterion(logic).label]};
+    return {state:'unsure', missing:[criterion(logic).label], unsure:[criterion(logic).label], no:[]};
+  }
+  if(Array.isArray(logic)){
+    return combineAll(logic.map(logicSatisfied));
+  }
+  if(logic.all_of) return combineAll(logic.all_of.map(logicSatisfied));
+  if(logic.any_of) return combineAny(logic.any_of.map(logicSatisfied));
+  return {state:'yes', missing:[], unsure:[], no:[]};
+}
+function combineAll(results){
+  const no=uniq(results.flatMap(r=>r.no)); const unsure=uniq(results.flatMap(r=>r.unsure));
+  if(no.length) return {state:'no', missing:uniq([...no, ...unsure]), unsure, no};
+  if(unsure.length) return {state:'unsure', missing:unsure, unsure, no:[]};
+  return {state:'yes', missing:[], unsure:[], no:[]};
+}
+function combineAny(results){
+  if(results.some(r=>r.state==='yes')) return {state:'yes', missing:[], unsure:[], no:[]};
+  const uncertain = results.filter(r=>r.state==='unsure');
+  if(uncertain.length) return {state:'unsure', missing:uniq(uncertain.flatMap(r=>r.missing)), unsure:uniq(uncertain.flatMap(r=>r.unsure)), no:uniq(results.flatMap(r=>r.no))};
+  return {state:'no', missing:uniq(results.flatMap(r=>r.no)), unsure:[], no:uniq(results.flatMap(r=>r.no))};
+}
+function renderSummary(){
+  const sel=selectedPathways(); const out=$('#summary');
+  if(!sel.length){ out.textContent='Check one or more pathways above. Summary will appear here.'; return; }
+  let lines=[];
+  lines.push('GLP-1 COVERAGE CRITERIA SUMMARY');
+  lines.push('Insurance: '+(payerSelect.options[payerSelect.selectedIndex]?.text || ''));
+  lines.push('Plan: '+(planSelect.options[planSelect.selectedIndex]?.text || ''));
+  lines.push('');
+  sel.forEach(({agent,pathway}, idx)=>{
+    const sd=statusDef(pathway.status);
+    const criteriaResult = logicSatisfied(pathway.criteria);
+    const priorResult = logicSatisfied(pathway.prior_trials);
+    const ids=uniq([...walkLogic(pathway.criteria), ...walkLogic(pathway.prior_trials)]);
+    lines.push(`${idx+1}. ${agent.drug} (${agent.ingredient}) — ${pathway.indication}`);
+    lines.push(`   Listed status: ${sd.label}`);
+    if(pathway.status==='not_covered'){
+      lines.push('   Bottom line: NOT COVERED for this pathway in the selected policy row.');
+    } else {
+      ids.forEach(id=>{
+        const st=(criterionStatus[id] || 'unsure').toUpperCase(); const val=(criterionValue[id] || '').trim();
+        lines.push(`   - ${criterion(id).label}: ${st}${val?` — ${val}`:''}`);
+      });
+      const anyNo = criteriaResult.state==='no' || priorResult.state==='no';
+      const anyUnsure = criteriaResult.state==='unsure' || priorResult.state==='unsure';
+      const need = uniq([...criteriaResult.missing, ...priorResult.missing]);
+      if(anyNo){
+        lines.push('   Bottom line: DOES NOT CURRENTLY MEET listed pathway criteria. Not met: '+need.join('; ')+'.');
+      } else if(anyUnsure){
+        lines.push('   Bottom line: POSSIBLE PATHWAY if chart documentation confirms: '+need.join('; ')+'.');
+      } else if(pathway.status==='covered_no_prior_authorization' || pathway.status==='covered_with_conditions_no_authorization'){
+        lines.push('   Bottom line: Criteria checked YES. Appears covered/no authorization pathway if current payer data and member benefit are verified.');
+      } else if(pathway.status==='covered_with_authorization'){
+        lines.push('   Bottom line: Criteria checked YES. Appears to support authorization submission.');
+      } else if(pathway.status==='covered_with_authorization_and_prior_trials'){
+        lines.push('   Bottom line: Criteria and prior-trial items checked YES. Appears to support authorization submission with step/prior-trial documentation.');
+      } else {
+        lines.push('   Bottom line: Criteria checked YES for listed pathway; verify current payer requirements.');
+      }
+    }
+    lines.push('');
   });
-  $$('#facts_body input[data-lab]').forEach(inp=>inp.addEventListener('input',()=>{
-    const v=inp.value.trim(); const num=parseFloat(v); state.labs[inp.dataset.lab]=(v===''||isNaN(num))?null:num; refresh(); }));
-}
-function markNeeded(){
-  const pol=findPolicy(); const need = pol ? unknownNeeds(pol,evalPolicy(pol)) : {dx:new Set(),tried:new Set(),contra:new Set(),labs:new Set()};
-  ['dx','tried','contra'].forEach(kind=>{
-    const badge=$('#facts_body [data-needbadge="'+kind+'"]'); if(badge) badge.classList.toggle('on', need[kind].size>0);
-    $$('#facts_body .chip[data-kind="'+kind+'"]').forEach(ch=>ch.classList.toggle('needed', need[kind].has(ch.dataset.chipid)));
-  });
-  $$('#facts_body .lab-cell').forEach(c=>c.classList.toggle('needed', need.labs.has(c.dataset.labcell)));
+  out.textContent=lines.join('\n');
 }
 
-function statusMeta(pol,ev){
-  const fs=pol.formulary_status;
-  if(fs==='not_covered') return {tone:'block',big:'Not on formulary',sub:'Likely requires a formulary exception or a covered alternative; verify member-specific benefit.',chip:'block',chipText:'Not covered'};
-  if(fs==='covered'&&!pol.pa_required) return {tone:'ok',big:'Appears covered — no PA',sub:'No prior authorization is listed in this policy file; confirm current member benefit before acting.',chip:'ok',chipText:'No PA listed'};
-  const big = fs==='step_therapy'?'Step therapy / PA likely':'Prior auth likely';
-  if(ev.overall==='unmet') return {tone:'block',big:big,sub:'Do not submit yet — at least one policy criterion is not met as entered.',chip:'block',chipText:'Blocker'};
-  if(ev.overall==='unknown') return {tone:'warn',big:big,sub:'Potentially submit-ready, but chart confirmation is still needed.',chip:'warn',chipText:'Confirm gaps'};
-  return {tone:'ok',big:'Potentially submit-ready',sub:'All on-file criteria are met as entered. Verify current policy and attach documentation before submission.',chip:'ok',chipText:'Ready to verify'};
-}
-function verdictSentence(pol,ev){
-  if(pol.formulary_status==='not_covered') return pol.appeal_notes||'This appears not covered on this plan. Confirm benefit design, then consider a covered alternative or formulary exception.';
-  if(pol.formulary_status==='covered'&&!pol.pa_required) return 'This policy file lists no prior authorization requirement. Confirm the current formulary/member benefit before sending or relying on this.';
-  const unmet=ev.rows.filter(r=>r.status==='unmet'), unknown=ev.rows.filter(r=>r.status==='unknown');
-  if(unmet.length) return ('Do not submit yet. Blocker'+(unmet.length>1?'s':'')+': '+unmet.map(r=>r.label).join('; ')+'. '+(pol.appeal_notes||'')).trim();
-  if(unknown.length) return 'Close, but confirm/document before submitting: '+unknown.map(r=>r.label).join('; ')+'.';
-  return 'On-file criteria are met as entered. Next step: verify the current payer policy, attach the supporting chart evidence, then submit if clinically appropriate.';
-}
-function classBlock(d){
-  const cl = DATA.classes && DATA.classes[d.class]; if(!cl) return '';
-  const mems = (cl.members||[]).map(m=>{ const sel = (d.name && m.toLowerCase().includes(d.name.toLowerCase())) || (d.generic&&m.toLowerCase().includes(d.generic.toLowerCase())); return '<span class="mem'+(sel?' sel':'')+'">'+esc(m)+'</span>'; }).join(' &middot; ');
-  return '<div class="class-line"><b style="color:#cfd2da">'+esc(d.class)+' class:</b> '+mems+(cl.note?'<br><span style="opacity:.8">'+esc(cl.note)+'</span>':'')+'</div>';
-}
-function renderVerdict(){
-  const body=$('verdict_body'); const d=drug(),pay=payer();
-  if(!d||!pay){ body.innerHTML='<div class="vp-empty">Pick a drug, payer, and plan type to see PA readiness.</div>'; return; }
-  const pol=findPolicy();
-  if(!pol){
-    const rel=relatedPolicies();
-    const relText=rel.length?' Related policy entries exist for other plan types: '+rel.map(p=>LOB_LABEL[p.line_of_business]||p.line_of_business).join(', ')+'. They are not substituted.':'';
-    body.innerHTML='<div class="vp-eyebrow">PA readiness</div><div class="vp-status warn"><div class="vp-dot"></div><div><div class="vp-big" style="color:var(--d-warn)">No exact policy on file</div><div class="vp-sub">No researched entry for '+esc(d.name)+' + '+esc(pay.name)+' ('+esc(LOB_LABEL[state.lob])+').'+esc(relText)+' Use the research prompt below, then add an exact policy to coverage.json.</div></div></div>';
-    return;
-  }
-  const ev=evalPolicy(pol), m=statusMeta(pol,ev), fr=freshness(pol), sc=sourceConfidence(pol);
-  let h='<div class="vp-eyebrow">PA readiness &middot; '+esc(d.name)+' <span style="opacity:.6">('+esc(d.generic)+')</span></div><div class="vp-status '+m.tone+'"><div class="vp-dot"></div><div><div class="vp-big">'+esc(m.big)+'</div><div class="vp-sub">'+esc(m.sub)+'</div></div></div>';
-  const pills=[];
-  if(pol.tier!=null) pills.push('<span class="vp-pill">Tier <b>'+pol.tier+'</b></span>');
-  if(pol.quantity_limit) pills.push('<span class="vp-pill">Qty: <b>'+esc(pol.quantity_limit)+'</b></span>');
-  pills.push('<span class="vp-pill"><b>'+esc(pay.name)+'</b> &middot; '+esc(LOB_LABEL[state.lob])+'</span>');
-  pills.push('<span class="vp-pill '+fr.cls+'">'+esc(fr.txt)+'</span>');
-  pills.push('<span class="vp-pill '+sc.cls+'">'+esc(sc.txt)+'</span>');
-  h+='<div class="vp-pills">'+pills.join('')+'</div>';
-  if(fr.stale || sc.warn) h+='<div class="vp-verdict" style="border-color:rgba(251,191,36,.35);color:var(--d-warn)">⚠ Verify the current, member-specific policy before relying on this entry.</div>';
-  if(pol.criteria&&pol.criteria.length){
-    const met=ev.rows.filter(r=>r.status==='met').length;
-    h+='<div class="vp-crit-head">Criteria &middot; '+met+'/'+ev.rows.length+' met</div>';
-    h+=ev.rows.map((r,i)=>{ const mark=r.status==='met'?'✓':r.status==='unmet'?'✕':'?';
-      const stat=r.status==='met'?('Met'+(r.detail?' &middot; '+esc(r.detail):'')):r.status==='unmet'?('Not met'+(r.detail?' &middot; '+esc(r.detail):'')+' — likely denial driver'):'Confirm &amp; document'+(r.detail?' &middot; '+esc(r.detail):'');
-      return '<div class="vp-crit '+r.status+'" style="animation-delay:'+(i*60)+'ms"><div class="vp-cmark">'+mark+'</div><div><div class="vp-clabel">'+esc(r.label)+'</div><div class="vp-cstat">'+stat+'</div></div></div>'; }).join('');
-  }
-  h+='<div class="vp-verdict">'+esc(verdictSentence(pol,ev))+'</div>';
-  const altPills=(pol.alternatives||[]).map(a=>'<span class="alt-pill">'+esc(a)+'</span>').join('');
-  h+='<div class="vp-foot"><div class="vp-foot-h">Alternatives &amp; class</div>'+(altPills||'<span class="class-line">No specific alternatives listed.</span>')+classBlock(d);
-  if(pol.source&&pol.source.name) h+='<div class="vp-src">Source: '+esc(pol.source.name)+(pol.source.date?' &middot; '+esc(pol.source.date):'')+(pol.source.url?' &middot; '+esc(pol.source.url):'')+'</div>';
-  h+='</div>';
-  body.innerHTML=h;
-}
-
-function selLabels(map,set){ return [...set].map(id=>map[id]||id); }
-function factsSummary(){
-  const L=[],d=drug(),pay=payer();
-  L.push('Drug: '+(d?d.name+' ('+d.generic+')':'[drug]'));
-  L.push('Payer / plan: '+(pay?pay.name:'[payer]')+' — '+LOB_LABEL[state.lob]);
-  const dx=selLabels(DATA.vocab.diagnoses,state.dx); if(dx.length)L.push('Diagnoses documented: '+dx.join(', ')); else if(state.dx_none)L.push('Diagnoses: documented absent / no matching diagnosis found'); else if(state.dx_unknown)L.push('Diagnoses: not checked / unknown');
-  const tr=selLabels(DATA.vocab.therapies,state.tried); if(tr.length)L.push('Prior therapies documented: '+tr.join(', ')); else if(state.tried_none)L.push('Prior therapies: no trial/intolerance documented'); else if(state.tried_unknown)L.push('Prior therapies: not checked / unknown');
-  const co=selLabels(DATA.vocab.contraindications,state.contra); if(co.length)L.push('Contraindications / cautions present: '+co.join(', ')); else if(state.contra_none)L.push('Contraindications / cautions: documented absent / screened clear'); else if(state.contra_unknown)L.push('Contraindications / cautions: not checked / unknown');
-  const labs=Object.keys(state.labs).filter(k=>state.labs[k]!=null).map(k=>{ const m=DATA.vocab.labs[k]||{}; return (m.label||k)+' '+state.labs[k]+(m.unit?' '+m.unit:''); });
-  if(labs.length)L.push('Labs: '+labs.join(' | '));
-  return L.join('\n');
-}
-function buildPatient(){
-  const d=drug(),pay=payer(),pol=findPolicy(); if(!d||!pay||!pol) return '';
-  const sign='\n\n— [Your clinician / office]';
-  if(pol.formulary_status==='not_covered'){ const alt=(pol.alternatives||[]).join(' or ')||'other options';
-    return 'Hi [Patient name],\n\nI reviewed our current information for '+d.name+' with your '+pay.name+' plan. It appears this plan may not cover it as prescribed, so we should confirm the benefit and discuss next steps. Options may include '+alt+', or a formulary exception if appropriate. We will review this before making a final plan.'+sign; }
-  if(pol.formulary_status==='covered'&&!pol.pa_required)
-    return 'Hi [Patient name],\n\nBased on the policy information we have, '+d.name+' appears not to require prior authorization with your '+pay.name+' plan. We still need to confirm the current member-specific benefit and clinical appropriateness before relying on that. We will let you know if the pharmacy or plan asks for anything else.'+sign;
-  const ev=evalPolicy(pol), unmet=ev.rows.filter(r=>r.status==='unmet').length, unknown=ev.rows.filter(r=>r.status==='unknown').length;
-  if(unmet) return 'Hi [Patient name],\n\nYour '+pay.name+' plan appears to require prior authorization for '+d.name+'. Based on the chart facts entered so far, the request may not meet the plan criteria yet. We should review options before submitting, such as documenting an exception, choosing a covered alternative, or preparing an appeal if appropriate.'+sign;
-  if(unknown) return 'Hi [Patient name],\n\nYour '+pay.name+' plan appears to require prior authorization for '+d.name+'. Our office is checking the documentation the plan usually asks for before submitting anything. We will let you know if we need more information from you.'+sign;
-  return 'Hi [Patient name],\n\nYour '+pay.name+' plan appears to require prior authorization for '+d.name+'. Based on the facts entered so far, the request looks ready for final chart review and policy verification before submission. We will let you know once there is an update from the plan.'+sign;
-}
-function buildLetter(){
-  const d=drug(),pay=payer(),pol=findPolicy(); if(!d||!pay||!pol) return '';
-  if(pol.formulary_status==='covered'&&!pol.pa_required)
-    return 'RE: Coverage check — '+d.name+' ('+d.generic+')\n\nThe on-file policy entry for '+pay.name+' ('+LOB_LABEL[state.lob]+') lists no prior authorization requirement. This is not a coverage determination. Confirm current formulary/member benefit and pharmacy rejection status before relying on it.';
-  if(pol.formulary_status==='not_covered')
-    return 'RE: '+d.name+' — '+pay.name+' ('+LOB_LABEL[state.lob]+')\n\nThis agent appears to be a benefit exclusion or non-formulary item on this plan. Rather than a standard PA, this likely needs a formulary exception or a switch to a covered alternative ('+((pol.alternatives||[]).join(', ')||'see plan')+'). Confirm the benefit design before drafting an appeal.';
-  const ev=evalPolicy(pol), met=ev.rows.filter(r=>r.status==='met'), unknown=ev.rows.filter(r=>r.status==='unknown'), unmet=ev.rows.filter(r=>r.status==='unmet');
-  const dx=selLabels(DATA.vocab.diagnoses,state.dx); const L=[];
-  L.push('RE: Prior authorization preparation — '+d.name+' ('+d.generic+')');
-  L.push('Member: [NAME / DOB / ID]   Payer: '+pay.name+' ('+LOB_LABEL[state.lob]+')   Prescriber: [NAME, NPI]');
-  L.push(''); L.push('To the '+pay.name+' review team,'); L.push('');
-  L.push('I am preparing a prior authorization request for '+d.name+(dx.length?' for the treatment of '+dx.join(', ').toLowerCase():'')+'. The following documented facts support medical necessity under the on-file criteria:');
-  if(met.length) met.forEach(r=>L.push('  • '+r.label+(r.detail?' — '+r.detail:''))); else L.push('  • [No criteria confirmed yet — complete the clinical facts.]');
-  if(unknown.length){ L.push(''); L.push('Confirm in the chart before submitting (do NOT state unless documented):'); unknown.forEach(r=>L.push('  • '+r.label)); }
-  if(unmet.length){ L.push(''); L.push('Not met as entered — address/document an exception, choose an alternative, or expect a denial:'); unmet.forEach(r=>L.push('  • '+r.label)); if(pol.appeal_notes) L.push('  Note: '+pol.appeal_notes); }
-  L.push(''); L.push('Supporting records should be attached after final verification of current payer policy and member-specific benefit.');
-  return L.join('\n');
-}
-function buildPacket(){
-  const d=drug(),pay=payer(),pol=findPolicy(); if(!d||!pay||!pol) return '';
-  const ev=evalPolicy(pol); const unmet=ev.rows.filter(r=>r.status==='unmet'), unknown=ev.rows.filter(r=>r.status==='unknown'), met=ev.rows.filter(r=>r.status==='met');
-  const L=[];
-  L.push('PA READINESS PACKET — '+d.name+' / '+pay.name+' / '+LOB_LABEL[state.lob]);
-  L.push('Not a coverage determination. Verify current policy and member-specific benefit.');
-  L.push('');
-  if(pol.formulary_status==='not_covered'){
-    L.push('Primary issue: appears non-formulary / benefit exclusion.');
-    L.push('Next steps:');
-    L.push('  □ Confirm rejection code / formulary status with pharmacy or plan.');
-    L.push('  □ Discuss covered alternatives: '+((pol.alternatives||[]).join(', ')||'[none listed]')+'.');
-    L.push('  □ If clinically necessary, prepare formulary exception rationale.');
-    return L.join('\n');
-  }
-  if(pol.formulary_status==='covered'&&!pol.pa_required){
-    L.push('Primary issue: no PA listed in this policy file.');
-    L.push('Next steps:');
-    L.push('  □ Confirm current formulary/member benefit.');
-    L.push('  □ Confirm pharmacy can adjudicate without PA.');
-    L.push('  □ Save rejection/paid claim status if available.');
-    return L.join('\n');
-  }
-  L.push('Confirmed support:');
-  if(met.length) met.forEach(r=>L.push('  ✓ '+r.label+(r.detail?' — '+r.detail:''))); else L.push('  — None yet.');
-  L.push('');
-  L.push('Do before submission:');
-  if(unknown.length) unknown.forEach(r=>L.push('  □ Confirm/document: '+r.label)); else L.push('  ✓ No unknown criteria from entered facts.');
-  if(unmet.length){
-    L.push(''); L.push('Blockers / denial drivers:');
-    unmet.forEach(r=>L.push('  ⛔ '+r.label+(r.detail?' — '+r.detail:'')));
-  }
-  L.push('');
-  L.push('Attachments to gather:');
-  leavesOf({all_of:pol.criteria||[]}).forEach(l=>{
-    if(l.type==='diagnosis') L.push('  □ Problem list / note documenting '+(DATA.vocab.diagnoses[l.needs]||l.needs));
-    if(l.type==='prior_therapy') L.push('  □ Medication history showing '+(DATA.vocab.therapies[l.needs]||l.needs)+' trial/intolerance');
-    if(l.type==='contraindication') L.push('  □ Safety screen documenting '+(DATA.vocab.contraindications[l.needs]||l.needs)+' status');
-    if(l.type==='lab') L.push('  □ Recent '+((DATA.vocab.labs[l.key]||{}).label||l.key));
-  });
-  if(pol.appeal_notes){ L.push(''); L.push('Appeal/exception note: '+pol.appeal_notes); }
-  return uniq(L).join('\n');
-}
-function epicTermsFor(leaf){
-  if(leaf.type==='lab') return EPIC_TERMS.labs[leaf.key]||[(DATA.vocab.labs[leaf.key]||{}).label||leaf.key];
-  const k = leaf.type==='diagnosis'?'dx':leaf.type==='prior_therapy'?'tried':'contra';
-  const t = EPIC_TERMS[k]&&EPIC_TERMS[k][leaf.needs]; if(t) return t;
-  return [(leaf.label||'').replace(/[(),]/g,'').split(' ').slice(0,3).join(' ')];
-}
-function buildEpic(){
-  const d=drug(),pay=payer(),pol=findPolicy(); if(!d||!pay||!pol) return null;
-  const per=(pol.criteria||[]).map(c=>({ label:clauseLabel(c), terms:uniq(leavesOf(c).flatMap(epicTermsFor)) }));
-  const all=uniq(per.flatMap(p=>p.terms));
-  return { combined: all.map(t=>'"'+t+'"').join(' OR '), per:per, priorPA:'"prior authorization" "'+d.name+'" "'+pay.name+'"' };
-}
-function renderEpic(){
-  const e=buildEpic(); const body=$('epic_body'); if(!e){ body.innerHTML=''; return; }
-  let h='';
-  if(e.combined){ h+='<div class="console-label">Find all supporting evidence</div><div class="console"><div class="console-row"><div class="console-q"><span class="pfx">⌕ </span>'+esc(e.combined)+'</div><button class="copybtn" data-copy="'+esc(e.combined)+'">Copy</button></div></div>'; }
-  if(e.per.length){ h+='<div class="console-label">Jump to one item</div><div class="term-chips">'+e.per.flatMap(p=>p.terms.map(t=>'<span class="term-chip" data-copy="'+esc(t)+'" title="'+esc(p.label)+'">'+esc(t)+'</span>')).join('')+'</div>'; }
-  h+='<div class="console-label">Prior PA / coverage notes in the chart</div><div class="console"><div class="console-row"><div class="console-q"><span class="pfx">⌕ </span>'+esc(e.priorPA)+'</div><button class="copybtn" data-copy="'+esc(e.priorPA)+'">Copy</button></div></div>';
-  body.innerHTML=h;
-  $$('#epic_body [data-copy]').forEach(el=>el.addEventListener('click',async()=>{ const ok=await copyText(el.getAttribute('data-copy')); toast(ok?'Search copied':'Copy blocked',!ok); }));
-}
-const SCHEMA_HINT = '{ drug_id, payer_id, line_of_business, formulary_status, tier, pa_required, quantity_limit:null|string, alternatives:[], last_researched:"YYYY-MM-DD"|null, criteria:[leaf|{any_of:[clause...]|all_of:[clause...],label}], source:{name,url,date} }';
-function criteriaText(pol){
-  const walk=(c,depth=1)=>{
-    const pad='  '.repeat(depth);
-    if(c.any_of) return pad+'- ANY OF: '+clauseLabel(c)+'\n'+c.any_of.map(x=>walk(x,depth+1)).join('\n');
-    if(c.all_of) return pad+'- ALL OF: '+clauseLabel(c)+'\n'+c.all_of.map(x=>walk(x,depth+1)).join('\n');
-    return pad+'- '+clauseLabel(c);
-  };
-  return (pol.criteria||[]).map(c=>walk(c,1)).join('\n') || '  (none)';
-}
-function buildVerify(){
-  const d=drug(),pay=payer(),pol=findPolicy(); const facts=factsSummary();
-  const head='NOT a coverage determination — preparing a prior-authorization request to confirm with the plan and discuss with a clinician.\nCite the exact payer policy document, URL, and effective date. Do NOT invent clinical facts; use only what is provided. Treat missing/unknown facts as not documented.\n\n';
-  if(!pol){
-    const rel=relatedPolicies();
-    const relLine=rel.length?'\nNote: entries exist for other plan types ('+rel.map(p=>LOB_LABEL[p.line_of_business]||p.line_of_business).join(', ')+') but must NOT be substituted.\n':'';
-    return head+'Research the CURRENT prior-authorization / formulary policy for:\n  Drug: '+(d?d.name:'[drug]')+'\n  Payer: '+(pay?pay.name:'[payer]')+'   Plan type: '+LOB_LABEL[state.lob]+relLine+'\n1) Is a PA required? Give tier, step therapy, and quantity limits with the policy citation + date.\n2) List the medical-necessity criteria as a nested checklist if needed.\n3) Using ONLY the facts below, mark each: met / not documented / not met.\n4) Draft a medical-necessity letter from documented facts; bracket anything missing.\n5) Output one JSON policy object I can paste into coverage.json.\n\nPATIENT FACTS\n'+facts+'\n\nJSON SHAPE\n'+SCHEMA_HINT;
-  }
-  return head+'I have an on-file policy (last researched '+(pol.last_researched||'never')+'). VERIFY and CORRECT it against the current '+pay.name+' ('+LOB_LABEL[state.lob]+') policy for '+d.name+', then:\n1) Confirm/fix PA requirement, tier, step therapy, quantity limits — with citation + date.\n2) Confirm/fix the criteria checklist below. Preserve nested logic with any_of/all_of.\n3) Using ONLY the facts below, mark each: met / not documented / not met.\n4) Draft a medical-necessity letter from documented facts only.\n5) Return a corrected JSON policy object and set last_researched to today.\n\nON-FILE CRITERIA\n'+criteriaText(pol)+'\n\nPATIENT FACTS\n'+facts+'\n\nJSON SHAPE\n'+SCHEMA_HINT;
-}
-function updateCTA(){
-  const chip=$('cta_chip'),line=$('cta_line'),btn=$('cta_main');
-  const d=drug(),pay=payer(),pol=findPolicy();
-  const show=(id,on)=>{ const el=$(id); if(el) el.style.display=on?'':'none'; };
-  if(!d||!pay){ chip.innerHTML=''; line.textContent='Pick a drug, payer, and plan type to check PA readiness.'; btn.className='cta-btn locked'; btn.textContent='Open CoverMyMeds →';
-    ['patient_section','epic_section','letter_section','packet_section','verify_section'].forEach(s=>show(s,false)); return; }
-  if(!pol){ chip.innerHTML='<span class="verdict-chip none">No exact policy</span>'; line.innerHTML='Generate a <span class="v">research prompt</span>; do not substitute another plan type.'; btn.className='cta-btn'; btn.textContent='Build research prompt →';
-    show('patient_section',false); show('epic_section',false); show('letter_section',false); show('packet_section',false); show('verify_section',true); $('verify_box').textContent=buildVerify(); return; }
-  const ev=evalPolicy(pol), m=statusMeta(pol,ev);
-  chip.innerHTML='<span class="verdict-chip '+m.chip+'">'+esc(m.chipText)+'</span>';
-  if(pol.criteria&&pol.criteria.length){ const met=ev.rows.filter(r=>r.status==='met').length, gaps=ev.rows.filter(r=>r.status!=='met').length;
-    line.innerHTML='<span class="v">'+met+'/'+ev.rows.length+' criteria met'+(gaps?' · '+gaps+' to resolve':'')+'</span>'; }
-  else line.textContent = pol.pa_required?'PA required — see readiness check.':'No PA requirement listed in this policy file.';
-  btn.className='cta-btn';
-  btn.textContent = pol.formulary_status==='not_covered' ? 'Review alternatives →' : (pol.pa_required ? 'Open CoverMyMeds →' : 'Confirm benefit →');
-  $('patient_box').textContent=buildPatient(); show('patient_section',true);
-  renderEpic(); show('epic_section',true);
-  $('letter_box').textContent=buildLetter(); show('letter_section',true);
-  $('packet_box').textContent=buildPacket(); show('packet_section',true);
-  $('verify_box').textContent=buildVerify(); show('verify_section',true);
-}
-
-async function copyText(t){
-  try{ await navigator.clipboard.writeText(t); return true; }
-  catch(e){ try{ const ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select(); const ok=document.execCommand('copy'); document.body.removeChild(ta); return ok; }catch(e2){ return false; } }
-}
-function toast(msg,warn){ const t=$('toast'); t.textContent=msg; t.classList.toggle('warn',!!warn); t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2200); }
-
-function refresh(){ renderFactsStructure(); renderVerdict(); updateCTA(); markNeeded(); saveState(); }
-function storage(){ return window.sessionStorage || window.localStorage; }
-function saveState(){ try{ storage().setItem(STORAGE_KEY, JSON.stringify({drug_id:state.drug_id,payer_id:state.payer_id,lob:state.lob,dx:[...state.dx],dx_none:state.dx_none,dx_unknown:state.dx_unknown,tried:[...state.tried],tried_none:state.tried_none,tried_unknown:state.tried_unknown,contra:[...state.contra],contra_none:state.contra_none,contra_unknown:state.contra_unknown,labs:state.labs})); }catch(e){} }
-function applyLoadedState(s,legacy=false){
-  state.drug_id=s.drug_id||''; state.payer_id=s.payer_id||''; state.lob=s.lob||'commercial';
-  state.dx=new Set(s.dx||[]); state.tried=new Set(s.tried||[]); state.contra=new Set(s.contra||[]);
-  state.dx_none=legacy?false:!!s.dx_none; state.tried_none=legacy?false:!!s.tried_none; state.contra_none=legacy?false:!!s.contra_none;
-  state.dx_unknown=legacy?!!s.dx_none:!!s.dx_unknown; state.tried_unknown=legacy?!!s.tried_none:!!s.tried_unknown; state.contra_unknown=legacy?!!s.contra_none:!!s.contra_unknown;
-  state.labs=s.labs||{};
-}
-function loadState(){
-  try{ const raw=storage().getItem(STORAGE_KEY); if(raw){ applyLoadedState(JSON.parse(raw),false); return; } }catch(e){}
-  for(const k of LEGACY_STORAGE_KEYS){ try{ const raw=localStorage.getItem(k); if(raw){ applyLoadedState(JSON.parse(raw),true); return; } }catch(e){} }
-}
-function clearAll(){ try{ storage().removeItem(STORAGE_KEY); LEGACY_STORAGE_KEYS.forEach(k=>localStorage.removeItem(k)); }catch(e){}
-  state.drug_id=''; state.payer_id=''; state.lob='commercial'; ['dx','tried','contra'].forEach(clearKind); state.labs={};
-  $('f_drug').value=''; $('f_payer').value=''; $('f_lob').value='commercial'; factsSig='';
-  refresh(); toast('Cleared'); }
-
-function fillSelects(){
-  $('f_drug').innerHTML='<option value="">Choose a drug&hellip;</option>'+DATA.drugs.map(d=>'<option value="'+esc(d.id)+'">'+esc(d.name)+' &mdash; '+esc(d.generic)+'</option>').join('');
-  $('f_payer').innerHTML='<option value="">Choose&hellip;</option>'+DATA.payers.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join('');
-}
-function hydrate(){ $('f_drug').value=state.drug_id||''; $('f_payer').value=state.payer_id||''; $('f_lob').value=state.lob||'commercial'; }
-
-function bind(){
-  $('f_drug').addEventListener('change',()=>{ state.drug_id=$('f_drug').value; refresh(); });
-  $('f_payer').addEventListener('change',()=>{ state.payer_id=$('f_payer').value; refresh(); });
-  $('f_lob').addEventListener('change',()=>{ state.lob=$('f_lob').value; refresh(); });
-  $('info-btn').addEventListener('click',()=>$('disclaimer').classList.toggle('show'));
-  $('clear-btn').addEventListener('click',()=>{ if(confirm('Clear patient facts and selections?')) clearAll(); });
-  $('cta_main').addEventListener('click',async()=>{
-    if($('cta_main').classList.contains('locked')) return;
-    const pol=findPolicy();
-    if(!pol){ const ok=await copyText(buildVerify()); toast(ok?'Research prompt copied':'Copy blocked',!ok); const v=$('verify_section'); if(v&&v.style.display!=='none') v.scrollIntoView({behavior:'smooth',block:'start'}); return; }
-    if(pol.formulary_status==='not_covered'){ $('verdict_body').scrollIntoView({behavior:'smooth',block:'start'}); toast('See alternatives and exception notes'); return; }
-    if(pol.formulary_status==='covered'&&!pol.pa_required){ $('verdict_body').scrollIntoView({behavior:'smooth',block:'start'}); toast('Confirm benefit/current formulary first'); return; }
-    window.open(CMM_URL,'_blank','noopener'); toast('Opened CoverMyMeds — verify and attach documentation');
-  });
-  $('copy_patient').addEventListener('click',async()=>{ const ok=await copyText(buildPatient()); toast(ok?'Patient message copied':'Copy blocked',!ok); });
-  $('copy_letter').addEventListener('click',async()=>{ const ok=await copyText(buildLetter()); toast(ok?'Justification copied':'Copy blocked',!ok); });
-  $('copy_packet').addEventListener('click',async()=>{ const ok=await copyText(buildPacket()); toast(ok?'PA packet copied':'Copy blocked',!ok); });
-  $('copy_dataset').addEventListener('click',async()=>{ const ok=await copyText(RAW); toast(ok?'Data file copied — paste to an LLM to refresh':'Copy blocked',!ok); });
-  $('open_oe').addEventListener('click',async()=>{ await copyText(buildVerify()); window.open(OE_URL,'_blank','noopener'); toast('Opened OpenEvidence — paste the prompt'); });
-}
-
-async function init(){
-  try{ await load(); }catch(e){ return; }
-  fillSelects(); loadState(); bind(); hydrate();
-  const meta = DATA._meta||{};
-  $('data_status').textContent = /ILLUSTRATIVE/i.test(meta.data_status||'') ? 'illustrative (replace)' : (USING_EXTERNAL_DATA?'external data':'loaded');
-  $('rev_date').textContent = meta.last_reviewed || '—';
-  const sourceNote = USING_EXTERNAL_DATA ? 'External data URL loaded — verify provenance. ' : '';
-  $('databar').textContent = sourceNote + (meta.data_status || 'Data loaded');
-  refresh();
-}
-document.addEventListener('DOMContentLoaded',init);
+loadCoverageData();
 </script>
 </body>
 </html>
