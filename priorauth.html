@@ -1,6 +1,7 @@
 
 
 
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -103,8 +104,2883 @@ textarea{min-height:118px;resize:vertical;font-family:ui-monospace,SFMono-Regula
 
   <div class="footer-note">JSON schema includes deep-research instructions. Demonstration rows are not payer determinations.</div>
 </div>
+<script id="coverageData" type="application/json">
+{
+  "schema_version": "3.2-ask-plan-criteria-checker",
+  "created": "2026-06-13",
+  "updated": "2026-06-13",
+  "verification_notice": "Universal coverage-verification scaffold. This is not a payer determination. Use it to ask the member's plan/PBM and prepare Epic evidence if PA or step therapy is required.",
+  "status_definitions": {
+    "covered": {
+      "label": "Covered",
+      "short_label": "Covered",
+      "color": "green"
+    },
+    "covered_with_criteria": {
+      "label": "Covered with criteria",
+      "short_label": "Covered with criteria",
+      "color": "green"
+    },
+    "covered_with_authorization": {
+      "label": "Covered with authorization",
+      "short_label": "Authorization",
+      "color": "yellow"
+    },
+    "covered_with_authorization_and_prior_trial": {
+      "label": "Authorization + prior trial/step",
+      "short_label": "Auth + prior trial",
+      "color": "orange"
+    },
+    "not_covered": {
+      "label": "Not covered",
+      "short_label": "Not covered",
+      "color": "red"
+    },
+    "unknown_or_verify": {
+      "label": "Unknown / verify with plan",
+      "short_label": "Verify",
+      "color": "gray"
+    }
+  },
+  "criteria_library": {
+    "plan_verification_call": {
+      "label": "Plan/PBM verification completed",
+      "target_value": "Drug, indication, PA status, step therapy, preferred alternatives, exact criteria, and call reference number documented",
+      "value_prompt": "Plan/PBM, date, representative, reference number, and answer",
+      "acceptable_evidence": [
+        "Patient call note",
+        "office call note",
+        "payer portal",
+        "PBM portal"
+      ],
+      "icd10_codes": [],
+      "epic_terms": [
+        "insurance",
+        "pharmacy benefit",
+        "prior authorization",
+        "formulary",
+        "step therapy",
+        "reference number",
+        "PBM"
+      ]
+    },
+    "type_2_diabetes": {
+      "label": "Type 2 diabetes diagnosis",
+      "target_value": "T2DM documented if plan says diabetes indication is required",
+      "value_prompt": "Problem list or assessment evidence",
+      "acceptable_evidence": [
+        "Problem list",
+        "assessment/plan",
+        "ICD-10 diagnosis",
+        "endocrinology note"
+      ],
+      "icd10_codes": [
+        "E11",
+        "E11.9",
+        "E11.65",
+        "E11.22",
+        "E11.21",
+        "E11.29",
+        "E11.40",
+        "E11.42",
+        "E11.59",
+        "E11.69",
+        "E11.8"
+      ],
+      "epic_terms": [
+        "type 2 diabetes",
+        "T2DM",
+        "diabetes mellitus type 2",
+        "diabetic",
+        "E11"
+      ]
+    },
+    "a1c_evidence": {
+      "label": "HbA1c / glycemic evidence",
+      "target_value": "Most recent HbA1c; common thresholds are plan-specific, often diabetes range or \u22657.0 if uncontrolled criterion is required",
+      "value_prompt": "A1c value/date",
+      "acceptable_evidence": [
+        "Lab result"
+      ],
+      "icd10_codes": [],
+      "epic_terms": [
+        "HbA1c",
+        "A1c",
+        "hemoglobin A1c",
+        "glycohemoglobin",
+        "glucose"
+      ]
+    },
+    "metformin_or_preferred_trial": {
+      "label": "Metformin/preferred-agent trial, contraindication, or intolerance",
+      "target_value": "Required only if plan/PBM reports step therapy",
+      "value_prompt": "Medication, dates, dose, response, intolerance, contraindication, or reason not appropriate",
+      "acceptable_evidence": [
+        "Medication history",
+        "pharmacy claim",
+        "allergy/intolerance",
+        "assessment/plan"
+      ],
+      "icd10_codes": [],
+      "epic_terms": [
+        "metformin",
+        "Glucophage",
+        "Trulicity",
+        "Ozempic",
+        "Rybelsus",
+        "Victoza",
+        "Mounjaro",
+        "failed",
+        "trial",
+        "intolerance",
+        "contraindication",
+        "eGFR"
+      ]
+    },
+    "bmi_ge_30_or_27_comorbidity": {
+      "label": "BMI threshold for weight-related coverage",
+      "target_value": "Typical label/policy universe: BMI \u226530, or BMI \u226527 with weight-related comorbidity; exact plan rule must be verified",
+      "value_prompt": "BMI, height, weight, date, and comorbidity if BMI 27-29.9",
+      "acceptable_evidence": [
+        "Vitals",
+        "problem list",
+        "weight management note"
+      ],
+      "icd10_codes": [
+        "E66.9",
+        "E66.01",
+        "E66.811",
+        "E66.812",
+        "E66.813",
+        "E66.3",
+        "Z68.27",
+        "Z68.28",
+        "Z68.29",
+        "Z68.30",
+        "Z68.31",
+        "Z68.32",
+        "Z68.33",
+        "Z68.34",
+        "Z68.35",
+        "Z68.36",
+        "Z68.37",
+        "Z68.38",
+        "Z68.39",
+        "Z68.41",
+        "Z68.42",
+        "Z68.43",
+        "Z68.44",
+        "Z68.45",
+        "I10",
+        "E78.5",
+        "G47.33",
+        "R73.03"
+      ],
+      "epic_terms": [
+        "BMI",
+        "body mass index",
+        "height",
+        "weight",
+        "obesity",
+        "overweight",
+        "hypertension",
+        "HTN",
+        "dyslipidemia",
+        "hyperlipidemia",
+        "sleep apnea",
+        "OSA",
+        "prediabetes"
+      ]
+    },
+    "lifestyle_weight_management": {
+      "label": "Lifestyle / weight-management documentation",
+      "target_value": "Diet, exercise, reduced-calorie plan, or structured weight-management program if plan requires it",
+      "value_prompt": "Program/intervention, dates, duration, and response",
+      "acceptable_evidence": [
+        "PCP note",
+        "nutrition counseling",
+        "weight management visit",
+        "dietitian note"
+      ],
+      "icd10_codes": [
+        "Z71.3",
+        "Z71.82"
+      ],
+      "epic_terms": [
+        "diet",
+        "reduced calorie",
+        "nutrition",
+        "dietitian",
+        "exercise",
+        "physical activity",
+        "weight management",
+        "lifestyle",
+        "calorie",
+        "supervised"
+      ]
+    },
+    "anti_obesity_trial": {
+      "label": "Prior anti-obesity medication trial/intolerance/contraindication",
+      "target_value": "Required only if plan/PBM reports step therapy",
+      "value_prompt": "Medication, dates, response, intolerance, or contraindication",
+      "acceptable_evidence": [
+        "Medication history",
+        "assessment/plan",
+        "contraindication rationale"
+      ],
+      "icd10_codes": [],
+      "epic_terms": [
+        "orlistat",
+        "phentermine",
+        "topiramate",
+        "Qsymia",
+        "Contrave",
+        "naltrexone",
+        "bupropion",
+        "Saxenda",
+        "trial",
+        "contraindication",
+        "intolerance"
+      ]
+    },
+    "osa_with_ahi": {
+      "label": "OSA severity / sleep-study evidence",
+      "target_value": "Moderate-to-severe OSA or AHI/REI threshold if plan requires; document sleep study date/source",
+      "value_prompt": "AHI/REI, severity, study type/date, and sleep medicine note",
+      "acceptable_evidence": [
+        "Polysomnography",
+        "home sleep test",
+        "sleep medicine note",
+        "problem list"
+      ],
+      "icd10_codes": [
+        "G47.33"
+      ],
+      "epic_terms": [
+        "sleep apnea",
+        "obstructive sleep apnea",
+        "OSA",
+        "AHI",
+        "REI",
+        "apnea hypopnea index",
+        "respiratory event index",
+        "hypopnea",
+        "polysomnography",
+        "home sleep test",
+        "sleep study"
+      ]
+    },
+    "pap_cpapt_status": {
+      "label": "PAP/CPAP status if required",
+      "target_value": "Use, adherence, intolerance, unable/unwilling, or not required by plan",
+      "value_prompt": "CPAP/PAP use, adherence data, intolerance, or reason not used",
+      "acceptable_evidence": [
+        "Sleep medicine note",
+        "DME/adherence data",
+        "documented patient report"
+      ],
+      "icd10_codes": [
+        "G47.33",
+        "Z99.89"
+      ],
+      "epic_terms": [
+        "CPAP",
+        "PAP",
+        "positive airway pressure",
+        "mask intolerance",
+        "adherence",
+        "DME",
+        "sleep medicine"
+      ]
+    },
+    "ascvd_evidence": {
+      "label": "Established cardiovascular disease / ASCVD",
+      "target_value": "Established CVD if plan covers a CV-risk-reduction pathway",
+      "value_prompt": "CAD/MI/stroke/PAD/CABG/stent evidence and date",
+      "acceptable_evidence": [
+        "Problem list",
+        "cardiology note",
+        "hospital discharge summary",
+        "vascular history"
+      ],
+      "icd10_codes": [
+        "I25.10",
+        "I25.2",
+        "I21.9",
+        "I63.9",
+        "I69.30",
+        "I70.209",
+        "I73.9",
+        "Z95.1",
+        "Z95.5"
+      ],
+      "epic_terms": [
+        "ASCVD",
+        "cardiovascular disease",
+        "coronary artery disease",
+        "CAD",
+        "myocardial infarction",
+        "MI",
+        "stroke",
+        "CVA",
+        "PAD",
+        "peripheral artery disease",
+        "CABG",
+        "stent"
+      ]
+    },
+    "ckd_albuminuria_t2d": {
+      "label": "CKD / albuminuria with type 2 diabetes if plan recognizes it",
+      "target_value": "CKD, eGFR, UACR/albuminuria, and T2DM evidence if plan requires",
+      "value_prompt": "CKD stage, eGFR, UACR/albuminuria, date",
+      "acceptable_evidence": [
+        "Problem list",
+        "lab result",
+        "nephrology note"
+      ],
+      "icd10_codes": [
+        "E11.22",
+        "N18.1",
+        "N18.2",
+        "N18.30",
+        "N18.31",
+        "N18.32",
+        "N18.4",
+        "N18.5",
+        "R80.9"
+      ],
+      "epic_terms": [
+        "CKD",
+        "chronic kidney disease",
+        "eGFR",
+        "GFR",
+        "creatinine",
+        "albuminuria",
+        "urine albumin",
+        "microalbumin",
+        "UACR",
+        "proteinuria"
+      ]
+    },
+    "mash_fibrosis_evidence": {
+      "label": "MASH/NASH/fatty liver fibrosis evidence if plan recognizes it",
+      "target_value": "MASH/NASH/MASLD plus fibrosis stage, often F2-F3/noncirrhotic when specified; exact plan rule must be verified",
+      "value_prompt": "Diagnosis, biopsy/FibroScan/MRE/FIB-4, fibrosis stage, hepatology note",
+      "acceptable_evidence": [
+        "Hepatology note",
+        "liver biopsy",
+        "FibroScan/elastography",
+        "MRE",
+        "imaging",
+        "lab workup"
+      ],
+      "icd10_codes": [
+        "K75.81",
+        "K76.0",
+        "K74.00",
+        "K74.01",
+        "K74.02"
+      ],
+      "epic_terms": [
+        "MASH",
+        "NASH",
+        "MASLD",
+        "NAFLD",
+        "fatty liver",
+        "steatohepatitis",
+        "hepatic steatosis",
+        "fibrosis",
+        "F2",
+        "F3",
+        "FibroScan",
+        "elastography",
+        "MRE",
+        "liver biopsy",
+        "cirrhosis",
+        "noncirrhotic"
+      ]
+    }
+  },
+  "payers": [
+    {
+      "id": "ask_my_plan",
+      "name": "Ask My Plan / PBM Verification",
+      "plan_types": [
+        {
+          "id": "commercial",
+          "name": "Commercial"
+        },
+        {
+          "id": "employer",
+          "name": "Employer plan"
+        },
+        {
+          "id": "medicare_advantage",
+          "name": "Medicare Advantage"
+        },
+        {
+          "id": "medicaid",
+          "name": "Medicaid"
+        },
+        {
+          "id": "exchange",
+          "name": "Exchange"
+        },
+        {
+          "id": "unknown",
+          "name": "Unknown / verify"
+        }
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "payer_id": "ask_my_plan",
+      "plan_type_id": "commercial",
+      "policy_name": "Ask My Plan \u2014 GLP-1/GIP-GLP verification and Epic evidence prep",
+      "verification_status": "member_specific_verification_required",
+      "source_name": "Plan/PBM phone or portal verification required",
+      "source_url": "",
+      "effective_date": "member-specific",
+      "retrieved_date": "2026-06-13",
+      "notes_on_limits": "This row intentionally does not claim coverage. It creates a script and evidence checklist for member-specific verification.",
+      "agents": [
+        {
+          "drug": "Ozempic",
+          "ingredient": "semaglutide injection",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "ozempic_t2dm__cardiometabolic_indication_to_verify",
+              "indication": "T2DM / cardiometabolic indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask plan if covered for T2DM; verify PA, preferred GLP step therapy, A1c or diagnosis requirements, and whether CV/CKD evidence matters.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "ozempic_weight_loss_without_t2dm__verify_exclusion",
+              "indication": "Weight loss without T2DM \u2014 verify exclusion",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Many plans exclude diabetes-only products for weight loss; do not assume coverage.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Rybelsus",
+          "ingredient": "oral semaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "rybelsus_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if oral semaglutide is preferred/nonpreferred and whether metformin or injectable GLP trial is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Mounjaro",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "mounjaro_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if covered for T2DM and whether Ozempic/Trulicity/Rybelsus or metformin step therapy is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "mounjaro_ckd_albuminuria_with_t2dm__verify_if_relevant",
+              "indication": "CKD/albuminuria with T2DM \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ckd_albuminuria_t2d"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Only use if plan explicitly recognizes kidney-risk language; otherwise treat as supporting context, not coverage criterion.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Trulicity",
+          "ingredient": "dulaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "trulicity_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred GLP-1 and whether PA/step therapy applies.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "trulicity_t2dm_with_cv_risk__verify_if_relevant",
+              "indication": "T2DM with CV risk \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Use ASCVD only if plan asks or if PA form recognizes CV risk evidence.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Victoza",
+          "ingredient": "liraglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "victoza_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred/nonpreferred and whether prior GLP or metformin evidence is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Byetta",
+          "ingredient": "exenatide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "byetta_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Bydureon BCise",
+          "ingredient": "exenatide extended release",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "bydureon_bcise_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Wegovy",
+          "ingredient": "semaglutide 2.4 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "wegovy_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_established_cvd_with_overweight_obesity_to_verify",
+              "indication": "Established CVD with overweight/obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes CV risk-reduction indication and what documentation is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_mash_nash_fatty_liver_fibrosis_to_verify",
+              "indication": "MASH/NASH/fatty liver fibrosis to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "mash_fibrosis_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes MASH/MASLD/fibrosis indication; verify biopsy/noninvasive fibrosis requirements and cirrhosis exclusions.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Zepbound",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "zepbound_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "zepbound_osa_with_obesity_to_verify",
+              "indication": "OSA with obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "osa_with_ahi"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "pap_cpapt_status"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if OSA indication is covered; verify AHI/REI threshold, sleep study requirements, BMI requirement, and PAP/CPAP requirements.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Saxenda",
+          "ingredient": "liraglutide 3 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "saxenda_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred Wegovy/Zepbound or other alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "payer_id": "ask_my_plan",
+      "plan_type_id": "employer",
+      "policy_name": "Ask My Plan \u2014 GLP-1/GIP-GLP verification and Epic evidence prep",
+      "verification_status": "member_specific_verification_required",
+      "source_name": "Plan/PBM phone or portal verification required",
+      "source_url": "",
+      "effective_date": "member-specific",
+      "retrieved_date": "2026-06-13",
+      "notes_on_limits": "This row intentionally does not claim coverage. It creates a script and evidence checklist for member-specific verification.",
+      "agents": [
+        {
+          "drug": "Ozempic",
+          "ingredient": "semaglutide injection",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "ozempic_t2dm__cardiometabolic_indication_to_verify",
+              "indication": "T2DM / cardiometabolic indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask plan if covered for T2DM; verify PA, preferred GLP step therapy, A1c or diagnosis requirements, and whether CV/CKD evidence matters.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "ozempic_weight_loss_without_t2dm__verify_exclusion",
+              "indication": "Weight loss without T2DM \u2014 verify exclusion",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Many plans exclude diabetes-only products for weight loss; do not assume coverage.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Rybelsus",
+          "ingredient": "oral semaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "rybelsus_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if oral semaglutide is preferred/nonpreferred and whether metformin or injectable GLP trial is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Mounjaro",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "mounjaro_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if covered for T2DM and whether Ozempic/Trulicity/Rybelsus or metformin step therapy is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "mounjaro_ckd_albuminuria_with_t2dm__verify_if_relevant",
+              "indication": "CKD/albuminuria with T2DM \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ckd_albuminuria_t2d"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Only use if plan explicitly recognizes kidney-risk language; otherwise treat as supporting context, not coverage criterion.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Trulicity",
+          "ingredient": "dulaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "trulicity_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred GLP-1 and whether PA/step therapy applies.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "trulicity_t2dm_with_cv_risk__verify_if_relevant",
+              "indication": "T2DM with CV risk \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Use ASCVD only if plan asks or if PA form recognizes CV risk evidence.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Victoza",
+          "ingredient": "liraglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "victoza_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred/nonpreferred and whether prior GLP or metformin evidence is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Byetta",
+          "ingredient": "exenatide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "byetta_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Bydureon BCise",
+          "ingredient": "exenatide extended release",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "bydureon_bcise_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Wegovy",
+          "ingredient": "semaglutide 2.4 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "wegovy_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_established_cvd_with_overweight_obesity_to_verify",
+              "indication": "Established CVD with overweight/obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes CV risk-reduction indication and what documentation is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_mash_nash_fatty_liver_fibrosis_to_verify",
+              "indication": "MASH/NASH/fatty liver fibrosis to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "mash_fibrosis_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes MASH/MASLD/fibrosis indication; verify biopsy/noninvasive fibrosis requirements and cirrhosis exclusions.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Zepbound",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "zepbound_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "zepbound_osa_with_obesity_to_verify",
+              "indication": "OSA with obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "osa_with_ahi"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "pap_cpapt_status"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if OSA indication is covered; verify AHI/REI threshold, sleep study requirements, BMI requirement, and PAP/CPAP requirements.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Saxenda",
+          "ingredient": "liraglutide 3 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "saxenda_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred Wegovy/Zepbound or other alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "payer_id": "ask_my_plan",
+      "plan_type_id": "medicare_advantage",
+      "policy_name": "Ask My Plan \u2014 GLP-1/GIP-GLP verification and Epic evidence prep",
+      "verification_status": "member_specific_verification_required",
+      "source_name": "Plan/PBM phone or portal verification required",
+      "source_url": "",
+      "effective_date": "member-specific",
+      "retrieved_date": "2026-06-13",
+      "notes_on_limits": "This row intentionally does not claim coverage. It creates a script and evidence checklist for member-specific verification.",
+      "agents": [
+        {
+          "drug": "Ozempic",
+          "ingredient": "semaglutide injection",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "ozempic_t2dm__cardiometabolic_indication_to_verify",
+              "indication": "T2DM / cardiometabolic indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask plan if covered for T2DM; verify PA, preferred GLP step therapy, A1c or diagnosis requirements, and whether CV/CKD evidence matters.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "ozempic_weight_loss_without_t2dm__verify_exclusion",
+              "indication": "Weight loss without T2DM \u2014 verify exclusion",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Many plans exclude diabetes-only products for weight loss; do not assume coverage.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Rybelsus",
+          "ingredient": "oral semaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "rybelsus_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if oral semaglutide is preferred/nonpreferred and whether metformin or injectable GLP trial is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Mounjaro",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "mounjaro_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if covered for T2DM and whether Ozempic/Trulicity/Rybelsus or metformin step therapy is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "mounjaro_ckd_albuminuria_with_t2dm__verify_if_relevant",
+              "indication": "CKD/albuminuria with T2DM \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ckd_albuminuria_t2d"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Only use if plan explicitly recognizes kidney-risk language; otherwise treat as supporting context, not coverage criterion.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Trulicity",
+          "ingredient": "dulaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "trulicity_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred GLP-1 and whether PA/step therapy applies.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "trulicity_t2dm_with_cv_risk__verify_if_relevant",
+              "indication": "T2DM with CV risk \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Use ASCVD only if plan asks or if PA form recognizes CV risk evidence.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Victoza",
+          "ingredient": "liraglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "victoza_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred/nonpreferred and whether prior GLP or metformin evidence is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Byetta",
+          "ingredient": "exenatide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "byetta_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Bydureon BCise",
+          "ingredient": "exenatide extended release",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "bydureon_bcise_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Wegovy",
+          "ingredient": "semaglutide 2.4 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "wegovy_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_established_cvd_with_overweight_obesity_to_verify",
+              "indication": "Established CVD with overweight/obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes CV risk-reduction indication and what documentation is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_mash_nash_fatty_liver_fibrosis_to_verify",
+              "indication": "MASH/NASH/fatty liver fibrosis to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "mash_fibrosis_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes MASH/MASLD/fibrosis indication; verify biopsy/noninvasive fibrosis requirements and cirrhosis exclusions.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Zepbound",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "zepbound_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "zepbound_osa_with_obesity_to_verify",
+              "indication": "OSA with obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "osa_with_ahi"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "pap_cpapt_status"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if OSA indication is covered; verify AHI/REI threshold, sleep study requirements, BMI requirement, and PAP/CPAP requirements.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Saxenda",
+          "ingredient": "liraglutide 3 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "saxenda_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred Wegovy/Zepbound or other alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "payer_id": "ask_my_plan",
+      "plan_type_id": "medicaid",
+      "policy_name": "Ask My Plan \u2014 GLP-1/GIP-GLP verification and Epic evidence prep",
+      "verification_status": "member_specific_verification_required",
+      "source_name": "Plan/PBM phone or portal verification required",
+      "source_url": "",
+      "effective_date": "member-specific",
+      "retrieved_date": "2026-06-13",
+      "notes_on_limits": "This row intentionally does not claim coverage. It creates a script and evidence checklist for member-specific verification.",
+      "agents": [
+        {
+          "drug": "Ozempic",
+          "ingredient": "semaglutide injection",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "ozempic_t2dm__cardiometabolic_indication_to_verify",
+              "indication": "T2DM / cardiometabolic indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask plan if covered for T2DM; verify PA, preferred GLP step therapy, A1c or diagnosis requirements, and whether CV/CKD evidence matters.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "ozempic_weight_loss_without_t2dm__verify_exclusion",
+              "indication": "Weight loss without T2DM \u2014 verify exclusion",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Many plans exclude diabetes-only products for weight loss; do not assume coverage.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Rybelsus",
+          "ingredient": "oral semaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "rybelsus_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if oral semaglutide is preferred/nonpreferred and whether metformin or injectable GLP trial is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Mounjaro",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "mounjaro_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if covered for T2DM and whether Ozempic/Trulicity/Rybelsus or metformin step therapy is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "mounjaro_ckd_albuminuria_with_t2dm__verify_if_relevant",
+              "indication": "CKD/albuminuria with T2DM \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ckd_albuminuria_t2d"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Only use if plan explicitly recognizes kidney-risk language; otherwise treat as supporting context, not coverage criterion.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Trulicity",
+          "ingredient": "dulaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "trulicity_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred GLP-1 and whether PA/step therapy applies.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "trulicity_t2dm_with_cv_risk__verify_if_relevant",
+              "indication": "T2DM with CV risk \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Use ASCVD only if plan asks or if PA form recognizes CV risk evidence.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Victoza",
+          "ingredient": "liraglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "victoza_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred/nonpreferred and whether prior GLP or metformin evidence is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Byetta",
+          "ingredient": "exenatide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "byetta_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Bydureon BCise",
+          "ingredient": "exenatide extended release",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "bydureon_bcise_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Wegovy",
+          "ingredient": "semaglutide 2.4 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "wegovy_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_established_cvd_with_overweight_obesity_to_verify",
+              "indication": "Established CVD with overweight/obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes CV risk-reduction indication and what documentation is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_mash_nash_fatty_liver_fibrosis_to_verify",
+              "indication": "MASH/NASH/fatty liver fibrosis to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "mash_fibrosis_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes MASH/MASLD/fibrosis indication; verify biopsy/noninvasive fibrosis requirements and cirrhosis exclusions.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Zepbound",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "zepbound_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "zepbound_osa_with_obesity_to_verify",
+              "indication": "OSA with obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "osa_with_ahi"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "pap_cpapt_status"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if OSA indication is covered; verify AHI/REI threshold, sleep study requirements, BMI requirement, and PAP/CPAP requirements.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Saxenda",
+          "ingredient": "liraglutide 3 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "saxenda_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred Wegovy/Zepbound or other alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "payer_id": "ask_my_plan",
+      "plan_type_id": "exchange",
+      "policy_name": "Ask My Plan \u2014 GLP-1/GIP-GLP verification and Epic evidence prep",
+      "verification_status": "member_specific_verification_required",
+      "source_name": "Plan/PBM phone or portal verification required",
+      "source_url": "",
+      "effective_date": "member-specific",
+      "retrieved_date": "2026-06-13",
+      "notes_on_limits": "This row intentionally does not claim coverage. It creates a script and evidence checklist for member-specific verification.",
+      "agents": [
+        {
+          "drug": "Ozempic",
+          "ingredient": "semaglutide injection",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "ozempic_t2dm__cardiometabolic_indication_to_verify",
+              "indication": "T2DM / cardiometabolic indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask plan if covered for T2DM; verify PA, preferred GLP step therapy, A1c or diagnosis requirements, and whether CV/CKD evidence matters.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "ozempic_weight_loss_without_t2dm__verify_exclusion",
+              "indication": "Weight loss without T2DM \u2014 verify exclusion",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Many plans exclude diabetes-only products for weight loss; do not assume coverage.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Rybelsus",
+          "ingredient": "oral semaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "rybelsus_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if oral semaglutide is preferred/nonpreferred and whether metformin or injectable GLP trial is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Mounjaro",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "mounjaro_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if covered for T2DM and whether Ozempic/Trulicity/Rybelsus or metformin step therapy is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "mounjaro_ckd_albuminuria_with_t2dm__verify_if_relevant",
+              "indication": "CKD/albuminuria with T2DM \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ckd_albuminuria_t2d"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Only use if plan explicitly recognizes kidney-risk language; otherwise treat as supporting context, not coverage criterion.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Trulicity",
+          "ingredient": "dulaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "trulicity_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred GLP-1 and whether PA/step therapy applies.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "trulicity_t2dm_with_cv_risk__verify_if_relevant",
+              "indication": "T2DM with CV risk \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Use ASCVD only if plan asks or if PA form recognizes CV risk evidence.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Victoza",
+          "ingredient": "liraglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "victoza_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred/nonpreferred and whether prior GLP or metformin evidence is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Byetta",
+          "ingredient": "exenatide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "byetta_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Bydureon BCise",
+          "ingredient": "exenatide extended release",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "bydureon_bcise_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Wegovy",
+          "ingredient": "semaglutide 2.4 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "wegovy_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_established_cvd_with_overweight_obesity_to_verify",
+              "indication": "Established CVD with overweight/obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes CV risk-reduction indication and what documentation is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_mash_nash_fatty_liver_fibrosis_to_verify",
+              "indication": "MASH/NASH/fatty liver fibrosis to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "mash_fibrosis_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes MASH/MASLD/fibrosis indication; verify biopsy/noninvasive fibrosis requirements and cirrhosis exclusions.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Zepbound",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "zepbound_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "zepbound_osa_with_obesity_to_verify",
+              "indication": "OSA with obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "osa_with_ahi"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "pap_cpapt_status"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if OSA indication is covered; verify AHI/REI threshold, sleep study requirements, BMI requirement, and PAP/CPAP requirements.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Saxenda",
+          "ingredient": "liraglutide 3 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "saxenda_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred Wegovy/Zepbound or other alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "payer_id": "ask_my_plan",
+      "plan_type_id": "unknown",
+      "policy_name": "Ask My Plan \u2014 GLP-1/GIP-GLP verification and Epic evidence prep",
+      "verification_status": "member_specific_verification_required",
+      "source_name": "Plan/PBM phone or portal verification required",
+      "source_url": "",
+      "effective_date": "member-specific",
+      "retrieved_date": "2026-06-13",
+      "notes_on_limits": "This row intentionally does not claim coverage. It creates a script and evidence checklist for member-specific verification.",
+      "agents": [
+        {
+          "drug": "Ozempic",
+          "ingredient": "semaglutide injection",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "ozempic_t2dm__cardiometabolic_indication_to_verify",
+              "indication": "T2DM / cardiometabolic indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask plan if covered for T2DM; verify PA, preferred GLP step therapy, A1c or diagnosis requirements, and whether CV/CKD evidence matters.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "ozempic_weight_loss_without_t2dm__verify_exclusion",
+              "indication": "Weight loss without T2DM \u2014 verify exclusion",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Many plans exclude diabetes-only products for weight loss; do not assume coverage.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Rybelsus",
+          "ingredient": "oral semaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "rybelsus_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if oral semaglutide is preferred/nonpreferred and whether metformin or injectable GLP trial is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Mounjaro",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "mounjaro_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if covered for T2DM and whether Ozempic/Trulicity/Rybelsus or metformin step therapy is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "mounjaro_ckd_albuminuria_with_t2dm__verify_if_relevant",
+              "indication": "CKD/albuminuria with T2DM \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ckd_albuminuria_t2d"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Only use if plan explicitly recognizes kidney-risk language; otherwise treat as supporting context, not coverage criterion.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Trulicity",
+          "ingredient": "dulaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "trulicity_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred GLP-1 and whether PA/step therapy applies.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "trulicity_t2dm_with_cv_risk__verify_if_relevant",
+              "indication": "T2DM with CV risk \u2014 verify if relevant",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Use ASCVD only if plan asks or if PA form recognizes CV risk evidence.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Victoza",
+          "ingredient": "liraglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "victoza_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if preferred/nonpreferred and whether prior GLP or metformin evidence is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Byetta",
+          "ingredient": "exenatide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "byetta_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Bydureon BCise",
+          "ingredient": "exenatide extended release",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "bydureon_bcise_t2dm_indication_to_verify",
+              "indication": "T2DM indication to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "type_2_diabetes",
+                  "a1c_evidence"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "metformin_or_preferred_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Wegovy",
+          "ingredient": "semaglutide 2.4 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "wegovy_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_established_cvd_with_overweight_obesity_to_verify",
+              "indication": "Established CVD with overweight/obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "ascvd_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes CV risk-reduction indication and what documentation is required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "wegovy_mash_nash_fatty_liver_fibrosis_to_verify",
+              "indication": "MASH/NASH/fatty liver fibrosis to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "mash_fibrosis_evidence"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if plan recognizes MASH/MASLD/fibrosis indication; verify biopsy/noninvasive fibrosis requirements and cirrhosis exclusions.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Zepbound",
+          "ingredient": "tirzepatide",
+          "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "zepbound_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if weight-loss drugs are a covered benefit; verify BMI, comorbidity, lifestyle duration, PA, and step therapy.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            },
+            {
+              "id": "zepbound_osa_with_obesity_to_verify",
+              "indication": "OSA with obesity to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "osa_with_ahi"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "pap_cpapt_status"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if OSA indication is covered; verify AHI/REI threshold, sleep study requirements, BMI requirement, and PAP/CPAP requirements.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        },
+        {
+          "drug": "Saxenda",
+          "ingredient": "liraglutide 3 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "Coverage is plan/member-specific; verify with PBM/plan.",
+          "pathways": [
+            {
+              "id": "saxenda_chronic_weight_management_to_verify",
+              "indication": "Chronic weight management to verify",
+              "status": "unknown_or_verify",
+              "criteria": {
+                "all_of": [
+                  "plan_verification_call",
+                  "bmi_ge_30_or_27_comorbidity",
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "anti_obesity_trial"
+                ]
+              },
+              "target_values_summary": "Coverage unknown until member-specific plan/PBM verification. Use checklist to capture plan answer and find supporting Epic evidence.",
+              "notes": "Ask if still covered/formulary and whether preferred Wegovy/Zepbound or other alternatives are required.",
+              "source_refs": [],
+              "evidence_tier": "verification_scaffold"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+</script>
 <script>
-const DEFAULT_DATA_URL = new URLSearchParams(location.search).get('data') || 'https://dormantone.github.io/payloadprompt/coverage.json';
+const OVERRIDE_DATA_URL = new URLSearchParams(location.search).get('data');
 let DATA = null;
 const $ = s => document.querySelector(s);
 function showLoadError(message){
@@ -112,8 +2988,8 @@ function showLoadError(message){
   const meta = document.querySelector('#policyMeta');
   const box = document.querySelector('#pathways');
   if(title) title.textContent = 'Coverage JSON not loaded';
-  if(meta) meta.textContent = DEFAULT_DATA_URL;
-  if(box) box.innerHTML = `<div class="empty">${message}<br><br>Place the JSON file next to this HTML file on a web server, or open with ?data=https://example.com/coverage.json. Local file:// loading may be blocked by the browser.</div>`;
+  if(meta) meta.textContent = OVERRIDE_DATA_URL || 'embedded coverage data';
+  if(box) box.innerHTML = `<div class="empty">${message}<br><br>This page reads coverage data embedded directly in the HTML file, so it works even when opened locally. To load a live source instead, open it with ?data=https://example.com/coverage.json</div>`;
 }
 const FALLBACK_STATUS_DEFINITIONS = {
   covered: {label:'Covered', short_label:'Covered', color:'green'},
@@ -220,14 +3096,28 @@ function wrapFlatPathways(raw){
   };
 }
 
+function readEmbeddedData(){
+  const node = document.querySelector('#coverageData');
+  if(!node) throw new Error('Embedded coverage data block (#coverageData) is missing.');
+  const text = node.textContent.trim();
+  if(!text) throw new Error('Embedded coverage data block is empty.');
+  return JSON.parse(text);
+}
 async function loadCoverageData(){
   try{
-    const response = await fetch(DEFAULT_DATA_URL, {cache:'no-store'});
-    if(!response.ok) throw new Error(`HTTP ${response.status}`);
-    const raw = await response.json();
+    let raw, sourceLabel;
+    if(OVERRIDE_DATA_URL){
+      const response = await fetch(OVERRIDE_DATA_URL, {cache:'no-store'});
+      if(!response.ok) throw new Error(`HTTP ${response.status}`);
+      raw = await response.json();
+      sourceLabel = OVERRIDE_DATA_URL;
+    } else {
+      raw = readEmbeddedData();
+      sourceLabel = 'embedded coverage data';
+    }
     DATA = normalizeCoverageData(raw);
     const foot = document.querySelector('.footer-note');
-    if(foot) foot.textContent = `Loaded coverage JSON from ${DEFAULT_DATA_URL}. Demonstration rows are not payer determinations.`;
+    if(foot) foot.textContent = `Loaded ${sourceLabel}. Demonstration rows are not payer determinations.`;
     init();
   }catch(err){
     console.error(err);
