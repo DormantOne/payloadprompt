@@ -1,0 +1,679 @@
+{
+  "_instructions": "Dear LLM — you have been handed the data file for 'Auth Prep', a tool that prepares a clinician for prior authorization. It is NOT a coverage determination and must not imply approval. THIS DATA IS ILLUSTRATIVE AND MAY BE OUT OF DATE. Your job: (1) For every policy, look up the issuer's CURRENT published formulary / prior-authorization / medical policy and VERIFY each field — correct formulary_status, pa_required, tier, step therapy, quantity_limit, alternatives, and the full criteria list so they match the real, current policy. (2) Put the exact source document name, URL, and effective date in `source`, and set that policy's `last_researched` to today's date in YYYY-MM-DD. (3) Add any drug + payer + line_of_business combinations that are commonly needed but missing here. NEVER substitute one line_of_business for another. (4) Keep `vocab` in sync — every id used inside a criterion MUST exist in the matching vocab map, or the app will not render it. (5) Do NOT invent clinical facts or criteria; criteria must reflect real published payer policy. If you cannot verify a policy, set its `last_researched` to null and add a `note` field saying it is unverified rather than guessing. (6) RE-ISSUE THE ENTIRE FILE as one valid JSON document using these EXACT keys and this EXACT structure. Output JSON only — no markdown, no code fences, no commentary. Preserve `_instructions`, `_schema`, and `_meta` keys. Remember coverage is plan- and PBM-specific and changes constantly; flag material caveats in each policy's `appeal_notes`.",
+  "_schema": {
+    "vocab": "Label dictionaries the UI uses to render inputs. diagnoses/therapies/contraindications map id -> short label. labs map key -> {label, unit}. Every id referenced by a criterion must appear here.",
+    "classes": "Map of drug-class name -> { members: [strings], note }. members lists every drug in the class so the UI can show siblings/alternatives.",
+    "payers": "[ { id, name, lines:[commercial|ma|medicaid] } ]",
+    "drugs": "[ { id, name, generic, class, indications:[strings] } ] — class must match a key in classes.",
+    "policies": "[ { drug_id, payer_id, line_of_business, formulary_status: covered|covered_with_pa|step_therapy|not_covered, tier:int|null, pa_required:bool, quantity_limit:string|null, alternatives:[strings], last_researched: 'YYYY-MM-DD'|null, criteria:[clause], appeal_notes, source:{name,url,date} } ]",
+    "clause": "Either a leaf or a group. Leaf: {type:'diagnosis'|'prior_therapy'|'contraindication'|'lab', needs:'<vocab id>' (not for lab), key:'<lab key>' & op:'ge'|'le'|'gt'|'lt' & value:number (lab only), absent:true (contraindication: criterion is MET only when the item is documented ABSENT), label:'full sentence shown to the user'}. Group: {any_of:[clause...], label} or {all_of:[clause...], label}. A policy passes when ALL top-level clauses pass. Missing facts remain unknown/not documented; do not treat unknown as absent."
+  },
+  "_meta": {
+    "format_version": "1.1",
+    "data_status": "ILLUSTRATIVE — fabricated test data, NOT real plan policy",
+    "last_reviewed": "2026-06-13 (demo seed; safety semantics updated)",
+    "today_hint": "Freshness is computed in-app against the viewer's clock."
+  },
+  "vocab": {
+    "diagnoses": {
+      "t2dm": "Type 2 diabetes",
+      "obesity": "Obesity / overweight",
+      "ascvd": "Established cardiovascular disease",
+      "hf": "Heart failure",
+      "ckd": "Chronic kidney disease",
+      "ra": "Rheumatoid arthritis",
+      "afib": "Atrial fibrillation",
+      "fh_chol": "Familial hypercholesterolemia",
+      "weight_related_comorbidity": "Weight-related comorbidity"
+    },
+    "therapies": {
+      "metformin": "Metformin",
+      "sulfonylurea": "Sulfonylurea",
+      "sglt2": "SGLT2 inhibitor",
+      "glp1": "GLP-1 agonist",
+      "statin_high": "High-intensity statin",
+      "ezetimibe": "Ezetimibe",
+      "methotrexate": "Methotrexate / DMARD",
+      "lifestyle": "Comprehensive lifestyle program"
+    },
+    "contraindications": {
+      "mtc_men2": "MTC / MEN 2 history",
+      "pancreatitis": "Pancreatitis history",
+      "tb": "Active infection / latent TB",
+      "renal_severe": "Severe renal impairment"
+    },
+    "labs": {
+      "a1c": {
+        "label": "HbA1c",
+        "unit": "%"
+      },
+      "bmi": {
+        "label": "BMI",
+        "unit": ""
+      },
+      "egfr": {
+        "label": "eGFR",
+        "unit": "mL/min"
+      },
+      "ldl": {
+        "label": "LDL-C",
+        "unit": "mg/dL"
+      }
+    }
+  },
+  "classes": {
+    "GLP-1 receptor agonist": {
+      "members": [
+        "Semaglutide — Ozempic, Wegovy, Rybelsus",
+        "Dulaglutide — Trulicity",
+        "Liraglutide — Victoza, Saxenda",
+        "Tirzepatide — Mounjaro, Zepbound",
+        "Exenatide — Byetta, Bydureon"
+      ],
+      "note": "Tirzepatide is a dual GIP/GLP-1 agonist, commonly grouped with this class."
+    },
+    "SGLT2 inhibitor": {
+      "members": [
+        "Empagliflozin — Jardiance",
+        "Dapagliflozin — Farxiga",
+        "Canagliflozin — Invokana",
+        "Ertugliflozin — Steglatro"
+      ],
+      "note": ""
+    },
+    "TNF inhibitor": {
+      "members": [
+        "Adalimumab — Humira (+ biosimilars: Amjevita, Hyrimoz, Cyltezo)",
+        "Etanercept — Enbrel",
+        "Infliximab — Remicade",
+        "Certolizumab — Cimzia",
+        "Golimumab — Simponi"
+      ],
+      "note": "Most plans now prefer an adalimumab biosimilar over the originator."
+    },
+    "PCSK9 inhibitor": {
+      "members": [
+        "Evolocumab — Repatha",
+        "Alirocumab — Praluent",
+        "Inclisiran — Leqvio (siRNA, related mechanism)"
+      ],
+      "note": ""
+    },
+    "Factor Xa inhibitor (DOAC)": {
+      "members": [
+        "Apixaban — Eliquis",
+        "Rivaroxaban — Xarelto",
+        "Edoxaban — Savaysa"
+      ],
+      "note": ""
+    }
+  },
+  "payers": [
+    {
+      "id": "uhc",
+      "name": "UnitedHealthcare",
+      "lines": [
+        "commercial",
+        "ma",
+        "medicaid"
+      ]
+    },
+    {
+      "id": "aetna",
+      "name": "Aetna",
+      "lines": [
+        "commercial",
+        "ma"
+      ]
+    },
+    {
+      "id": "cigna",
+      "name": "Cigna",
+      "lines": [
+        "commercial"
+      ]
+    },
+    {
+      "id": "elevance",
+      "name": "Elevance Health (Anthem)",
+      "lines": [
+        "commercial",
+        "ma"
+      ]
+    },
+    {
+      "id": "humana",
+      "name": "Humana",
+      "lines": [
+        "ma"
+      ]
+    }
+  ],
+  "drugs": [
+    {
+      "id": "ozempic",
+      "name": "Ozempic",
+      "generic": "semaglutide",
+      "class": "GLP-1 receptor agonist",
+      "indications": [
+        "Type 2 diabetes"
+      ]
+    },
+    {
+      "id": "wegovy",
+      "name": "Wegovy",
+      "generic": "semaglutide",
+      "class": "GLP-1 receptor agonist",
+      "indications": [
+        "Chronic weight management"
+      ]
+    },
+    {
+      "id": "trulicity",
+      "name": "Trulicity",
+      "generic": "dulaglutide",
+      "class": "GLP-1 receptor agonist",
+      "indications": [
+        "Type 2 diabetes"
+      ]
+    },
+    {
+      "id": "jardiance",
+      "name": "Jardiance",
+      "generic": "empagliflozin",
+      "class": "SGLT2 inhibitor",
+      "indications": [
+        "Type 2 diabetes",
+        "Heart failure",
+        "CKD"
+      ]
+    },
+    {
+      "id": "farxiga",
+      "name": "Farxiga",
+      "generic": "dapagliflozin",
+      "class": "SGLT2 inhibitor",
+      "indications": [
+        "Type 2 diabetes",
+        "Heart failure",
+        "CKD"
+      ]
+    },
+    {
+      "id": "humira",
+      "name": "Humira",
+      "generic": "adalimumab",
+      "class": "TNF inhibitor",
+      "indications": [
+        "Rheumatoid arthritis"
+      ]
+    },
+    {
+      "id": "repatha",
+      "name": "Repatha",
+      "generic": "evolocumab",
+      "class": "PCSK9 inhibitor",
+      "indications": [
+        "ASCVD",
+        "Familial hypercholesterolemia"
+      ]
+    },
+    {
+      "id": "eliquis",
+      "name": "Eliquis",
+      "generic": "apixaban",
+      "class": "Factor Xa inhibitor (DOAC)",
+      "indications": [
+        "Atrial fibrillation",
+        "VTE"
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "drug_id": "ozempic",
+      "payer_id": "uhc",
+      "line_of_business": "commercial",
+      "formulary_status": "covered_with_pa",
+      "tier": 3,
+      "pa_required": true,
+      "quantity_limit": "1 carton (4 weeks) / 28 days",
+      "alternatives": [
+        "Metformin",
+        "Glipizide"
+      ],
+      "last_researched": "2026-06-02",
+      "criteria": [
+        {
+          "type": "diagnosis",
+          "needs": "t2dm",
+          "label": "Documented Type 2 diabetes (ICD-10 E11.x)"
+        },
+        {
+          "type": "prior_therapy",
+          "needs": "metformin",
+          "label": "Trial / failure or intolerance of metformin"
+        },
+        {
+          "type": "lab",
+          "key": "a1c",
+          "op": "ge",
+          "value": 7.0,
+          "label": "Most recent HbA1c ≥ 7.0% on current regimen"
+        },
+        {
+          "type": "contraindication",
+          "needs": "mtc_men2",
+          "absent": true,
+          "label": "No personal/family history of medullary thyroid carcinoma or MEN 2"
+        }
+      ],
+      "appeal_notes": "If A1c < 7.0%, document inadequate control by other measures or an intolerance pattern.",
+      "source": {
+        "name": "[ILLUSTRATIVE] UHC Commercial PDL — sample",
+        "url": "",
+        "date": "2026-06"
+      }
+    },
+    {
+      "drug_id": "ozempic",
+      "payer_id": "aetna",
+      "line_of_business": "commercial",
+      "formulary_status": "step_therapy",
+      "tier": 3,
+      "pa_required": true,
+      "quantity_limit": "1 package / 28 days",
+      "alternatives": [
+        "Metformin",
+        "Sulfonylurea"
+      ],
+      "last_researched": "2026-04-18",
+      "criteria": [
+        {
+          "type": "diagnosis",
+          "needs": "t2dm",
+          "label": "Documented Type 2 diabetes"
+        },
+        {
+          "any_of": [
+            {
+              "type": "prior_therapy",
+              "needs": "metformin",
+              "label": "Tried metformin"
+            },
+            {
+              "type": "prior_therapy",
+              "needs": "sulfonylurea",
+              "label": "Tried a sulfonylurea"
+            }
+          ],
+          "label": "Step therapy: trial of metformin OR a sulfonylurea"
+        }
+      ],
+      "appeal_notes": "Step therapy can be bypassed with documented contraindication/intolerance to both.",
+      "source": {
+        "name": "[ILLUSTRATIVE] Aetna Commercial PA policy — sample",
+        "url": "",
+        "date": "2026-04"
+      }
+    },
+    {
+      "drug_id": "ozempic",
+      "payer_id": "cigna",
+      "line_of_business": "commercial",
+      "formulary_status": "covered_with_pa",
+      "tier": 2,
+      "pa_required": true,
+      "quantity_limit": null,
+      "alternatives": [
+        "Metformin"
+      ],
+      "last_researched": "2026-03-15",
+      "criteria": [
+        {
+          "type": "diagnosis",
+          "needs": "t2dm",
+          "label": "Documented Type 2 diabetes"
+        },
+        {
+          "type": "lab",
+          "key": "a1c",
+          "op": "ge",
+          "value": 7.0,
+          "label": "HbA1c ≥ 7.0%"
+        }
+      ],
+      "appeal_notes": "",
+      "source": {
+        "name": "[ILLUSTRATIVE] Cigna Commercial PA policy — sample",
+        "url": "",
+        "date": "2026-03"
+      }
+    },
+    {
+      "drug_id": "wegovy",
+      "payer_id": "uhc",
+      "line_of_business": "commercial",
+      "formulary_status": "covered_with_pa",
+      "tier": 3,
+      "pa_required": true,
+      "quantity_limit": "Per label titration schedule",
+      "alternatives": [
+        "Comprehensive lifestyle program"
+      ],
+      "last_researched": "2026-05-20",
+      "criteria": [
+        {
+          "type": "diagnosis",
+          "needs": "obesity",
+          "label": "Documented obesity / overweight indication"
+        },
+        {
+          "any_of": [
+            {
+              "type": "lab",
+              "key": "bmi",
+              "op": "ge",
+              "value": 30,
+              "label": "BMI ≥ 30"
+            },
+            {
+              "all_of": [
+                {
+                  "type": "lab",
+                  "key": "bmi",
+                  "op": "ge",
+                  "value": 27,
+                  "label": "BMI ≥ 27"
+                },
+                {
+                  "type": "diagnosis",
+                  "needs": "weight_related_comorbidity",
+                  "label": "Documented weight-related comorbidity"
+                }
+              ],
+              "label": "BMI ≥ 27 with a weight-related comorbidity"
+            }
+          ],
+          "label": "BMI threshold: ≥30, or ≥27 with weight-related comorbidity"
+        },
+        {
+          "type": "prior_therapy",
+          "needs": "lifestyle",
+          "label": "Documented trial of a comprehensive lifestyle program"
+        }
+      ],
+      "appeal_notes": "Many plans exclude weight-loss agents entirely — confirm the benefit design, not just the criteria.",
+      "source": {
+        "name": "[ILLUSTRATIVE] UHC weight-management policy — sample",
+        "url": "",
+        "date": "2026-05"
+      }
+    },
+    {
+      "drug_id": "wegovy",
+      "payer_id": "aetna",
+      "line_of_business": "ma",
+      "formulary_status": "not_covered",
+      "tier": null,
+      "pa_required": false,
+      "quantity_limit": null,
+      "alternatives": [
+        "Lifestyle program",
+        "Phentermine (if appropriate)"
+      ],
+      "last_researched": "2026-01-30",
+      "criteria": [],
+      "appeal_notes": "Weight-loss drugs are a common Medicare benefit exclusion; an exception is unlikely. Focus on covered alternatives.",
+      "source": {
+        "name": "[ILLUSTRATIVE] Medicare Part D exclusion — sample",
+        "url": "",
+        "date": "2026-01"
+      }
+    },
+    {
+      "drug_id": "trulicity",
+      "payer_id": "uhc",
+      "line_of_business": "commercial",
+      "formulary_status": "step_therapy",
+      "tier": 3,
+      "pa_required": true,
+      "quantity_limit": "4 pens / 28 days",
+      "alternatives": [
+        "Metformin",
+        "Preferred GLP-1 per plan"
+      ],
+      "last_researched": "2026-02-10",
+      "criteria": [
+        {
+          "type": "diagnosis",
+          "needs": "t2dm",
+          "label": "Documented Type 2 diabetes"
+        },
+        {
+          "type": "prior_therapy",
+          "needs": "metformin",
+          "label": "Trial / failure of metformin"
+        }
+      ],
+      "appeal_notes": "Plan may designate a different GLP-1 as the preferred agent — confirm before submitting.",
+      "source": {
+        "name": "[ILLUSTRATIVE] UHC Commercial PDL — sample",
+        "url": "",
+        "date": "2026-02"
+      }
+    },
+    {
+      "drug_id": "jardiance",
+      "payer_id": "uhc",
+      "line_of_business": "commercial",
+      "formulary_status": "covered",
+      "tier": 2,
+      "pa_required": false,
+      "quantity_limit": null,
+      "alternatives": [],
+      "last_researched": "2026-06-05",
+      "criteria": [],
+      "appeal_notes": "",
+      "source": {
+        "name": "[ILLUSTRATIVE] UHC Commercial PDL — sample",
+        "url": "",
+        "date": "2026-06"
+      }
+    },
+    {
+      "drug_id": "jardiance",
+      "payer_id": "cigna",
+      "line_of_business": "commercial",
+      "formulary_status": "covered_with_pa",
+      "tier": 2,
+      "pa_required": true,
+      "quantity_limit": null,
+      "alternatives": [
+        "Metformin"
+      ],
+      "last_researched": "2025-12-01",
+      "criteria": [
+        {
+          "any_of": [
+            {
+              "type": "diagnosis",
+              "needs": "t2dm",
+              "label": "Type 2 diabetes"
+            },
+            {
+              "type": "diagnosis",
+              "needs": "ckd",
+              "label": "Chronic kidney disease"
+            },
+            {
+              "type": "diagnosis",
+              "needs": "hf",
+              "label": "Heart failure"
+            }
+          ],
+          "label": "At least one on-label indication documented"
+        }
+      ],
+      "appeal_notes": "Older entry — verify against the current Cigna policy before relying on it.",
+      "source": {
+        "name": "[ILLUSTRATIVE] Cigna Commercial PA policy — sample",
+        "url": "",
+        "date": "2025-12"
+      }
+    },
+    {
+      "drug_id": "farxiga",
+      "payer_id": "elevance",
+      "line_of_business": "commercial",
+      "formulary_status": "covered_with_pa",
+      "tier": 2,
+      "pa_required": true,
+      "quantity_limit": null,
+      "alternatives": [
+        "Empagliflozin (Jardiance)"
+      ],
+      "last_researched": "2026-05-28",
+      "criteria": [
+        {
+          "any_of": [
+            {
+              "type": "diagnosis",
+              "needs": "t2dm",
+              "label": "Type 2 diabetes"
+            },
+            {
+              "type": "diagnosis",
+              "needs": "hf",
+              "label": "Heart failure"
+            },
+            {
+              "type": "diagnosis",
+              "needs": "ckd",
+              "label": "Chronic kidney disease"
+            }
+          ],
+          "label": "At least one on-label indication documented"
+        },
+        {
+          "type": "lab",
+          "key": "egfr",
+          "op": "ge",
+          "value": 20,
+          "label": "eGFR ≥ 20 mL/min"
+        }
+      ],
+      "appeal_notes": "eGFR threshold varies by indication — confirm the specific cutoff.",
+      "source": {
+        "name": "[ILLUSTRATIVE] Elevance Commercial policy — sample",
+        "url": "",
+        "date": "2026-05"
+      }
+    },
+    {
+      "drug_id": "humira",
+      "payer_id": "uhc",
+      "line_of_business": "commercial",
+      "formulary_status": "covered_with_pa",
+      "tier": 4,
+      "pa_required": true,
+      "quantity_limit": "2 pens / 28 days",
+      "alternatives": [
+        "Adalimumab biosimilar (preferred)"
+      ],
+      "last_researched": "2026-04-02",
+      "criteria": [
+        {
+          "type": "diagnosis",
+          "needs": "ra",
+          "label": "Documented rheumatoid arthritis"
+        },
+        {
+          "type": "prior_therapy",
+          "needs": "methotrexate",
+          "label": "Trial / failure of methotrexate or another DMARD"
+        },
+        {
+          "type": "contraindication",
+          "needs": "tb",
+          "absent": true,
+          "label": "Negative TB screen / no active serious infection"
+        }
+      ],
+      "appeal_notes": "Plan likely prefers a biosimilar first — confirm whether the originator needs added justification.",
+      "source": {
+        "name": "[ILLUSTRATIVE] UHC specialty policy — sample",
+        "url": "",
+        "date": "2026-04"
+      }
+    },
+    {
+      "drug_id": "repatha",
+      "payer_id": "aetna",
+      "line_of_business": "commercial",
+      "formulary_status": "covered_with_pa",
+      "tier": 3,
+      "pa_required": true,
+      "quantity_limit": "Per dosing schedule",
+      "alternatives": [
+        "Ezetimibe",
+        "High-intensity statin"
+      ],
+      "last_researched": "2026-03-22",
+      "criteria": [
+        {
+          "any_of": [
+            {
+              "type": "diagnosis",
+              "needs": "ascvd",
+              "label": "Established cardiovascular disease"
+            },
+            {
+              "type": "diagnosis",
+              "needs": "fh_chol",
+              "label": "Familial hypercholesterolemia"
+            }
+          ],
+          "label": "ASCVD or familial hypercholesterolemia documented"
+        },
+        {
+          "type": "prior_therapy",
+          "needs": "statin_high",
+          "label": "Trial of a high-intensity statin (or documented intolerance)"
+        },
+        {
+          "type": "lab",
+          "key": "ldl",
+          "op": "ge",
+          "value": 70,
+          "label": "LDL-C ≥ 70 mg/dL despite max-tolerated therapy"
+        }
+      ],
+      "appeal_notes": "Document statin intolerance if a statin was not tried. LDL threshold differs by indication (≥ 70 ASCVD, ≥ 100 primary prevention).",
+      "source": {
+        "name": "[ILLUSTRATIVE] Aetna lipid-lowering policy — sample",
+        "url": "",
+        "date": "2026-03"
+      }
+    },
+    {
+      "drug_id": "eliquis",
+      "payer_id": "humana",
+      "line_of_business": "ma",
+      "formulary_status": "covered",
+      "tier": 3,
+      "pa_required": false,
+      "quantity_limit": null,
+      "alternatives": [],
+      "last_researched": null,
+      "note": "Unverified placeholder — confirm against the current Humana Part D formulary.",
+      "criteria": [],
+      "appeal_notes": "Unverified entry.",
+      "source": {
+        "name": "[ILLUSTRATIVE] unverified",
+        "url": "",
+        "date": ""
+      }
+    }
+  ]
+}
