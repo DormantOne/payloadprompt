@@ -1,103 +1,297 @@
 {
-  "_instructions": [
-    "Purpose: This file drives a simple GLP-1 coverage-pathway display. It is not a clinical guideline and not a substitute for verifying the member-specific benefit, formulary, and current payer policy.",
-    "Do not infer across payer_id or plan_type_id. The application should only display a policy when payer_id + plan_type_id match exactly.",
-    "Arrange each exact payer/plan policy as a list of agents. Each agent may have multiple pathways because one drug may be covered for diabetes, obesity, cardiovascular risk reduction, CKD, or OSA under different rules.",
-    "Every pathway must use one of these status values: covered_no_prior_authorization, covered_with_conditions_no_authorization, covered_with_authorization, covered_with_authorization_and_prior_trials, not_covered.",
-    "Use covered_no_prior_authorization only when the source explicitly says the drug is covered without authorization and without chart criteria beyond normal prescribing. Use covered_with_conditions_no_authorization when coverage is available without authorization only if specific diagnosis/lab/indication criteria are present.",
-    "Use covered_with_authorization when the payer requires authorization but not an explicit prior medication trial. Use covered_with_authorization_and_prior_trials when both authorization criteria and prior therapy/failure/contraindication are required.",
-    "Put diagnosis/lab/indication requirements in pathway.criteria. Put step therapy, preferred product, metformin, lifestyle program, or prior medication requirements in pathway.prior_trials.",
-    "criteria and prior_trials support all_of and any_of. References must point to criteria_library IDs. Example: {\"all_of\":[\"type_2_diabetes\"],\"any_of\":[\"a1c_ge_6_5\",\"fpg_ge_126\"]}.",
-    "criteria_library.search_terms is the source for the Epic search block. Terms should be specific chart-finding terms, not prose. Keep them short and pasteable.",
-    "When deep research is completed, replace sample policies with exact, cited payer policies. Include source_url, source_name, effective_date, retrieved_date, and verification_status for every policy."
-  ],
-  "schema_version": "2.0-pathways",
+  "_instructions": {
+    "purpose": "GLP-1 / GIP-GLP coverage pathway data model for a simple professional coverage-prep page. The page is not a payer determination, a clinical guideline, or member-specific benefit verification.",
+    "core_user_workflow": [
+      "User selects insurance and plan type.",
+      "Application displays exact payer_id + plan_type_id policy row only; never infer across plans.",
+      "Each drug displays one or more indication/pathway rows.",
+      "Each pathway has a single status: covered_no_prior_authorization, covered_with_conditions_no_authorization, covered_with_authorization, covered_with_authorization_and_prior_trials, or not_covered.",
+      "User checks one or more relevant pathways/indications.",
+      "Application generates value/evidence fields, relevant Epic search terms, ICD-10 OR blocks, and a concise bottom summary. No patient letter. No extra persuasion layer."
+    ],
+    "status_rules": {
+      "covered_no_prior_authorization": "Use only when the payer/formulary source explicitly indicates the agent is covered and no authorization/step criteria are listed. Criteria may be empty; if diagnosis consistency is still expected, list it under clinical_context rather than formal criteria.",
+      "covered_with_conditions_no_authorization": "Use when no authorization is listed, but coverage requires documented diagnosis/lab/indication criteria such as T2D, HbA1c threshold, BMI threshold, OSA, or MASH stage.",
+      "covered_with_authorization": "Use when prior authorization/coverage review is required and the pathway depends on diagnosis/lab/indication criteria but no explicit prior therapy/step trial is required.",
+      "covered_with_authorization_and_prior_trials": "Use when authorization is required and the payer also requires prior medication trial, preferred-agent failure, lifestyle program duration, PAP/CPAP trial/status, or other prior therapy evidence.",
+      "not_covered": "Use only when source explicitly excludes the drug/indication. Keep visible but visually separate; do not mix with positive coverage pathways."
+    },
+    "research_requirements_for_each_policy": [
+      "Every real payer row must include payer_id, plan_type_id, policy_name, verification_status, source_name, source_url, effective_date, retrieved_date, and agents[].",
+      "Every agent must include drug, ingredient, class, and pathways[].",
+      "Every pathway must include id, indication, status, criteria, prior_trials, target_values_summary, notes, source_refs, and evidence_tier.",
+      "criteria and prior_trials must reference criteria_library IDs using all_of / any_of. Keep logic shallow where possible. If payer text is complex, create a named criterion with a clear label and target_value.",
+      "criteria_library entries should include label, target_value, value_prompt, acceptable_evidence, icd10_codes, epic_terms, and optional notes. This is what makes the Epic block and value fields relevant instead of noisy.",
+      "ICD-10 codes should be included only when relevant to the criterion. Separate codes with OR in the app output. Include many codes only when they help retrieve chart evidence. Mark uncertain/candidate code groups in notes for human coding verification.",
+      "Research universe rows are scaffolds only. Do not convert them to payer coverage without exact payer evidence."
+    ],
+    "coverage_universe_to_consider_in_deep_research": [
+      "Type 2 diabetes glycemic control and cardiometabolic risk reduction",
+      "Chronic weight management: adult BMI >=30 or BMI >=27 with weight-related comorbidity",
+      "Obstructive sleep apnea with obesity, especially moderate-to-severe OSA and AHI/REI documentation",
+      "Cardiovascular risk reduction in established CVD with overweight/obesity where labeled/policy-recognized",
+      "CKD with type 2 diabetes where labeled/policy-recognized",
+      "MASH/MASLD/fatty liver: especially noncirrhotic MASH with moderate-to-advanced fibrosis F2-F3 where labeled/policy-recognized",
+      "Pediatric T2D and adolescent obesity where product labeling/policy supports it",
+      "Explicit exclusions: cosmetic weight loss, off-label weight loss for diabetes-only products, compounded/unapproved products, noncovered benefit categories"
+    ]
+  },
+  "schema_version": "3.0-status-workbench",
   "created": "2026-06-13",
-  "verification_notice": "Starter schema and demonstration data only. Do not use as verified payer coverage until each policy row is researched, sourced, and reviewed.",
+  "verification_notice": "Demonstration/research scaffold. Replace sample payer rows with exact payer/PBM policy evidence before clinical use.",
   "status_definitions": {
-    "covered_no_prior_authorization": "Covered; no authorization listed in this policy row.",
-    "covered_with_conditions_no_authorization": "Covered without authorization if specific indication criteria are documented.",
-    "covered_with_authorization": "Covered with authorization if criteria are documented.",
-    "covered_with_authorization_and_prior_trials": "Covered with authorization if criteria and prior trial/step therapy requirements are documented.",
-    "not_covered": "Not covered under this policy row. Show separately; do not mix with covered pathways."
+    "covered_no_prior_authorization": {
+      "label": "Covered \u2014 no authorization listed",
+      "short_label": "Covered",
+      "color": "green"
+    },
+    "covered_with_conditions_no_authorization": {
+      "label": "Covered if criteria documented \u2014 no authorization listed",
+      "short_label": "Covered with criteria",
+      "color": "green"
+    },
+    "covered_with_authorization": {
+      "label": "Covered with authorization",
+      "short_label": "Covered with authorization",
+      "color": "yellow"
+    },
+    "covered_with_authorization_and_prior_trials": {
+      "label": "Covered with authorization + prior trial/step",
+      "short_label": "Authorization + prior trial",
+      "color": "orange"
+    },
+    "not_covered": {
+      "label": "Not covered",
+      "short_label": "Not covered",
+      "color": "red"
+    }
+  },
+  "source_register": {
+    "fda_zepbound_osa_2024": {
+      "name": "FDA press announcement: first medication for obstructive sleep apnea",
+      "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-first-medication-obstructive-sleep-apnea",
+      "date": "2024-12-20",
+      "why_relevant": "Zepbound moderate-to-severe OSA in adults with obesity; sleep-study/AHI evidence target."
+    },
+    "fda_wegovy_mash_2025": {
+      "name": "FDA: Wegovy approval for MASH with moderate-to-advanced scarring",
+      "url": "https://www.fda.gov/drugs/news-events-human-drugs/fda-approves-treatment-serious-liver-disease-known-mash",
+      "date": "2025-08-15",
+      "why_relevant": "Wegovy pathway for noncirrhotic MASH/NASH with moderate-to-advanced fibrosis/scarring."
+    },
+    "fda_wegovy_cvd_2024": {
+      "name": "FDA press announcement: Wegovy cardiovascular risk reduction",
+      "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-first-treatment-reduce-risk-serious-heart-problems-specifically-adults-obesity-or",
+      "date": "2024-03-08",
+      "why_relevant": "Wegovy CV event risk reduction in adults with CVD and overweight/obesity."
+    },
+    "cdc_obesity_codes_2024": {
+      "name": "CDC adult obesity ICD-10-CM code promotion material",
+      "url": "https://www.cdc.gov/obesity/media/pdfs/2024/12/adult-partner-promotion-materials-icd-10-codes-508.pdf",
+      "date": "2024-11-01",
+      "why_relevant": "New adult obesity class codes E66.811-E66.813 used with BMI Z codes."
+    },
+    "icd10_osa_g47_33_2026": {
+      "name": "2026 ICD-10-CM G47.33 obstructive sleep apnea",
+      "url": "https://www.icd10data.com/ICD10CM/Codes/G00-G99/G40-G47/G47-/G47.33",
+      "date": "2026",
+      "why_relevant": "OSA/hypopnea chart diagnosis code target."
+    },
+    "icd10_mash_k75_81_2026": {
+      "name": "2026 ICD-10-CM K75.81 nonalcoholic steatohepatitis",
+      "url": "https://www.icd10data.com/ICD10CM/Codes/K00-K95/K70-K77/K75-/K75.81",
+      "date": "2026",
+      "why_relevant": "MASH/NASH diagnosis code target."
+    }
   },
   "criteria_library": {
     "type_2_diabetes": {
       "label": "Type 2 diabetes diagnosis",
-      "value_label": "Diagnosis / problem-list evidence",
-      "placeholder": "e.g., T2DM on problem list; E11.9; endocrinology note date",
-      "search_terms": [
+      "target_value": "T2D diagnosis documented",
+      "value_prompt": "Problem list/assessment evidence for T2D",
+      "acceptable_evidence": [
+        "Problem list",
+        "assessment/plan",
+        "endocrinology note",
+        "ICD-10 diagnosis"
+      ],
+      "icd10_codes": [
+        "E11",
+        "E11.9",
+        "E11.65",
+        "E11.22",
+        "E11.21",
+        "E11.29",
+        "E11.40",
+        "E11.42",
+        "E11.59",
+        "E11.69",
+        "E11.8"
+      ],
+      "epic_terms": [
         "type 2 diabetes",
         "T2DM",
         "diabetes mellitus type 2",
-        "E11",
-        "diabetic"
+        "diabetic",
+        "E11"
       ]
     },
-    "a1c_ge_6_5": {
-      "label": "HbA1c \u2265 6.5%",
-      "value_label": "Most recent HbA1c",
-      "placeholder": "e.g., 7.4% on 05/12/2026",
-      "search_terms": [
+    "a1c_diabetes_range": {
+      "label": "HbA1c in diabetes range",
+      "target_value": "HbA1c \u2265 6.5%",
+      "value_prompt": "Most recent HbA1c value/date",
+      "acceptable_evidence": [
+        "Lab result"
+      ],
+      "icd10_codes": [],
+      "epic_terms": [
         "HbA1c",
         "A1c",
         "hemoglobin A1c",
         "glycohemoglobin"
       ]
     },
-    "a1c_ge_7_0": {
-      "label": "HbA1c \u2265 7.0%",
-      "value_label": "Most recent HbA1c",
-      "placeholder": "e.g., 8.1% on 05/12/2026",
-      "search_terms": [
+    "a1c_ge_7": {
+      "label": "HbA1c above common payer threshold",
+      "target_value": "HbA1c \u2265 7.0%",
+      "value_prompt": "Most recent HbA1c value/date",
+      "acceptable_evidence": [
+        "Lab result"
+      ],
+      "icd10_codes": [],
+      "epic_terms": [
         "HbA1c",
         "A1c",
         "hemoglobin A1c",
         "glycohemoglobin"
       ]
     },
-    "fpg_ge_126": {
-      "label": "Fasting plasma glucose \u2265 126 mg/dL",
-      "value_label": "Fasting glucose",
-      "placeholder": "e.g., fasting glucose 143 mg/dL on 05/12/2026",
-      "search_terms": [
+    "fasting_glucose_diabetes_range": {
+      "label": "Fasting glucose in diabetes range",
+      "target_value": "Fasting glucose \u2265 126 mg/dL",
+      "value_prompt": "Fasting glucose value/date",
+      "acceptable_evidence": [
+        "Lab result"
+      ],
+      "icd10_codes": [],
+      "epic_terms": [
         "fasting glucose",
         "fasting plasma glucose",
         "FPG",
         "glucose"
       ]
     },
-    "bmi_ge_30": {
-      "label": "BMI \u2265 30 kg/m\u00b2",
-      "value_label": "BMI / height / weight",
-      "placeholder": "e.g., BMI 36.2; height 5'7; weight 231 lb",
-      "search_terms": [
+    "metformin_trial_or_contraindication": {
+      "label": "Metformin trial/intolerance/contraindication",
+      "target_value": "Prior metformin use, intolerance, contraindication, or reason not appropriate",
+      "value_prompt": "Metformin dates, dose, failure/intolerance, or contraindication",
+      "acceptable_evidence": [
+        "Medication history",
+        "allergy/intolerance",
+        "assessment/plan",
+        "renal function rationale"
+      ],
+      "icd10_codes": [],
+      "epic_terms": [
+        "metformin",
+        "Glucophage",
+        "intolerance",
+        "contraindication",
+        "GI side effects",
+        "eGFR",
+        "renal"
+      ]
+    },
+    "preferred_glp_trial_or_contraindication": {
+      "label": "Preferred GLP/GIP-GLP tried or contraindicated",
+      "target_value": "Preferred formulary agent tried, failed, unavailable, intolerable, or contraindicated",
+      "value_prompt": "Preferred agent history and reason",
+      "acceptable_evidence": [
+        "Medication history",
+        "pharmacy claims",
+        "formulary exception rationale"
+      ],
+      "icd10_codes": [],
+      "epic_terms": [
+        "Trulicity",
+        "Ozempic",
+        "Rybelsus",
+        "Victoza",
+        "Mounjaro",
+        "Wegovy",
+        "Zepbound",
+        "failed",
+        "trial",
+        "intolerance",
+        "contraindication"
+      ]
+    },
+    "bmi_ge_30_adult": {
+      "label": "Adult obesity threshold",
+      "target_value": "BMI \u2265 30 kg/m\u00b2",
+      "value_prompt": "BMI, height, weight, and date",
+      "acceptable_evidence": [
+        "Vitals",
+        "weight management note"
+      ],
+      "icd10_codes": [
+        "E66.9",
+        "E66.811",
+        "E66.812",
+        "E66.813",
+        "E66.01",
+        "E66.09",
+        "Z68.30",
+        "Z68.31",
+        "Z68.32",
+        "Z68.33",
+        "Z68.34",
+        "Z68.35",
+        "Z68.36",
+        "Z68.37",
+        "Z68.38",
+        "Z68.39",
+        "Z68.41",
+        "Z68.42",
+        "Z68.43",
+        "Z68.44",
+        "Z68.45"
+      ],
+      "epic_terms": [
         "BMI",
         "body mass index",
         "height",
-        "weight"
+        "weight",
+        "obesity",
+        "class 1 obesity",
+        "class 2 obesity",
+        "class 3 obesity"
       ]
     },
-    "bmi_ge_27_weight_comorbidity": {
-      "label": "BMI \u2265 27 kg/m\u00b2 with weight-related comorbidity",
-      "value_label": "BMI and comorbidity",
-      "placeholder": "e.g., BMI 29.4 with hypertension / dyslipidemia / OSA",
-      "search_terms": [
+    "bmi_ge_27_with_comorbidity": {
+      "label": "Adult overweight threshold with comorbidity",
+      "target_value": "BMI \u2265 27 kg/m\u00b2 plus at least one weight-related comorbidity",
+      "value_prompt": "BMI/date and comorbidity evidence",
+      "acceptable_evidence": [
+        "Vitals",
+        "problem list",
+        "assessment/plan"
+      ],
+      "icd10_codes": [
+        "E66.3",
+        "Z68.27",
+        "Z68.28",
+        "Z68.29",
+        "I10",
+        "E78.5",
+        "G47.33",
+        "R73.03",
+        "I25.10"
+      ],
+      "epic_terms": [
         "BMI",
         "body mass index",
-        "hypertension",
-        "HTN",
-        "dyslipidemia",
-        "hyperlipidemia",
-        "sleep apnea",
-        "OSA"
-      ]
-    },
-    "weight_related_comorbidity": {
-      "label": "Weight-related comorbidity documented",
-      "value_label": "Comorbidity evidence",
-      "placeholder": "e.g., HTN, dyslipidemia, OSA, prediabetes, ASCVD",
-      "search_terms": [
+        "overweight",
         "hypertension",
         "HTN",
         "dyslipidemia",
@@ -108,137 +302,67 @@
         "ASCVD"
       ]
     },
-    "lifestyle_program_documented": {
-      "label": "Reduced-calorie diet / increased physical activity / weight program documented",
-      "value_label": "Lifestyle program documentation",
-      "placeholder": "e.g., nutrition counseling, exercise plan, weight program dates",
-      "search_terms": [
+    "lifestyle_weight_management": {
+      "label": "Lifestyle/weight-management plan documented",
+      "target_value": "Reduced-calorie diet, increased physical activity, or structured weight-management program documented",
+      "value_prompt": "Program/intervention, dates, and response",
+      "acceptable_evidence": [
+        "Nutrition counseling",
+        "weight management visit",
+        "PCP note",
+        "lifestyle plan"
+      ],
+      "icd10_codes": [
+        "Z71.3",
+        "Z71.82",
+        "Z76.89"
+      ],
+      "epic_terms": [
         "diet",
         "reduced calorie",
         "nutrition",
+        "dietitian",
         "exercise",
         "physical activity",
         "weight management",
-        "lifestyle"
+        "lifestyle",
+        "calorie"
       ]
     },
-    "moderate_severe_osa": {
-      "label": "Moderate-to-severe obstructive sleep apnea",
-      "value_label": "OSA severity / sleep study evidence",
-      "placeholder": "e.g., moderate OSA on sleep study dated 03/02/2026",
-      "search_terms": [
-        "sleep apnea",
-        "obstructive sleep apnea",
-        "OSA",
-        "sleep study",
-        "polysomnography"
-      ]
-    },
-    "ahi_value": {
-      "label": "Apnea-hypopnea index / respiratory event index documented",
-      "value_label": "AHI / REI value",
-      "placeholder": "e.g., AHI 32/hr on polysomnography",
-      "search_terms": [
-        "AHI",
-        "apnea hypopnea index",
-        "apnea-hypopnea index",
-        "hypopnea",
-        "REI",
-        "respiratory event index",
-        "polysomnography"
-      ]
-    },
-    "obesity_with_osa": {
-      "label": "Obesity documented with OSA",
-      "value_label": "BMI and OSA evidence",
-      "placeholder": "e.g., BMI 34.1 with moderate OSA",
-      "search_terms": [
-        "BMI",
-        "body mass index",
-        "obesity",
-        "sleep apnea",
-        "OSA"
-      ]
-    },
-    "established_ascvd": {
-      "label": "Established ASCVD / cardiovascular disease",
-      "value_label": "ASCVD evidence",
-      "placeholder": "e.g., prior MI, CAD, stroke, PAD; date/source",
-      "search_terms": [
-        "ASCVD",
-        "coronary artery disease",
-        "CAD",
-        "myocardial infarction",
-        "MI",
-        "stroke",
-        "CVA",
-        "PAD",
-        "peripheral artery disease"
-      ]
-    },
-    "ckd_with_t2d": {
-      "label": "CKD in patient with type 2 diabetes",
-      "value_label": "CKD evidence",
-      "placeholder": "e.g., eGFR 52, albuminuria, CKD stage 3a",
-      "search_terms": [
-        "eGFR",
-        "GFR",
-        "creatinine",
-        "albuminuria",
-        "urine albumin",
-        "microalbumin",
-        "UACR",
-        "CKD"
-      ]
-    },
-    "metformin_trial_or_contraindication": {
-      "label": "Metformin trial, intolerance, or contraindication",
-      "value_label": "Metformin history",
-      "placeholder": "e.g., metformin tried 01/2025\u201304/2025; GI intolerance; eGFR contraindication",
-      "search_terms": [
-        "metformin",
-        "Glucophage",
-        "intolerance",
-        "contraindication",
-        "GI side effects",
-        "eGFR"
-      ]
-    },
-    "preferred_agent_trial": {
-      "label": "Preferred formulary agent tried or contraindicated",
-      "value_label": "Preferred-agent history",
-      "placeholder": "e.g., Trulicity tried and inadequate response; Ozempic unavailable; contraindication",
-      "search_terms": [
-        "Trulicity",
-        "Ozempic",
-        "Rybelsus",
-        "Victoza",
-        "Mounjaro",
-        "trial",
-        "failed",
-        "intolerance",
-        "contraindication"
-      ]
-    },
-    "weight_program_3_to_6_months": {
-      "label": "Prior structured weight-loss program / lifestyle trial",
-      "value_label": "Weight program duration and dates",
-      "placeholder": "e.g., supervised lifestyle program for 6 months; dates and result",
-      "search_terms": [
+    "weight_program_duration": {
+      "label": "Prior structured weight-loss program duration",
+      "target_value": "Often 3\u20136 months if payer requires it; record exact policy duration",
+      "value_prompt": "Weight program dates/duration and result",
+      "acceptable_evidence": [
+        "Nutrition program",
+        "weight management program",
+        "PCP documentation"
+      ],
+      "icd10_codes": [
+        "Z71.3",
+        "Z71.82"
+      ],
+      "epic_terms": [
         "weight loss program",
         "weight management",
         "nutrition counseling",
         "dietitian",
-        "lifestyle",
         "exercise",
-        "calorie"
+        "lifestyle",
+        "calorie",
+        "supervised"
       ]
     },
-    "anti_obesity_med_trial": {
-      "label": "Prior anti-obesity medication trial or contraindication",
-      "value_label": "Anti-obesity medication history",
-      "placeholder": "e.g., orlistat/phentermine/topiramate trial, intolerance, contraindication",
-      "search_terms": [
+    "anti_obesity_med_trial_or_contraindication": {
+      "label": "Prior anti-obesity medication trial/intolerance/contraindication",
+      "target_value": "Prior anti-obesity agent trial or reason not appropriate, if payer requires",
+      "value_prompt": "Medication, dates, response, intolerance, or contraindication",
+      "acceptable_evidence": [
+        "Medication history",
+        "contraindication rationale"
+      ],
+      "icd10_codes": [],
+      "epic_terms": [
         "orlistat",
         "phentermine",
         "topiramate",
@@ -248,76 +372,270 @@
         "bupropion",
         "Saxenda",
         "trial",
-        "contraindication"
+        "contraindication",
+        "intolerance"
       ]
     },
-    "pap_trial_or_unable_unwilling": {
-      "label": "PAP/CPAP use, intolerance, or unable/unwilling status documented",
-      "value_label": "PAP / CPAP evidence",
-      "placeholder": "e.g., CPAP intolerance documented; PAP use noted; unable/unwilling per sleep note",
-      "search_terms": [
+    "moderate_to_severe_osa": {
+      "label": "Moderate-to-severe obstructive sleep apnea",
+      "target_value": "Moderate or severe OSA documented",
+      "value_prompt": "OSA severity and sleep-study date/source",
+      "acceptable_evidence": [
+        "Sleep study",
+        "sleep medicine note",
+        "problem list"
+      ],
+      "icd10_codes": [
+        "G47.33"
+      ],
+      "epic_terms": [
+        "sleep apnea",
+        "obstructive sleep apnea",
+        "OSA",
+        "hypopnea",
+        "sleep study",
+        "polysomnography"
+      ]
+    },
+    "ahi_ge_15": {
+      "label": "AHI/REI consistent with moderate-to-severe OSA",
+      "target_value": "AHI or REI \u2265 15 events/hour, or payer-specific threshold",
+      "value_prompt": "AHI/REI value, study type, and date",
+      "acceptable_evidence": [
+        "Polysomnography",
+        "home sleep test",
+        "sleep medicine note"
+      ],
+      "icd10_codes": [
+        "G47.33"
+      ],
+      "epic_terms": [
+        "AHI",
+        "REI",
+        "apnea hypopnea index",
+        "apnea-hypopnea index",
+        "respiratory event index",
+        "hypopnea",
+        "polysomnography",
+        "home sleep test"
+      ]
+    },
+    "pap_cpapt_status": {
+      "label": "PAP/CPAP use, intolerance, unable/unwilling, or not required by policy",
+      "target_value": "PAP/CPAP status if payer asks",
+      "value_prompt": "CPAP/PAP use, intolerance, adherence, or reason not used",
+      "acceptable_evidence": [
+        "Sleep medicine note",
+        "DME/adherence data",
+        "patient report documented"
+      ],
+      "icd10_codes": [
+        "G47.33",
+        "Z99.89"
+      ],
+      "epic_terms": [
         "CPAP",
         "PAP",
         "positive airway pressure",
         "mask intolerance",
         "unable",
         "unwilling",
+        "adherence",
+        "DME",
         "sleep medicine"
+      ]
+    },
+    "established_cvd": {
+      "label": "Established cardiovascular disease / ASCVD",
+      "target_value": "Established CVD such as prior MI, CAD, stroke, PAD",
+      "value_prompt": "CVD diagnosis and supporting note/date",
+      "acceptable_evidence": [
+        "Problem list",
+        "cardiology note",
+        "hospital discharge summary",
+        "vascular history"
+      ],
+      "icd10_codes": [
+        "I25.10",
+        "I25.2",
+        "I21.9",
+        "I63.9",
+        "I69.30",
+        "I70.209",
+        "I73.9",
+        "Z95.1",
+        "Z95.5"
+      ],
+      "epic_terms": [
+        "ASCVD",
+        "cardiovascular disease",
+        "coronary artery disease",
+        "CAD",
+        "myocardial infarction",
+        "MI",
+        "stroke",
+        "CVA",
+        "PAD",
+        "peripheral artery disease",
+        "CABG",
+        "stent"
+      ]
+    },
+    "ckd_with_t2d": {
+      "label": "CKD with type 2 diabetes",
+      "target_value": "T2D with CKD/albuminuria or payer-specific kidney-risk criteria",
+      "value_prompt": "CKD stage, eGFR, UACR/albuminuria, and date",
+      "acceptable_evidence": [
+        "Problem list",
+        "lab result",
+        "nephrology note"
+      ],
+      "icd10_codes": [
+        "E11.22",
+        "N18.1",
+        "N18.2",
+        "N18.30",
+        "N18.31",
+        "N18.32",
+        "N18.4",
+        "N18.5",
+        "R80.9",
+        "R80.3"
+      ],
+      "epic_terms": [
+        "CKD",
+        "chronic kidney disease",
+        "eGFR",
+        "GFR",
+        "creatinine",
+        "albuminuria",
+        "urine albumin",
+        "microalbumin",
+        "UACR",
+        "proteinuria"
+      ]
+    },
+    "mash_nash_diagnosis": {
+      "label": "MASH/NASH or MASLD/fatty liver diagnosis",
+      "target_value": "MASH/NASH diagnosis or fatty liver/MASLD evidence, as policy specifies",
+      "value_prompt": "Diagnosis, imaging, biopsy, elastography, hepatology note",
+      "acceptable_evidence": [
+        "Problem list",
+        "hepatology note",
+        "liver biopsy",
+        "FibroScan/elastography",
+        "imaging",
+        "lab workup"
+      ],
+      "icd10_codes": [
+        "K75.81",
+        "K76.0",
+        "K75.8"
+      ],
+      "epic_terms": [
+        "MASH",
+        "NASH",
+        "MASLD",
+        "NAFLD",
+        "fatty liver",
+        "steatohepatitis",
+        "hepatic steatosis",
+        "FibroScan",
+        "elastography",
+        "liver biopsy"
+      ]
+    },
+    "mash_f2_f3_fibrosis": {
+      "label": "Moderate-to-advanced fibrosis/scarring without cirrhosis",
+      "target_value": "Fibrosis stage F2\u2013F3 / moderate-to-advanced scarring; noncirrhotic if policy specifies",
+      "value_prompt": "Fibrosis stage/source and evidence no cirrhosis if needed",
+      "acceptable_evidence": [
+        "Liver biopsy",
+        "FibroScan/elastography",
+        "hepatology note",
+        "MRE",
+        "FIB-4 plus specialist interpretation"
+      ],
+      "icd10_codes": [
+        "K74.0",
+        "K74.00",
+        "K74.01",
+        "K74.02",
+        "K75.81"
+      ],
+      "epic_terms": [
+        "fibrosis",
+        "F2",
+        "F3",
+        "moderate fibrosis",
+        "advanced fibrosis",
+        "scarring",
+        "FibroScan",
+        "elastography",
+        "MRE",
+        "biopsy",
+        "cirrhosis",
+        "noncirrhotic"
+      ]
+    },
+    "pediatric_or_adolescent_age": {
+      "label": "Pediatric/adolescent age criterion",
+      "target_value": "Age threshold per label/policy, commonly \u226510 for pediatric T2D or \u226512 for adolescent obesity depending on agent",
+      "value_prompt": "Age/date of birth evidence without including identifiers in exported text",
+      "acceptable_evidence": [
+        "Demographics",
+        "clinic note"
+      ],
+      "icd10_codes": [],
+      "epic_terms": [
+        "age",
+        "adolescent",
+        "pediatric"
       ]
     }
   },
   "payers": [
     {
-      "id": "internal_test",
-      "name": "Internal Test Insurance",
+      "id": "example_payer",
+      "name": "Example Commercial Plan",
       "plan_types": [
         {
           "id": "commercial",
           "name": "Commercial"
-        },
-        {
-          "id": "medicare_advantage",
-          "name": "Medicare Advantage"
         }
       ]
     },
     {
-      "id": "deep_research_placeholder",
-      "name": "Deep Research Placeholder",
+      "id": "research_universe",
+      "name": "Research Universe \u2014 not insurance",
       "plan_types": [
         {
-          "id": "commercial",
-          "name": "Commercial"
-        },
-        {
-          "id": "medicaid",
-          "name": "Medicaid"
-        },
-        {
-          "id": "medicare_advantage",
-          "name": "Medicare Advantage"
+          "id": "indication_map",
+          "name": "FDA-labeled / research map"
         }
       ]
     }
   ],
   "policies": [
     {
-      "payer_id": "internal_test",
+      "payer_id": "example_payer",
       "plan_type_id": "commercial",
-      "policy_name": "Internal Test GLP-1 Coverage Pathways",
+      "policy_name": "Example GLP-1 Pathway Map \u2014 replace with real payer policy",
       "verification_status": "demonstration_not_verified",
-      "source_name": "Demonstration data only",
+      "source_name": "Demonstration data; not a real payer policy",
       "source_url": "",
       "effective_date": "",
       "retrieved_date": "2026-06-13",
+      "notes_on_limits": "This row shows the intended structure and UI behavior. Do not use for real coverage decisions.",
       "agents": [
         {
           "drug": "Trulicity",
           "ingredient": "dulaglutide",
           "class": "GLP-1 receptor agonist",
+          "notes": "",
           "pathways": [
             {
-              "id": "trulicity_t2d_conditions_no_auth",
+              "id": "trulicity_t2d_no_auth_conditions",
               "indication": "Type 2 diabetes",
               "status": "covered_with_conditions_no_authorization",
               "criteria": {
@@ -325,12 +643,34 @@
                   "type_2_diabetes"
                 ],
                 "any_of": [
-                  "a1c_ge_6_5",
-                  "fpg_ge_126"
+                  "a1c_diabetes_range",
+                  "fasting_glucose_diabetes_range"
                 ]
               },
               "prior_trials": {},
-              "notes": "Demonstrates a covered-with-conditions path without authorization."
+              "target_values_summary": "T2D plus HbA1c \u22656.5% or fasting glucose \u2265126 mg/dL.",
+              "notes": "Example of covered-with-criteria and no authorization listed.",
+              "source_refs": [],
+              "evidence_tier": "payer_demo"
+            }
+          ]
+        },
+        {
+          "drug": "Victoza",
+          "ingredient": "liraglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "",
+          "pathways": [
+            {
+              "id": "victoza_t2d_straight",
+              "indication": "Type 2 diabetes",
+              "status": "covered_no_prior_authorization",
+              "criteria": {},
+              "prior_trials": {},
+              "target_values_summary": "No authorization criteria listed in this example row.",
+              "notes": "Straight-through example; real payer may still require diagnosis consistency.",
+              "source_refs": [],
+              "evidence_tier": "payer_demo"
             }
           ]
         },
@@ -338,6 +678,7 @@
           "drug": "Ozempic",
           "ingredient": "semaglutide injection",
           "class": "GLP-1 receptor agonist",
+          "notes": "",
           "pathways": [
             {
               "id": "ozempic_t2d_auth",
@@ -348,22 +689,29 @@
                   "type_2_diabetes"
                 ],
                 "any_of": [
-                  "a1c_ge_6_5",
-                  "fpg_ge_126",
-                  "ckd_with_t2d",
-                  "established_ascvd"
+                  "a1c_diabetes_range",
+                  "a1c_ge_7",
+                  "fasting_glucose_diabetes_range",
+                  "established_cvd",
+                  "ckd_with_t2d"
                 ]
               },
               "prior_trials": {},
-              "notes": "Use when diabetes/CKD/CV evidence supports the request."
+              "target_values_summary": "T2D plus A1c/glucose evidence or T2D with CV/CKD risk evidence.",
+              "notes": "Example authorization path without explicit prior trial.",
+              "source_refs": [],
+              "evidence_tier": "payer_demo"
             },
             {
-              "id": "ozempic_weight_not_covered",
+              "id": "ozempic_weight_excluded",
               "indication": "Weight loss without type 2 diabetes",
               "status": "not_covered",
               "criteria": {},
               "prior_trials": {},
-              "notes": "Demonstration non-covered pathway; use Wegovy/Zepbound pathways for weight-management coverage logic."
+              "target_values_summary": "No covered pathway in this example row.",
+              "notes": "Use obesity-labeled agents/policies if weight-management coverage exists.",
+              "source_refs": [],
+              "evidence_tier": "payer_demo"
             }
           ]
         },
@@ -371,24 +719,28 @@
           "drug": "Rybelsus",
           "ingredient": "oral semaglutide",
           "class": "GLP-1 receptor agonist",
+          "notes": "",
           "pathways": [
             {
-              "id": "rybelsus_t2d_auth_trial",
+              "id": "rybelsus_t2d_auth_step",
               "indication": "Type 2 diabetes",
               "status": "covered_with_authorization_and_prior_trials",
               "criteria": {
                 "all_of": [
                   "type_2_diabetes",
-                  "a1c_ge_7_0"
+                  "a1c_ge_7"
                 ]
               },
               "prior_trials": {
                 "any_of": [
                   "metformin_trial_or_contraindication",
-                  "preferred_agent_trial"
+                  "preferred_glp_trial_or_contraindication"
                 ]
               },
-              "notes": "Demonstrates authorization plus step/prior therapy."
+              "target_values_summary": "T2D with HbA1c \u22657.0%; metformin or preferred-agent history if required.",
+              "notes": "Example authorization plus prior trial/step requirement.",
+              "source_refs": [],
+              "evidence_tier": "payer_demo"
             }
           ]
         },
@@ -396,15 +748,16 @@
           "drug": "Mounjaro",
           "ingredient": "tirzepatide",
           "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "",
           "pathways": [
             {
-              "id": "mounjaro_t2d_auth_trial",
+              "id": "mounjaro_t2d_auth_step",
               "indication": "Type 2 diabetes",
               "status": "covered_with_authorization_and_prior_trials",
               "criteria": {
                 "all_of": [
                   "type_2_diabetes",
-                  "a1c_ge_7_0"
+                  "a1c_ge_7"
                 ]
               },
               "prior_trials": {
@@ -412,10 +765,13 @@
                   "metformin_trial_or_contraindication"
                 ],
                 "any_of": [
-                  "preferred_agent_trial"
+                  "preferred_glp_trial_or_contraindication"
                 ]
               },
-              "notes": "Demonstrates diabetes authorization with metformin/preferred-agent history."
+              "target_values_summary": "T2D with HbA1c \u22657.0%; metformin and/or preferred GLP history if policy requires.",
+              "notes": "Example of diabetes path with step therapy.",
+              "source_refs": [],
+              "evidence_tier": "payer_demo"
             }
           ]
         },
@@ -423,6 +779,7 @@
           "drug": "Wegovy",
           "ingredient": "semaglutide 2.4 mg",
           "class": "GLP-1 receptor agonist",
+          "notes": "",
           "pathways": [
             {
               "id": "wegovy_weight_auth",
@@ -430,31 +787,58 @@
               "status": "covered_with_authorization",
               "criteria": {
                 "any_of": [
-                  "bmi_ge_30",
-                  "bmi_ge_27_weight_comorbidity"
+                  "bmi_ge_30_adult",
+                  "bmi_ge_27_with_comorbidity"
                 ],
                 "all_of": [
-                  "lifestyle_program_documented"
+                  "lifestyle_weight_management"
                 ]
               },
               "prior_trials": {},
-              "notes": "Demonstrates obesity/overweight pathway."
+              "target_values_summary": "BMI \u226530, or BMI \u226527 with weight-related comorbidity; lifestyle documentation.",
+              "notes": "Example obesity/overweight pathway.",
+              "source_refs": [],
+              "evidence_tier": "payer_demo"
             },
             {
               "id": "wegovy_cvd_weight_auth",
-              "indication": "Weight management with established cardiovascular disease",
+              "indication": "Established cardiovascular disease with overweight/obesity",
               "status": "covered_with_authorization",
               "criteria": {
                 "all_of": [
-                  "established_ascvd"
+                  "established_cvd"
                 ],
                 "any_of": [
-                  "bmi_ge_30",
-                  "bmi_ge_27_weight_comorbidity"
+                  "bmi_ge_30_adult",
+                  "bmi_ge_27_with_comorbidity"
                 ]
               },
               "prior_trials": {},
-              "notes": "Demonstrates CV-risk pathway framing."
+              "target_values_summary": "Established CVD plus overweight/obesity.",
+              "notes": "FDA labeling includes MACE risk reduction in adults with established CVD and overweight/obesity; payer coverage varies.",
+              "source_refs": [
+                "fda_wegovy_cvd_2024"
+              ],
+              "evidence_tier": "FDA-labeled/payer_demo"
+            },
+            {
+              "id": "wegovy_mash_auth",
+              "indication": "MASH/NASH with moderate-to-advanced fibrosis",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "all_of": [
+                  "mash_nash_diagnosis",
+                  "mash_f2_f3_fibrosis"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "MASH/NASH diagnosis plus F2\u2013F3/moderate-to-advanced fibrosis/scarring; noncirrhotic if policy specifies.",
+              "notes": "Included because MASH/fatty liver is a real coverage-research universe item, not an afterthought.",
+              "source_refs": [
+                "fda_wegovy_mash_2025",
+                "icd10_mash_k75_81_2026"
+              ],
+              "evidence_tier": "FDA-labeled/payer_demo"
             }
           ]
         },
@@ -462,57 +846,75 @@
           "drug": "Zepbound",
           "ingredient": "tirzepatide",
           "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "",
           "pathways": [
+            {
+              "id": "zepbound_weight_auth_step",
+              "indication": "Chronic weight management",
+              "status": "covered_with_authorization_and_prior_trials",
+              "criteria": {
+                "any_of": [
+                  "bmi_ge_30_adult",
+                  "bmi_ge_27_with_comorbidity"
+                ],
+                "all_of": [
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {
+                "any_of": [
+                  "weight_program_duration",
+                  "anti_obesity_med_trial_or_contraindication"
+                ]
+              },
+              "target_values_summary": "BMI \u226530, or BMI \u226527 with comorbidity; lifestyle documentation; prior weight program or medication trial if required.",
+              "notes": "Example of authorization plus prior trial path.",
+              "source_refs": [],
+              "evidence_tier": "payer_demo"
+            },
             {
               "id": "zepbound_osa_auth",
               "indication": "Moderate-to-severe obstructive sleep apnea with obesity",
               "status": "covered_with_authorization",
               "criteria": {
                 "all_of": [
-                  "moderate_severe_osa",
-                  "ahi_value",
-                  "obesity_with_osa",
-                  "lifestyle_program_documented"
+                  "moderate_to_severe_osa",
+                  "ahi_ge_15",
+                  "bmi_ge_30_adult",
+                  "lifestyle_weight_management"
                 ]
               },
               "prior_trials": {},
-              "notes": "Demonstrates OSA pathway using AHI/sleep-study evidence."
+              "target_values_summary": "Moderate-to-severe OSA, AHI/REI value, obesity/BMI, lifestyle plan.",
+              "notes": "FDA-labeled OSA pathway; payer may ask for PAP/CPAP status as a prior-therapy field.",
+              "source_refs": [
+                "fda_zepbound_osa_2024",
+                "icd10_osa_g47_33_2026"
+              ],
+              "evidence_tier": "FDA-labeled/payer_demo"
             },
             {
-              "id": "zepbound_weight_auth_trial",
-              "indication": "Chronic weight management",
+              "id": "zepbound_osa_auth_with_pap",
+              "indication": "OSA with obesity when payer requires PAP/CPAP status",
               "status": "covered_with_authorization_and_prior_trials",
               "criteria": {
-                "any_of": [
-                  "bmi_ge_30",
-                  "bmi_ge_27_weight_comorbidity"
-                ],
                 "all_of": [
-                  "lifestyle_program_documented"
+                  "moderate_to_severe_osa",
+                  "ahi_ge_15",
+                  "bmi_ge_30_adult"
                 ]
               },
               "prior_trials": {
                 "any_of": [
-                  "weight_program_3_to_6_months",
-                  "anti_obesity_med_trial"
+                  "pap_cpapt_status"
                 ]
               },
-              "notes": "Demonstrates weight-management pathway with prior trial requirement."
-            }
-          ]
-        },
-        {
-          "drug": "Victoza",
-          "ingredient": "liraglutide",
-          "class": "GLP-1 receptor agonist",
-          "pathways": [
-            {
-              "id": "victoza_t2d_no_auth",
-              "indication": "Type 2 diabetes",
-              "status": "covered_no_prior_authorization",
-              "criteria": {},
-              "prior_trials": {},
-              "notes": "Demonstrates a straight-through coverage path; verify whether actual policy still requires diagnosis consistency."
+              "target_values_summary": "OSA + AHI/REI + BMI, plus PAP/CPAP use/intolerance/unable/unwilling status if required.",
+              "notes": "Use only if exact payer policy asks for PAP/CPAP evidence.",
+              "source_refs": [
+                "fda_zepbound_osa_2024"
+              ],
+              "evidence_tier": "payer_demo"
             }
           ]
         },
@@ -520,6 +922,7 @@
           "drug": "Saxenda",
           "ingredient": "liraglutide 3 mg",
           "class": "GLP-1 receptor agonist",
+          "notes": "",
           "pathways": [
             {
               "id": "saxenda_weight_not_covered",
@@ -527,44 +930,198 @@
               "status": "not_covered",
               "criteria": {},
               "prior_trials": {},
-              "notes": "Demonstration not-covered row."
+              "target_values_summary": "Not covered in this example row.",
+              "notes": "Example explicit exclusion.",
+              "source_refs": [],
+              "evidence_tier": "payer_demo"
             }
           ]
         }
       ]
     },
     {
-      "payer_id": "internal_test",
-      "plan_type_id": "medicare_advantage",
-      "policy_name": "Internal Test Medicare Advantage GLP-1 Coverage Pathways",
-      "verification_status": "demonstration_not_verified",
-      "source_name": "Demonstration data only",
+      "payer_id": "research_universe",
+      "plan_type_id": "indication_map",
+      "policy_name": "Research universe \u2014 FDA-labeled and high-yield coverage pathways, not payer coverage",
+      "verification_status": "research_universe_not_payer_coverage",
+      "source_name": "FDA/DailyMed/ICD research scaffold; not a payer policy",
       "source_url": "",
-      "effective_date": "",
+      "effective_date": "varies",
       "retrieved_date": "2026-06-13",
+      "notes_on_limits": "This row intentionally maps the possible universe so deep research does not miss MASH/fatty liver, OSA, CVD, CKD, obesity, and diabetes pathways. Status colors here mean pathway type for research, not member-specific coverage.",
       "agents": [
         {
           "drug": "Ozempic",
           "ingredient": "semaglutide injection",
           "class": "GLP-1 receptor agonist",
+          "notes": "",
           "pathways": [
             {
-              "id": "ozempic_ma_t2d_auth",
-              "indication": "Type 2 diabetes",
+              "id": "ozempic_t2d_universe",
+              "indication": "T2D glycemic control",
               "status": "covered_with_authorization",
               "criteria": {
                 "all_of": [
                   "type_2_diabetes"
                 ],
                 "any_of": [
-                  "a1c_ge_6_5",
-                  "fpg_ge_126",
-                  "ckd_with_t2d",
-                  "established_ascvd"
+                  "a1c_diabetes_range",
+                  "a1c_ge_7",
+                  "fasting_glucose_diabetes_range"
                 ]
               },
               "prior_trials": {},
-              "notes": "Demonstration MA diabetes route."
+              "target_values_summary": "T2D diagnosis plus A1c/glucose evidence.",
+              "notes": "Universe row only; payer may require authorization/step therapy.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
+            },
+            {
+              "id": "ozempic_t2d_cvd_universe",
+              "indication": "T2D with established CVD",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "all_of": [
+                  "type_2_diabetes",
+                  "established_cvd"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "T2D plus established CVD.",
+              "notes": "Universe row only.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
+            },
+            {
+              "id": "ozempic_t2d_ckd_universe",
+              "indication": "T2D with CKD",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "all_of": [
+                  "type_2_diabetes",
+                  "ckd_with_t2d"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "T2D plus CKD/albuminuria evidence.",
+              "notes": "Universe row only.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
+            }
+          ]
+        },
+        {
+          "drug": "Trulicity",
+          "ingredient": "dulaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "",
+          "pathways": [
+            {
+              "id": "trulicity_t2d_universe",
+              "indication": "T2D glycemic control",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "all_of": [
+                  "type_2_diabetes"
+                ],
+                "any_of": [
+                  "a1c_diabetes_range",
+                  "a1c_ge_7"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "T2D plus glycemic evidence.",
+              "notes": "Universe row only.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
+            },
+            {
+              "id": "trulicity_t2d_cvd_universe",
+              "indication": "T2D with CVD or multiple CV risk factors",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "all_of": [
+                  "type_2_diabetes"
+                ],
+                "any_of": [
+                  "established_cvd"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "T2D plus CV disease/risk evidence.",
+              "notes": "Universe row only.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
+            }
+          ]
+        },
+        {
+          "drug": "Victoza",
+          "ingredient": "liraglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "",
+          "pathways": [
+            {
+              "id": "victoza_t2d_universe",
+              "indication": "T2D glycemic control",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "all_of": [
+                  "type_2_diabetes"
+                ],
+                "any_of": [
+                  "a1c_diabetes_range",
+                  "a1c_ge_7"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "T2D plus glycemic evidence.",
+              "notes": "Universe row only.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
+            },
+            {
+              "id": "victoza_pediatric_t2d_universe",
+              "indication": "Pediatric/adolescent T2D",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "all_of": [
+                  "type_2_diabetes",
+                  "pediatric_or_adolescent_age"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Pediatric age criterion plus T2D.",
+              "notes": "Universe row only.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
+            }
+          ]
+        },
+        {
+          "drug": "Rybelsus",
+          "ingredient": "oral semaglutide",
+          "class": "GLP-1 receptor agonist",
+          "notes": "",
+          "pathways": [
+            {
+              "id": "rybelsus_t2d_universe",
+              "indication": "T2D glycemic control",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "all_of": [
+                  "type_2_diabetes"
+                ],
+                "any_of": [
+                  "a1c_diabetes_range",
+                  "a1c_ge_7"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "T2D plus A1c/glucose evidence.",
+              "notes": "Universe row only.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
             }
           ]
         },
@@ -572,24 +1129,93 @@
           "drug": "Mounjaro",
           "ingredient": "tirzepatide",
           "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "",
           "pathways": [
             {
-              "id": "mounjaro_ma_t2d_auth_trial",
-              "indication": "Type 2 diabetes",
-              "status": "covered_with_authorization_and_prior_trials",
+              "id": "mounjaro_t2d_universe",
+              "indication": "T2D glycemic control",
+              "status": "covered_with_authorization",
               "criteria": {
                 "all_of": [
-                  "type_2_diabetes",
-                  "a1c_ge_7_0"
-                ]
-              },
-              "prior_trials": {
+                  "type_2_diabetes"
+                ],
                 "any_of": [
-                  "metformin_trial_or_contraindication",
-                  "preferred_agent_trial"
+                  "a1c_diabetes_range",
+                  "a1c_ge_7"
                 ]
               },
-              "notes": "Demonstration MA diabetes route with prior trial."
+              "prior_trials": {},
+              "target_values_summary": "T2D plus glycemic evidence.",
+              "notes": "Universe row only.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
+            }
+          ]
+        },
+        {
+          "drug": "Wegovy",
+          "ingredient": "semaglutide 2.4 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "",
+          "pathways": [
+            {
+              "id": "wegovy_weight_universe",
+              "indication": "Chronic weight management",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "any_of": [
+                  "bmi_ge_30_adult",
+                  "bmi_ge_27_with_comorbidity"
+                ],
+                "all_of": [
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "BMI \u226530 or \u226527 + comorbidity; lifestyle plan.",
+              "notes": "Universe row only.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
+            },
+            {
+              "id": "wegovy_cvd_universe",
+              "indication": "CVD risk reduction with overweight/obesity",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "all_of": [
+                  "established_cvd"
+                ],
+                "any_of": [
+                  "bmi_ge_30_adult",
+                  "bmi_ge_27_with_comorbidity"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "Established CVD plus overweight/obesity.",
+              "notes": "FDA-labeled universe.",
+              "source_refs": [
+                "fda_wegovy_cvd_2024"
+              ],
+              "evidence_tier": "FDA-labeled universe"
+            },
+            {
+              "id": "wegovy_mash_universe",
+              "indication": "MASH/NASH with F2-F3 fibrosis",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "all_of": [
+                  "mash_nash_diagnosis",
+                  "mash_f2_f3_fibrosis"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "MASH/NASH plus F2-F3/moderate-to-advanced fibrosis/scarring.",
+              "notes": "FDA-labeled universe; payer coverage must be researched separately.",
+              "source_refs": [
+                "fda_wegovy_mash_2025",
+                "icd10_mash_k75_81_2026"
+              ],
+              "evidence_tier": "FDA-labeled universe"
             }
           ]
         },
@@ -597,32 +1223,74 @@
           "drug": "Zepbound",
           "ingredient": "tirzepatide",
           "class": "dual GIP/GLP-1 receptor agonist",
+          "notes": "",
           "pathways": [
             {
-              "id": "zepbound_ma_osa_auth",
-              "indication": "Moderate-to-severe obstructive sleep apnea with obesity",
+              "id": "zepbound_weight_universe",
+              "indication": "Chronic weight management",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "any_of": [
+                  "bmi_ge_30_adult",
+                  "bmi_ge_27_with_comorbidity"
+                ],
+                "all_of": [
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "BMI \u226530 or \u226527 + comorbidity; lifestyle plan.",
+              "notes": "Universe row only.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
+            },
+            {
+              "id": "zepbound_osa_universe",
+              "indication": "Moderate-to-severe OSA with obesity",
               "status": "covered_with_authorization",
               "criteria": {
                 "all_of": [
-                  "moderate_severe_osa",
-                  "ahi_value",
-                  "obesity_with_osa"
+                  "moderate_to_severe_osa",
+                  "ahi_ge_15",
+                  "bmi_ge_30_adult",
+                  "lifestyle_weight_management"
                 ]
               },
-              "prior_trials": {
-                "any_of": [
-                  "pap_trial_or_unable_unwilling"
-                ]
-              },
-              "notes": "Demonstration MA OSA route; actual Medicare/Part D rules require careful verification."
-            },
-            {
-              "id": "zepbound_ma_weight_not_covered",
-              "indication": "Weight loss only",
-              "status": "not_covered",
-              "criteria": {},
               "prior_trials": {},
-              "notes": "Demonstration non-covered weight-loss-only route."
+              "target_values_summary": "Moderate-to-severe OSA, AHI/REI, BMI \u226530, lifestyle plan.",
+              "notes": "FDA-labeled OSA universe.",
+              "source_refs": [
+                "fda_zepbound_osa_2024",
+                "icd10_osa_g47_33_2026"
+              ],
+              "evidence_tier": "FDA-labeled universe"
+            }
+          ]
+        },
+        {
+          "drug": "Saxenda",
+          "ingredient": "liraglutide 3 mg",
+          "class": "GLP-1 receptor agonist",
+          "notes": "",
+          "pathways": [
+            {
+              "id": "saxenda_weight_universe",
+              "indication": "Chronic weight management",
+              "status": "covered_with_authorization",
+              "criteria": {
+                "any_of": [
+                  "bmi_ge_30_adult",
+                  "bmi_ge_27_with_comorbidity"
+                ],
+                "all_of": [
+                  "lifestyle_weight_management"
+                ]
+              },
+              "prior_trials": {},
+              "target_values_summary": "BMI threshold + lifestyle plan.",
+              "notes": "Universe row only; market status/formulary restrictions must be checked.",
+              "source_refs": [],
+              "evidence_tier": "FDA-labeled universe"
             }
           ]
         }
