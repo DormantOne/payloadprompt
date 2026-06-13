@@ -4,10 +4,11 @@
     "core_user_workflow": [
       "User selects insurance and plan type.",
       "Application displays exact payer_id + plan_type_id policy row only; never infer across plans.",
-      "Each drug displays one or more indication/pathway rows.",
-      "Each pathway has a single status: covered_no_prior_authorization, covered_with_conditions_no_authorization, covered_with_authorization, covered_with_authorization_and_prior_trials, or not_covered.",
+      "Each drug displays pathway bubbles: covered, covered with criteria, covered with authorization, authorization + prior trial/step, or not covered.",
       "User checks one or more relevant pathways/indications.",
-      "Application generates value/evidence fields, relevant Epic search terms, ICD-10 OR blocks, and a concise bottom summary. No patient letter. No extra persuasion layer."
+      "Application generates two separate Epic paste blocks: keywords/evidence terms and ICD-10 diagnosis codes, each only from checked pathway criteria.",
+      "Application generates a criteria checklist with yes / no / unsure for every criterion and prior-trial criterion.",
+      "Application summarizes whether the selected pathway appears satisfied, not satisfied, or could be satisfied if uncertain criteria are documented. No patient letter."
     ],
     "status_rules": {
       "covered_no_prior_authorization": "Use only when the payer/formulary source explicitly indicates the agent is covered and no authorization/step criteria are listed. Criteria may be empty; if diagnosis consistency is still expected, list it under clinical_context rather than formal criteria.",
@@ -23,7 +24,8 @@
       "criteria and prior_trials must reference criteria_library IDs using all_of / any_of. Keep logic shallow where possible. If payer text is complex, create a named criterion with a clear label and target_value.",
       "criteria_library entries should include label, target_value, value_prompt, acceptable_evidence, icd10_codes, epic_terms, and optional notes. This is what makes the Epic block and value fields relevant instead of noisy.",
       "ICD-10 codes should be included only when relevant to the criterion. Separate codes with OR in the app output. Include many codes only when they help retrieve chart evidence. Mark uncertain/candidate code groups in notes for human coding verification.",
-      "Research universe rows are scaffolds only. Do not convert them to payer coverage without exact payer evidence."
+      "Research universe rows are scaffolds only. Do not convert them to payer coverage without exact payer evidence.",
+      "For each criterion, include concise Epic keyword terms and ICD-10 code groups separately so the UI can generate split paste blocks."
     ],
     "coverage_universe_to_consider_in_deep_research": [
       "Type 2 diabetes glycemic control and cardiometabolic risk reduction",
@@ -34,9 +36,22 @@
       "MASH/MASLD/fatty liver: especially noncirrhotic MASH with moderate-to-advanced fibrosis F2-F3 where labeled/policy-recognized",
       "Pediatric T2D and adolescent obesity where product labeling/policy supports it",
       "Explicit exclusions: cosmetic weight loss, off-label weight loss for diabetes-only products, compounded/unapproved products, noncovered benefit categories"
-    ]
+    ],
+    "ui_requirements": [
+      "Keep the interface professional and minimal: insurance, plan, coverage pathways, Epic keyword block, Epic ICD-10 block, criteria checklist, final summary.",
+      "Status badges must wrap inside the panel and never overflow.",
+      "No patient-facing letter, no marketing language, no unsupported coverage prediction.",
+      "No cross-plan fallback. If no exact row exists, show no policy row.",
+      "The summary must explicitly distinguish: criteria met, criteria not met, or possibly obtainable if uncertain documentation is found."
+    ],
+    "criteria_status_logic": {
+      "yes": "Criterion evidence is documented or value entered and meets target according to human reviewer.",
+      "no": "Criterion is known not to be met; pathway should summarize as not currently meeting criteria.",
+      "unsure": "Criterion needs chart search/documentation; pathway may be obtainable if evidence is found or documented.",
+      "default": "Default each criterion to unsure, not no. Unknown is not the same as absent."
+    }
   },
-  "schema_version": "3.0-status-workbench",
+  "schema_version": "3.1-criteria-checker",
   "created": "2026-06-13",
   "verification_notice": "Demonstration/research scaffold. Replace sample payer rows with exact payer/PBM policy evidence before clinical use.",
   "status_definitions": {
@@ -1296,5 +1311,6 @@
         }
       ]
     }
-  ]
+  ],
+  "updated": "2026-06-13"
 }
