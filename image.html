@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Contrast / Imaging Study Finder — Copilot + OpenEvidence Payload Builder</title>
+<style>
+:root{
+  --bg:#f3f4f6; --panel:#ffffff; --accent:#1d4ed8; --accent2:#1e40af;
+  --border:#d1d5db; --text:#111827; --muted:#6b7280; --shadow:0 10px 25px rgba(15,23,42,.12); --r:16px;
+  --green:#0b6b3a; --green-soft:#e7f7ef; --green-line:#bfe7d2;
+  --yellow:#7a5a00; --yellow-soft:#fff6d6; --yellow-line:#f1dd8c;
+  --orange:#9a3f00; --orange-soft:#fff0e2; --orange-line:#ffcfa3;
+  --red:#8a1c1c; --red-soft:#fde8e8; --red-line:#f4b5b5;
+  --blue-soft:#e0f2fe; --gray:#4b5563; --gray-soft:#eef1f5; --gray-line:#cfd5dd;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(circle at top left,#dbeafe 0,#f3f4f6 44%,#e5e7eb 100%);color:var(--text);min-height:100vh;padding:16px;line-height:1.45}
+.wrap{max-width:1280px;margin:0 auto}
+.header,.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
+.header{padding:16px 18px;position:sticky;top:8px;z-index:10;background:linear-gradient(135deg,#fff,#e0f2fe);backdrop-filter:blur(10px)}
+.htop{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.title{font-size:1.16rem;font-weight:950;text-transform:uppercase;letter-spacing:.035em;color:var(--accent2)}
+.subtitle,.hint,.meta{color:var(--muted);font-size:.86rem;line-height:1.4;margin-top:6px}
+.badge{display:inline-flex;gap:6px;align-items:center;padding:5px 10px;border-radius:999px;background:rgba(29,78,216,.06);border:1px solid rgba(29,78,216,.18);color:var(--accent2);font-weight:900;font-size:.78rem;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:999px;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.25)}
+.actionsTop{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.key{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.keychip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 10px;font-size:.76rem;font-weight:850;border:1px solid transparent}
+.keychip.g{background:var(--green-soft);color:var(--green);border-color:var(--green-line)}
+.keychip.y{background:var(--yellow-soft);color:var(--yellow);border-color:var(--yellow-line)}
+.keychip.o{background:var(--orange-soft);color:var(--orange);border-color:var(--orange-line)}
+.keychip.r{background:var(--red-soft);color:var(--red);border-color:var(--red-line)}
+.keychip.x{background:var(--gray-soft);color:var(--gray);border-color:var(--gray-line)}
+.layout{margin-top:18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.18fr);gap:16px}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}}
+.panel{padding:14px}
+.phead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.ptitle{font-weight:950;display:flex;gap:8px;align-items:center}
+.step{min-width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:var(--accent);color:#fff;font-weight:950}
+fieldset{border:1px solid var(--border);background:#f9fafb;border-radius:12px;padding:10px;margin-top:10px}
+legend{padding:0 6px;color:var(--muted);font-size:.78rem;font-weight:950;text-transform:uppercase;letter-spacing:.08em}
+label.lbl{display:block;color:var(--muted);font-size:.8rem;font-weight:750;margin-top:8px}
+select,input,textarea{width:100%;margin-top:5px;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font:inherit;background:#fff}
+textarea{min-height:78px;resize:vertical;line-height:1.45}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(29,78,216,.18)}
+input[readonly]{background:var(--gray-soft);color:#374151;cursor:not-allowed;font-weight:850}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}.row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+@media(max-width:900px){.row4{grid-template-columns:1fr 1fr}}@media(max-width:780px){.row2,.row3,.row4{grid-template-columns:1fr}}
+.checkWrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chk{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 10px;font-size:.8rem;font-weight:750;color:#1f2937;cursor:pointer}.chk input{width:auto;margin:0}.chk:hover{border-color:var(--accent)}
+.tagRow{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.tag{border:1px solid rgba(29,78,216,.35);background:#fff;color:var(--accent2);font-size:.76rem;padding:5px 9px;border-radius:999px;cursor:pointer;font-weight:850}.tag:hover{background:rgba(29,78,216,.08)}
+.opt{display:flex;gap:10px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px;font-size:.85rem;line-height:1.3;margin-top:8px}.opt input{width:auto;margin-top:2px}
+.btnRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btn,.mini,.ghost{border:none;border-radius:10px;padding:10px 12px;font-weight:950;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}.btn{flex:1;min-width:160px}.primary,.mini{background:var(--accent);color:#fff}.primary:hover,.mini:hover{background:var(--accent2)}.secondary{background:#e5e7eb;color:var(--text)}.secondary:hover{background:#d1d5db}.ghost{border:1px solid rgba(29,78,216,.35);background:#fff;color:var(--accent2);border-radius:999px}.ghost:hover{box-shadow:0 6px 16px rgba(29,78,216,.18)}
+.out{background:#0f172a;color:#e2e8f0;border-radius:12px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:.82rem;line-height:1.55;overflow-y:auto;overflow-x:hidden;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;margin-top:6px;min-height:380px;max-height:calc(100vh - 286px)}
+.previewPanel{position:sticky;top:108px;max-height:calc(100vh - 124px);display:flex;flex-direction:column;overflow:hidden}@media(max-width:1000px){.previewPanel{position:static;max-height:none}.out{max-height:64vh}}
+.notice{margin-top:10px;font-size:.82rem;border-radius:10px;padding:9px 11px;line-height:1.45}.notice.safe{color:#065f46;background:rgba(16,185,129,.10);border:1px solid rgba(16,185,129,.35)}.notice.warn{color:#92400e;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.45)}.notice.red{color:#7f1d1d;background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.35)}
+.flagBox{border-radius:12px;border:1px solid var(--border);background:#fff;padding:10px;margin-top:10px}.flagTitle{font-size:.8rem;font-weight:950;color:var(--accent2);text-transform:uppercase;letter-spacing:.06em}.flagList{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}.pill{display:inline-flex;border-radius:999px;padding:5px 9px;font-size:.76rem;font-weight:850;border:1px solid}.pill.g{background:var(--green-soft);border-color:var(--green-line);color:var(--green)}.pill.y{background:var(--yellow-soft);border-color:var(--yellow-line);color:var(--yellow)}.pill.o{background:var(--orange-soft);border-color:var(--orange-line);color:var(--orange)}.pill.r{background:var(--red-soft);border-color:var(--red-line);color:var(--red)}.pill.x{background:var(--gray-soft);border-color:var(--gray-line);color:var(--gray)}
+.details summary{list-style:none;cursor:pointer;background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-weight:950;color:var(--accent2);display:flex;align-items:center;justify-content:space-between;margin-top:10px}.details summary::-webkit-details-marker{display:none}.details summary:after{content:"▾";color:var(--muted)}.details[open] summary:after{content:"▴"}.detailsBody{margin-top:8px}
+.toast{position:fixed;right:18px;bottom:18px;background:#111827;color:#fff;padding:10px 16px;border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.35);font-weight:950;z-index:9999;max-width:90vw}
+.phoneGate{display:none;margin-bottom:14px;background:#fff7ed;border:1px solid rgba(245,158,11,.55);border-radius:16px;box-shadow:var(--shadow);padding:14px}.phoneGateTitle{font-weight:950;color:#92400e;font-size:1.02rem}.phoneGate p{margin-top:6px;color:#7c2d12;font-size:.9rem}.phoneGateActions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}body.phoneMode .phoneGate{display:block}body.phoneMode:not(.allowPhone) .layout{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="phoneGate" id="phoneGate" aria-live="polite">
+  <div class="phoneGateTitle">Best used on a computer.</div>
+  <p>This builds a long clinical prompt for Microsoft 365 Copilot and/or OpenEvidence. Do not enter patient identifiers. Continue here if needed.</p>
+  <div class="phoneGateActions"><button class="mini" id="shareLinkBtn" type="button">📤 Share this link</button><a class="ghost" id="emailSelfBtn" href="mailto:">✉️ Email link to myself</a><button class="ghost" id="continuePhoneBtn" type="button">Continue on phone anyway</button></div>
+</section>
+<header class="header">
+  <div class="htop">
+    <div>
+      <div class="title">Contrast / Imaging Study Finder — Copilot + OpenEvidence Payload Builder</div>
+      <div class="subtitle">Builds a prompt to compare the <b>best study</b>, <b>second-best study</b>, contrast risk, mitigation, premedication, and the expected diagnostic value of contrast vs no contrast. Designed for UPMC Microsoft 365 Copilot and OpenEvidence. <br><strong>No identifiers. Not an order. Use radiology/protocoling and clinician judgment.</strong></div>
+      <div class="key" aria-label="risk key"><span class="keychip g">● Low risk / routine</span><span class="keychip y">● Check threshold</span><span class="keychip o">● Mitigate / discuss</span><span class="keychip r">● High-risk flag</span><span class="keychip x">● Needs confirmation</span></div>
+    </div>
+    <div class="actionsTop"><span class="badge"><span class="dot"></span> Prototype</span><button class="ghost" id="talkBtn" type="button">🔊 Talk it through</button></div>
+  </div>
+</header>
+<div class="layout">
+<section class="panel">
+  <div class="phead"><div class="ptitle"><span class="step">1</span> Clinical question</div></div>
+  <fieldset>
+    <legend>Condition / area / concern</legend>
+    <div class="row3">
+      <div><label class="lbl">Area</label><select id="area"></select></div>
+      <div><label class="lbl">Clinical concern / finding</label><select id="concern"></select></div>
+      <div><label class="lbl">Acuity</label><select id="acuity"><option>Routine outpatient</option><option>Urgent inpatient</option><option>Emergency / time-sensitive</option><option>ICU / unstable</option><option>Unknown</option></select></div>
+    </div>
+    <label class="lbl">Specific question you need imaging to answer</label>
+    <textarea id="question" placeholder="e.g., pancreatitis with fever: necrosis? abscess? pseudocyst? biliary obstruction?; stroke/TIA: hemorrhage? LVO? perfusion?; abdominal pain: appendicitis? diverticulitis? abscess?"></textarea>
+    <div class="tagRow" id="questionTags"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Institution default / contrast class</legend>
+    <div class="row3">
+      <div><label class="lbl">Institution / site</label><input id="site" value="UPMC Presbyterian Shadyside — Shadyside Campus"></div>
+      <div><label class="lbl">CT default contrast class</label><input id="ctDefault" value="Low-osmolar iodinated IV contrast per UPMC HS-RAD0018 / local radiology protocol"></div>
+      <div><label class="lbl">MRI default contrast class</label><input id="mrDefault" value="Group II gadolinium-based contrast agent per UPMC HS-RAD0017 / local radiology protocol"></div>
+    </div>
+    <label class="lbl">Local formulary / operational note</label>
+    <input id="formularyNote" value="Specific agent selected by radiology/pharmacy formulary and exam protocol; confirm current protocol if high-risk." />
+    <div class="hint">The prompt asks Copilot/OpenEvidence to verify current institutional policies rather than assuming a brand/product.</div>
+  </fieldset>
+
+  <div class="phead" style="margin-top:14px"><div class="ptitle"><span class="step">2</span> Contrast risk modifiers</div></div>
+  <fieldset>
+    <legend>Allergy / reaction history</legend>
+    <div class="row3">
+      <div><label class="lbl">Contrast allergy type</label><select id="allergy"><option>None known</option><option>Iodinated contrast allergy</option><option>Gadolinium contrast allergy</option><option>Generic contrast allergy — class unclear</option><option>Prior physiologic reaction only</option><option>Unknown</option></select></div>
+      <div><label class="lbl">Reaction severity</label><select id="severity"><option>None / not applicable</option><option>Mild — limited hives/itching/nausea</option><option>Moderate — diffuse hives, mild bronchospasm, facial/laryngeal edema</option><option>Severe — anaphylaxis, hypotension, severe bronchospasm, airway compromise</option><option>Unknown severity</option></select></div>
+      <div><label class="lbl">Premedicated before?</label><select id="premed"><option>Unknown / not applicable</option><option>Yes — tolerated</option><option>Yes — breakthrough reaction</option><option>No</option></select></div>
+    </div>
+    <label class="lbl">Reaction details / date / agent if known</label><input id="reactionDetails" placeholder="e.g., hives after CT contrast 2019; no airway symptoms; tolerated later with premedication"></input>
+  </fieldset>
+
+  <fieldset>
+    <legend>Renal / metabolic factors</legend>
+    <div class="row4">
+      <div><label class="lbl">eGFR</label><input id="egfr" inputmode="decimal" placeholder="e.g., 42"></div>
+      <div><label class="lbl">Current creatinine</label><input id="cr" inputmode="decimal" placeholder="e.g., 1.4"></div>
+      <div><label class="lbl">Prior creatinine</label><input id="crPrior" inputmode="decimal" placeholder="e.g., 1.0"></div>
+      <div><label class="lbl">Delta creatinine (auto)</label><input id="deltaCr" inputmode="decimal" placeholder="auto = current − prior" readonly></div>
+    </div>
+    <div class="row4">
+      <div><label class="lbl">Current Cr date</label><input id="crDate" type="date"></div>
+      <div><label class="lbl">Prior Cr date</label><input id="crPriorDate" type="date"></div>
+      <div><label class="lbl">BUN</label><input id="bun" inputmode="decimal" placeholder="e.g., 28"></div>
+      <div><label class="lbl">Albumin/creatinine ratio</label><input id="uacr" inputmode="decimal" placeholder="mg/g"></div>
+    </div>
+    <div class="row4">
+      <div><label class="lbl">UACR date</label><input id="uacrDate" type="date"></div>
+      <div><label class="lbl">Diabetes</label><select id="diabetes"><option>Unknown</option><option>No</option><option>Yes — type 2</option><option>Yes — type 1</option><option>Prediabetes</option></select></div>
+      <div><label class="lbl">Metformin</label><select id="metformin"><option>Unknown</option><option>No</option><option>Yes</option></select></div>
+      <div><label class="lbl">Dialysis / transplant kidney</label><select id="dialysis"><option>No / unknown</option><option>Dialysis</option><option>Kidney transplant</option><option>Solitary kidney</option></select></div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Patient/context flags</legend>
+    <div class="row4">
+      <div><label class="lbl">Age</label><input id="age" inputmode="numeric" placeholder="e.g., 67"></div>
+      <div><label class="lbl">Sex / gender relevant to imaging</label><select id="sex"><option>Unknown / not relevant</option><option>Female</option><option>Male</option><option>Other / specify in notes</option></select></div>
+      <div><label class="lbl">Pregnancy status</label><select id="pregnancy"><option>Not applicable / unknown</option><option>Not pregnant</option><option>Pregnant</option><option>Could be pregnant</option><option>Breastfeeding</option></select></div>
+      <div><label class="lbl">Hemodynamic status</label><select id="hemo"><option>Stable</option><option>Unstable / hypotensive</option><option>ICU / pressors</option><option>Unknown</option></select></div>
+    </div>
+    <div class="row4">
+      <div><label class="lbl">Fever</label><select id="fever"><option>Unknown</option><option>No</option><option>Yes</option></select></div>
+      <div><label class="lbl">WBC</label><input id="wbc" inputmode="decimal" placeholder="e.g., 16.2"></div>
+      <div><label class="lbl">Glucose</label><input id="glucose" inputmode="decimal" placeholder="e.g., 240"></div>
+      <div><label class="lbl">Lipase</label><input id="lipase" inputmode="decimal" placeholder="if relevant"></div>
+    </div>
+    <label class="lbl">Other relevant facts</label><textarea id="other" placeholder="e.g., prior surgery, anticoagulation, malignancy history, immunosuppression, trauma, focal neuro deficit, last known well, D-dimer/troponin, gallstones, LFTs, sepsis concern"></textarea>
+  </fieldset>
+
+  <div class="flagBox">
+    <div class="flagTitle">Computed flags</div>
+    <div class="flagList" id="flags"><span class="pill x">Enter data to compute flags</span></div>
+  </div>
+
+  <details class="details" open>
+    <summary>What to ask Copilot / OpenEvidence to do</summary>
+    <div class="detailsBody">
+      <label class="opt"><input type="checkbox" id="optBest" checked> <span><b>Best study + second-best study</b>, with route/protocol and what each can/cannot show.</span></label>
+      <label class="opt"><input type="checkbox" id="optEvidence" checked> <span><b>Use OpenEvidence / current evidence</b> plus ACR Appropriateness Criteria and local radiology protocol; cite source/date.</span></label>
+      <label class="opt"><input type="checkbox" id="optContrast" checked> <span><b>Contrast vs noncontrast value</b>: what added contrast shows, what noncontrast can show, and diagnostic value/percent sensitivity/specificity when available.</span></label>
+      <label class="opt"><input type="checkbox" id="optRisk" checked> <span><b>Risk of contrast</b>: allergy, CA-AKI/CI-AKI, NSF/GBCA, pregnancy/breastfeeding/metformin/diabetes; separate true risks from common myths.</span></label>
+      <label class="opt"><input type="checkbox" id="optMitigate" checked> <span><b>Mitigation</b>: hydration/renal precautions, alternative modality, low-osmolar iodinated or Group II GBCA, radiology discussion, timing, monitoring.</span></label>
+      <label class="opt"><input type="checkbox" id="optPremed" checked> <span><b>Premedication</b>: when recommended vs not, common regimens, breakthrough risk, and whether delay is acceptable in urgent disease.</span></label>
+      <label class="opt"><input type="checkbox" id="optLocal" checked> <span><b>UPMC Shadyside defaults</b>: apply HS-RAD0018 for iodinated/barium contrast and HS-RAD0017 for Group II GBCA, but verify current protocol.</span></label>
+      <label class="opt"><input type="checkbox" id="optOrder" checked> <span><b>Epic-order phrasing</b>: suggest practical order name / indication language to help radiology protocol correctly.</span></label>
+    </div>
+  </details>
+
+  <div class="btnRow"><button class="btn primary" id="seeBtn" type="button">👁 See Prompt</button><button class="btn secondary" id="copyBtn" type="button">📋 Copy Prompt</button><button class="btn secondary" id="clearBtn" type="button">🧹 Clear</button></div>
+</section>
+
+<section class="panel previewPanel">
+  <div class="phead"><div class="ptitle"><span class="step">3</span> Payload Preview</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="ghost" id="openEvidenceBtn" type="button">🧠 Build &amp; Open OpenEvidence</button><button class="mini" id="copilotBtn" type="button">🪟 Build &amp; Open Copilot</button></div></div>
+  <div class="out" id="output">No payload yet.
+Fill the clinical concern and risk modifiers, then press “See Prompt”, “Build & Open OpenEvidence”, or “Build & Open Copilot”.</div>
+  <div class="notice safe"><b>Design intent:</b> this does not choose an order by itself. It builds a disciplined prompt that asks for best imaging choice, alternatives, contrast risk, mitigation, and local protocol confirmation.</div>
+  <div class="notice warn"><b>Important:</b> Do not enter patient identifiers. If urgent/unstable, use radiology/ED/stroke/vascular pathways rather than waiting for an AI answer. The prompt is copied to your clipboard — paste it into the OpenEvidence or Copilot chat box after the tab opens.</div>
+  <div class="notice red"><b>Known limitation:</b> percentages are only requested “when available.” The prompt tells the model not to invent sensitivity/specificity or risk numbers.</div>
+</section>
+</div>
+</div>
+<script>
+(function(){
+"use strict";
+const COPILOT_URL="https://www.microsoft365.com/copilot";
+const OPENEVIDENCE_URL="https://www.openevidence.com";
+const SHARE_TITLE="Contrast / Imaging Study Finder";
+const SHARE_TEXT="Open this on a computer to build a Microsoft 365 Copilot / OpenEvidence imaging prompt.";
+const $=id=>document.getElementById(id);
+const v=id=>{const el=$(id); return el?String(el.value||"").trim():""};
+function toast(msg,ms){const t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),ms||2400)}
+function speak(text){try{if(!("speechSynthesis" in window))return;window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=1.05;window.speechSynthesis.speak(u)}catch(e){}}
+function copyText(text){if(navigator.clipboard&&navigator.clipboard.writeText)return navigator.clipboard.writeText(text);return new Promise((res,rej)=>{try{const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.focus();ta.select();document.execCommand("copy");ta.remove();res()}catch(e){rej(e)}})}
+const CONCERNS={
+  "Neuro / stroke":["Acute stroke / focal neurologic deficit","TIA / transient deficit","Intracranial hemorrhage concern","Headache — SAH / aneurysm concern","Seizure / mass / infection","Spine cord compression / cauda equina","Spinal infection / epidural abscess"],
+  "Chest / vascular":["Pulmonary embolism","Aortic dissection / acute aortic syndrome","Chest pain — coronary / CCTA question","Pneumonia complication / empyema","Mediastinal mass / malignancy staging"],
+  "Abdomen / GI":["Acute pancreatitis","Complicated pancreatitis — necrosis/abscess/pseudocyst","Appendicitis","Diverticulitis / abscess","Bowel obstruction","Mesenteric ischemia","GI bleed","Hepatobiliary obstruction / cholangitis","Pancreatic mass or cyst","Liver lesion characterization"],
+  "GU / renal":["Renal colic / stone","Pyelonephritis / renal abscess","Hematuria / urothelial malignancy","Renal mass characterization","AKI / obstruction"],
+  "Infection / fever":["Fever of unknown source","Sepsis source search","Abscess / deep infection","Osteomyelitis","Immunocompromised infection"],
+  "MSK / trauma":["Fracture / trauma","Soft-tissue infection / necrotizing infection","Septic arthritis / osteomyelitis","Occult malignancy / bone lesion"],
+  "Oncology":["Cancer staging","Treatment response","Metastasis search","Unknown primary","Post-treatment complication"]
+};
+const UNIVERSAL_TAGS=["avoid contrast if possible","contrast likely needed","radiology should protocol"];
+const DEFAULT_GUIDANCE={ph:"e.g., what exact question must imaging answer? what are you ruling in/out? does contrast change management?",tags:["rule out abscess","look for necrosis","look for mass","look for obstruction","look for ischemia","look for bleeding"]};
+const QUESTION_MAP={
+  "Acute stroke / focal neurologic deficit":{ph:"e.g., hemorrhage vs ischemia? large-vessel occlusion? core/penumbra mismatch? thrombectomy candidate?",tags:["rule out hemorrhage","look for LVO","assess core/penumbra","CTA head and neck","perfusion imaging"]},
+  "TIA / transient deficit":{ph:"e.g., infarct present? carotid/vertebral stenosis? embolic source? hemorrhage excluded?",tags:["exclude hemorrhage","look for infarct","carotid/vertebral stenosis","CTA head and neck"]},
+  "Intracranial hemorrhage concern":{ph:"e.g., acute blood? location/volume? underlying aneurysm or AVM? expansion/spot sign?",tags:["confirm acute blood","look for aneurysm/AVM","spot sign","CTA for source"]},
+  "Headache — SAH / aneurysm concern":{ph:"e.g., subarachnoid blood? aneurysm? if CT negative and high suspicion, next step (LP vs CTA)?",tags:["rule out SAH","look for aneurysm","CTA circle of Willis","if CT neg, next step"]},
+  "Seizure / mass / infection":{ph:"e.g., mass/tumor? abscess? encephalitis? acute structural cause? enhancing lesion?",tags:["look for mass","look for abscess","enhancing lesion","MRI with gadolinium"]},
+  "Spine cord compression / cauda equina":{ph:"e.g., cord/cauda compression? level? epidural mass or disc? cord signal change?",tags:["assess cord compression","identify level","cord signal change","MRI whole spine"]},
+  "Spinal infection / epidural abscess":{ph:"e.g., epidural abscess? discitis/osteomyelitis? extent? cord compromise?",tags:["look for epidural abscess","discitis/osteomyelitis","assess extent","MRI with gadolinium"]},
+  "Pulmonary embolism":{ph:"e.g., PE present? central vs segmental? clot burden? right-heart strain?",tags:["confirm PE","assess clot burden","right-heart strain","CT pulmonary angiogram"]},
+  "Aortic dissection / acute aortic syndrome":{ph:"e.g., dissection? Stanford A vs B? extent/branch involvement? rupture or hematoma?",tags:["rule out dissection","classify A vs B","branch involvement","CT angiogram aorta"]},
+  "Chest pain — coronary / CCTA question":{ph:"e.g., obstructive CAD? CCTA appropriate? calcium score? alternative cause (PE/dissection)?",tags:["assess for CAD","coronary CTA","triple rule-out?","alternative cause"]},
+  "Pneumonia complication / empyema":{ph:"e.g., empyema vs simple effusion? abscess? necrotizing pneumonia? drainable collection?",tags:["empyema vs effusion","look for abscess","drainable collection","necrotizing change"]},
+  "Mediastinal mass / malignancy staging":{ph:"e.g., mass characterization? nodal or vascular involvement? staging extent?",tags:["characterize mass","nodal involvement","vascular invasion","staging extent"]},
+  "Acute pancreatitis":{ph:"e.g., necrosis? peripancreatic collection? gallstone/biliary cause? when is contrast CT worthwhile?",tags:["look for necrosis","peripancreatic collection","biliary obstruction","timing of contrast CT"]},
+  "Complicated pancreatitis — necrosis/abscess/pseudocyst":{ph:"e.g., walled-off necrosis? infected collection? pseudocyst? vascular complication?",tags:["walled-off necrosis","infected collection","pseudocyst","vascular complication"]},
+  "Appendicitis":{ph:"e.g., appendicitis? perforation? abscess? alternative diagnosis? is contrast needed?",tags:["confirm appendicitis","look for perforation","look for abscess","alternative diagnosis"]},
+  "Diverticulitis / abscess":{ph:"e.g., diverticulitis? abscess? perforation/free air? fistula? complicated vs uncomplicated?",tags:["confirm diverticulitis","look for abscess","free air/perforation","complicated vs not"]},
+  "Bowel obstruction":{ph:"e.g., obstruction present? transition point? closed loop? ischemia? cause?",tags:["confirm obstruction","find transition point","closed loop","look for ischemia"]},
+  "Mesenteric ischemia":{ph:"e.g., arterial vs venous? occlusion site? bowel viability? arterial + venous phases?",tags:["arterial vs venous","occlusion site","bowel viability","CT angiogram"]},
+  "GI bleed":{ph:"e.g., active extravasation? source/location? CTA timing? candidate for IR vs endoscopy?",tags:["active extravasation","localize source","arterial phase timing","CT angiogram"]},
+  "Hepatobiliary obstruction / cholangitis":{ph:"e.g., biliary dilation? obstructing stone vs mass? level? cholangitis? is MRCP useful?",tags:["biliary dilation","stone vs mass","identify level","MRCP"]},
+  "Pancreatic mass or cyst":{ph:"e.g., solid vs cystic? ductal involvement? vascular contact/resectability? staging?",tags:["solid vs cystic","duct involvement","vascular contact","pancreas protocol CT"]},
+  "Liver lesion characterization":{ph:"e.g., benign vs malignant? hypervascular? multiphase needed? LI-RADS if at HCC risk?",tags:["characterize lesion","multiphase liver","hypervascular?","MRI with contrast"]},
+  "Renal colic / stone":{ph:"e.g., stone present? size/location? obstruction/hydronephrosis? is noncontrast CT enough?",tags:["confirm stone","size and location","hydronephrosis","noncontrast CT"]},
+  "Pyelonephritis / renal abscess":{ph:"e.g., complicated pyelonephritis? abscess? obstruction? emphysematous change?",tags:["look for abscess","obstruction","emphysematous change","CT with contrast"]},
+  "Hematuria / urothelial malignancy":{ph:"e.g., urothelial lesion? renal mass? stone? is CT urogram (excretory phase) appropriate?",tags:["urothelial lesion","renal mass","CT urogram","excretory phase"]},
+  "Renal mass characterization":{ph:"e.g., enhancing solid mass? cystic (Bosniak)? fat (AML)? multiphase renal protocol?",tags:["enhancement?","Bosniak class","renal mass protocol","MRI if indicated"]},
+  "AKI / obstruction":{ph:"e.g., obstruction/hydronephrosis? stones? is contrast safe given renal function? alternative to contrast?",tags:["look for obstruction","hydronephrosis","ultrasound first?"]},
+  "Fever of unknown source":{ph:"e.g., occult abscess? source localization? which region/protocol? does contrast add value?",tags:["localize source","look for abscess","CT chest/abd/pelvis","contrast value"]},
+  "Sepsis source search":{ph:"e.g., drainable collection? organ source? line/device source? fastest useful study?",tags:["drainable collection","organ source","most useful study","CT with contrast"]},
+  "Abscess / deep infection":{ph:"e.g., abscess vs phlegmon? drainable? extent? gas?",tags:["abscess vs phlegmon","drainable?","assess extent","look for gas"]},
+  "Osteomyelitis":{ph:"e.g., osteomyelitis? extent? associated abscess/collection? MRI with contrast vs alternative?",tags:["confirm osteomyelitis","assess extent","associated abscess","MRI with gadolinium"]},
+  "Immunocompromised infection":{ph:"e.g., atypical/fungal source? occult focus? which protocol given low yield of usual signs?",tags:["occult focus","atypical infection","CT with contrast","consider MRI"]},
+  "Fracture / trauma":{ph:"e.g., fracture/displacement? occult fracture? vascular injury? CT vs MRI?",tags:["confirm fracture","occult fracture","vascular injury (CTA)","CT detail"]},
+  "Soft-tissue infection / necrotizing infection":{ph:"e.g., necrotizing infection? gas in tissues? fascial involvement? drainable collection?",tags:["gas in tissue","fascial involvement","necrotizing concern","drainable collection"]},
+  "Septic arthritis / osteomyelitis":{ph:"e.g., septic joint/effusion? adjacent osteomyelitis? abscess? MRI with contrast?",tags:["joint effusion","adjacent osteomyelitis","look for abscess","MRI with gadolinium"]},
+  "Occult malignancy / bone lesion":{ph:"e.g., aggressive vs benign lesion? soft-tissue component? staging/biopsy planning?",tags:["aggressive features","soft-tissue mass","staging","MRI with contrast"]},
+  "Cancer staging":{ph:"e.g., local extent? nodal disease? metastases? which protocol/region for this primary?",tags:["local extent","nodal disease","look for mets","contrast-enhanced staging"]},
+  "Treatment response":{ph:"e.g., response vs progression? RECIST-measurable disease? same protocol as baseline?",tags:["response vs progression","RECIST targets","match prior protocol","new lesions?"]},
+  "Metastasis search":{ph:"e.g., distant metastases? which organs/region? most sensitive modality for this tumor?",tags:["look for mets","organ-specific","contrast-enhanced","consider MRI/PET"]},
+  "Unknown primary":{ph:"e.g., primary site? metastatic pattern? which protocol/region to find the primary?",tags:["find primary","metastatic pattern","CT chest/abd/pelvis","contrast value"]},
+  "Post-treatment complication":{ph:"e.g., post-surgical collection/leak? treatment effect vs recurrence? abscess?",tags:["collection/leak","effect vs recurrence","look for abscess","contrast-enhanced"]}
+};
+let selectorsWired=false;
+function applyConcernGuidance(){
+  const g=QUESTION_MAP[v("concern")]||DEFAULT_GUIDANCE;
+  const qEl=$("question"); if(qEl) qEl.placeholder=g.ph;
+  const tags=(g.tags||[]).concat(UNIVERSAL_TAGS);
+  const row=$("questionTags"); if(!row)return;
+  row.innerHTML=tags.map(t=>`<button class="tag" type="button" data-tag="${t}">${t}</button>`).join("");
+  row.querySelectorAll(".tag").forEach(b=>b.addEventListener("click",()=>{const ta=$("question");ta.value=(ta.value&& !/\s$/.test(ta.value)?ta.value+" ":ta.value)+b.dataset.tag+"; ";ta.focus()}));
+}
+function fillConcerns(){const arr=CONCERNS[v("area")]||[];$("concern").innerHTML=arr.map(x=>`<option>${x}</option>`).join("")+`<option>Other / specify in question</option>`; applyConcernGuidance();}
+function initSelectors(){
+  $("area").innerHTML=Object.keys(CONCERNS).map(x=>`<option>${x}</option>`).join("");
+  if(!selectorsWired){ $("area").addEventListener("change",fillConcerns); $("concern").addEventListener("change",applyConcernGuidance); selectorsWired=true; }
+  fillConcerns();
+}
+function n(id){const x=parseFloat(v(id));return isNaN(x)?null:x}
+function computeDelta(){
+  const cur=n("cr"), pri=n("crPrior"); const el=$("deltaCr"); if(!el)return;
+  if(cur!==null && pri!==null){ const delta=Math.round((cur-pri)*100)/100; el.value=(delta>0?"+":"")+delta; }
+  else { el.value=""; }
+}
+function flags(){
+  const F=[]; const eg=n("egfr"), age=n("age"), bun=n("bun"), glu=n("glucose");
+  const cur=n("cr"), pri=n("crPrior"), d=n("deltaCr");
+  const crD=v("crDate"), crPD=v("crPriorDate");
+  const allergy=v("allergy"), sev=v("severity"), preg=v("pregnancy"), hemo=v("hemo"), met=v("metformin"), dm=v("diabetes");
+  if(eg!==null){ if(eg<30)F.push(["r","eGFR <30 — high renal-risk flag"]); else if(eg<45)F.push(["o","eGFR 30–44 — check renal mitigation"]); else F.push(["g","eGFR ≥45 entered"]); }
+  if(d!==null){ if(d>=0.3)F.push(["r","ΔCr ≥0.3 mg/dL — AKI flag (KDIGO 48h)"]); else if(d>0)F.push(["y","small creatinine rise"]); }
+  if(cur!==null && pri!==null && pri>0 && cur/pri>=1.5)F.push(["r","Cr ≥1.5× prior — AKI flag (KDIGO 7d); verify interval"]);
+  if(crD && crPD){ const ms=Date.parse(crD)-Date.parse(crPD); if(!isNaN(ms)){ const days=Math.round(ms/86400000); F.push(["x","Cr interval ≈ "+days+" day(s) (prior → current)"]); } }
+  if(bun!==null && bun>=30)F.push(["y","BUN elevated — assess volume status"]);
+  if(dm.includes("Yes"))F.push(["y","Diabetes — renal screening relevant"]);
+  if(met==="Yes")F.push(["y","Metformin — check policy for iodinated contrast + renal status"]);
+  if(allergy.includes("Iodinated")||allergy.includes("Gadolinium")||allergy.includes("Generic"))F.push([sev.includes("Severe")?"r":sev.includes("Moderate")?"o":"y",allergy+" / "+sev]);
+  if(preg.includes("Pregnant")||preg.includes("Could"))F.push(["o","pregnancy flag — justify radiation/contrast and consider US/MRI"]);
+  if(preg.includes("Breastfeeding"))F.push(["y","breastfeeding — ask evidence/current policy"]);
+  if(hemo.includes("Unstable")||hemo.includes("ICU"))F.push(["r","unstable/time-sensitive — do not delay needed imaging"]);
+  if(age!==null && age>=75)F.push(["y","older adult — renal/frailty context"]);
+  if(glu!==null && glu>250)F.push(["y","hyperglycemia — context for infection/AKI/dehydration"]);
+  if(!F.length)F.push(["x","Enter data to compute flags"]);
+  $("flags").innerHTML=F.map(x=>`<span class="pill ${x[0]}">${x[1]}</span>`).join("");
+  return F.map(x=>x[1]);
+}
+function line(label, val){return val?`- ${label}: ${val}`:""}
+function patientBlock(){
+  const L=[];
+  [line("Area",v("area")),line("Clinical concern/finding",v("concern")),line("Acuity",v("acuity")),line("Question imaging must answer",v("question")),line("Age",v("age")),line("Sex/gender relevant to imaging",v("sex")),line("Pregnancy/breastfeeding status",v("pregnancy")),line("Hemodynamic status",v("hemo")),line("Fever",v("fever")),line("WBC",v("wbc")),line("Glucose",v("glucose")),line("Lipase",v("lipase")),line("Other relevant facts",v("other"))].filter(Boolean).forEach(x=>L.push(x));
+  return L.join("\n") || "(no clinical details entered)";
+}
+function riskBlock(){
+  const L=[];
+  [line("Contrast allergy type",v("allergy")),line("Reaction severity",v("severity")),line("Premedicated before",v("premed")),line("Reaction details",v("reactionDetails")),line("eGFR",v("egfr")),line("Current creatinine",v("cr")),line("Current creatinine date",v("crDate")),line("Prior creatinine",v("crPrior")),line("Prior creatinine date",v("crPriorDate")),line("Delta creatinine (current − prior)",v("deltaCr")),line("BUN",v("bun")),line("Urine albumin/creatinine ratio",v("uacr")),line("Albumin/creatinine ratio date",v("uacrDate")),line("Diabetes",v("diabetes")),line("Metformin",v("metformin")),line("Dialysis/transplant/solitary kidney",v("dialysis"))].filter(Boolean).forEach(x=>L.push(x));
+  return L.join("\n");
+}
+function buildPrompt(){
+  computeDelta();
+  const flagText=flags(); const L=[];
+  L.push("You are helping a clinician choose the most appropriate imaging study and contrast strategy for ONE de-identified patient. Use OpenEvidence/current evidence, ACR Appropriateness Criteria, ACR Manual on Contrast Media, and current local institutional protocol when available. Do not invent percentages, risks, policies, or contraindications. If data are not available, say so.");
+  L.push("");
+  L.push("INSTITUTION / DEFAULT CONTRAST CONTEXT");
+  L.push("Site: "+v("site"));
+  L.push("CT default contrast class: "+v("ctDefault"));
+  L.push("MRI default contrast class: "+v("mrDefault"));
+  L.push("Local formulary / operational note: "+v("formularyNote"));
+  L.push("Confirm current local protocol/policy before final ordering; specific agent should be selected by radiology/pharmacy protocol.");
+  L.push("");
+  L.push("PATIENT CLINICAL PICTURE — NO IDENTIFIERS");
+  L.push(patientBlock());
+  L.push("");
+  L.push("CONTRAST / RENAL / SAFETY DATA");
+  L.push(riskBlock());
+  L.push("");
+  L.push("COMPUTED FLAGS FROM BUILDER — verify clinically");
+  flagText.forEach(f=>L.push("- "+f));
+  L.push("");
+  if($("optEvidence").checked){L.push("PRIMARY EVIDENCE RULE");L.push("Use OpenEvidence/current evidence first, then ACR Appropriateness Criteria and ACR Manual on Contrast Media, then current institutional policy/protocol (UPMC / Shadyside if available). Cite source names and dates. If OpenEvidence and ACR conflict, explain the conflict and which is more applicable. Do not rely on memory alone.");L.push("");}
+  if($("optBest").checked){L.push("IMAGING CHOICE");L.push("1. State the BEST study/protocol for the clinical question, including modality, body region, contrast class, phase/protocol if relevant (e.g., CTA, CT abdomen/pelvis with IV contrast portal venous, multiphase pancreas/liver, MRI/MRCP with/without gadolinium, noncontrast CT, ultrasound). State why it is best.");L.push("2. State the SECOND-BEST study/protocol if contrast is risky/unavailable or the preferred test is not feasible. State why it is second-best and what is lost.");L.push("3. If the correct answer is a time-sensitive pathway (stroke, dissection, PE, GI bleed, mesenteric ischemia), say not to delay critical imaging for routine premedication unless radiology/clinical team decides delay is acceptable.");L.push("");}
+  if($("optContrast").checked){L.push("CONTRAST VS NONCONTRAST VALUE");L.push("For the best and second-best options, explain: what contrast adds; what an uncontrasted study can still show; what it may miss; and sensitivity/specificity/diagnostic yield percentages ONLY if available from reliable sources for this exact indication. If no percentages are available, say 'I did not find a reliable percentage for this exact scenario.'");L.push("");}
+  if($("optRisk").checked){L.push("CONTRAST RISK ANALYSIS");L.push("Assess iodinated contrast risk, gadolinium/GBCA risk, renal risk (CA-AKI/CI-AKI), NSF risk, allergy-like reaction risk, pregnancy/breastfeeding considerations, metformin/diabetes considerations, and risk of delaying diagnosis. Separate true contrast allergy from physiologic reaction and from unrelated shellfish/iodine myths if relevant.");L.push("");}
+  if($("optMitigate").checked){L.push("MITIGATION PLAN");L.push("List practical risk-mitigation options: radiology protocol discussion, alternative modality, lowest necessary dose, low-osmolar iodinated contrast or Group II GBCA as appropriate, IV hydration/volume optimization if evidence-based and not contraindicated, holding nephrotoxins only if clinically appropriate, post-study monitoring if needed, and urgent-team involvement if unstable.");L.push("");}
+  if($("optPremed").checked){L.push("PREMEDICATION");L.push("State whether premedication is indicated for this patient's reaction class/severity and same-class contrast exposure. Provide common elective and accelerated premedication regimens only if supported by the cited source/local policy, and state limitations: premedication does not eliminate breakthrough reactions and may delay diagnosis. For prior severe same-class reaction, treat as relative contraindication unless no adequate alternative and risk/benefit supports proceeding with resuscitation-ready monitoring.");L.push("");}
+  if($("optLocal").checked){L.push("LOCAL POLICY CHECK");L.push("For UPMC/Shadyside, verify current policies: HS-RAD0018 for iodinated/barium oral/IV contrast, HS-RAD0017 for gadolinium-based contrast, and local UPMC Presbyterian Shadyside CP-32 for procurement/storage/control/distribution/administration/monitoring. Use these for HOW contrast is administered; use evidence/ACR/radiology protocol for WHICH study is appropriate.");L.push("");}
+  if($("optOrder").checked){L.push("PRACTICAL ORDERING LANGUAGE");L.push("Suggest concise Epic order/indication wording that would help radiology protocol the exam, e.g., 'CT abdomen/pelvis with IV contrast — pancreatitis with fever, evaluate necrosis/abscess', but do not claim an exact Epic order exists unless verified. Include when to call radiology directly.");L.push("");}
+  L.push("OUTPUT FORMAT");
+  L.push("A. One-line bottom line: best study, second-best study, and whether contrast is worth the risk.");
+  L.push("B. Table: Study/protocol | what it shows | what it misses | contrast needed? | evidence/ACR rating | urgency comments.");
+  L.push("C. Risk/mitigation: iodinated, gadolinium, renal, allergy, pregnancy/breastfeeding, metformin/diabetes, delay risk.");
+  L.push("D. Premedication: yes/no/unclear; regimen if supported; breakthrough and delay caveats.");
+  L.push("E. Noncontrast value: what a no-contrast study can show, what it cannot, and any reliable percentage values if available.");
+  L.push("F. Sources: cite OpenEvidence/current sources, ACR documents, and local policy/protocol names/dates. Flag any uncertainty.");
+  L.push("");
+  L.push("SAFETY / SCOPE");
+  L.push("This is decision support, not an autonomous order. Do not include patient identifiers. If the patient is unstable or has stroke/dissection/PE/mesenteric ischemia/major bleeding concern, prioritize the applicable emergency pathway and direct radiology/specialty communication.");
+  const prompt=L.join("\n"); $("output").textContent=prompt; return prompt;
+}
+function clearAll(){document.querySelectorAll("input,textarea").forEach(el=>{ if(["site","ctDefault","mrDefault","formularyNote"].includes(el.id)) return; el.value=""; }); document.querySelectorAll("select").forEach(el=>{ el.selectedIndex=0; }); $("site").value="UPMC Presbyterian Shadyside — Shadyside Campus"; $("ctDefault").value="Low-osmolar iodinated IV contrast per UPMC HS-RAD0018 / local radiology protocol"; $("mrDefault").value="Group II gadolinium-based contrast agent per UPMC HS-RAD0017 / local radiology protocol"; $("formularyNote").value="Specific agent selected by radiology/pharmacy formulary and exam protocol; confirm current protocol if high-risk."; initSelectors(); computeDelta(); flags(); $("output").textContent='No payload yet.\nFill the clinical concern and risk modifiers, then press “See Prompt”, “Build & Open OpenEvidence”, or “Build & Open Copilot”.';}
+function openCopilot(){const p=buildPrompt(); copyText(p).then(()=>{toast("Payload copied. Opening Copilot — paste into the chat box."); setTimeout(()=>window.open(COPILOT_URL,"_blank","noopener"),900)},()=>toast("Clipboard blocked — select and copy manually."));}
+function openOpenEvidence(){const p=buildPrompt(); copyText(p).then(()=>{toast("Payload copied. Opening OpenEvidence — paste into the chat box."); setTimeout(()=>window.open(OPENEVIDENCE_URL,"_blank","noopener"),900)},()=>toast("Clipboard blocked — select and copy manually."));}
+function talk(){speak("This tool builds a prompt for imaging and contrast decisions. Pick the clinical concern, enter allergy, kidney function including current and prior creatinine with dates, pregnancy, diabetes, metformin, fever, glucose, and other relevant values. The prompt asks OpenEvidence and Copilot for the best study, second best study, contrast risk, mitigation, premedication, and what a noncontrast study can and cannot show. Do not enter patient identifiers.")}
+function isLikelyPhone(){const ua=navigator.userAgent||"";const uaPhone=/iPhone|iPod|Windows Phone|webOS|BlackBerry|IEMobile|Opera Mini|Android.*Mobile|Mobile Safari/i.test(ua);const coarse=window.matchMedia&&window.matchMedia("(pointer: coarse)").matches;const narrow=(window.innerWidth||9999)<=820;return uaPhone||(coarse&&narrow)}
+function phoneAllowed(){return sessionStorage.getItem("imagingAllowPhone")==="1"}
+function applyDeviceMode(){const phone=isLikelyPhone();document.body.classList.toggle("phoneMode",phone);document.body.classList.toggle("allowPhone",phone&&phoneAllowed());const url=location.href;$("emailSelfBtn").href="mailto:?subject="+encodeURIComponent(SHARE_TITLE)+"&body="+encodeURIComponent(SHARE_TEXT+"\n\n"+url)}
+async function shareThisLink(){try{if(navigator.share){await navigator.share({title:SHARE_TITLE,text:SHARE_TEXT,url:location.href})}else{await copyText(location.href);toast("Link copied.")}}catch(e){toast("Share canceled.")}}
+initSelectors(); computeDelta(); flags();
+function recompute(){ computeDelta(); flags(); }
+["egfr","cr","crPrior","crDate","crPriorDate","age","bun","glucose","allergy","severity","pregnancy","hemo","metformin","diabetes"].forEach(id=>{const el=$(id); if(!el)return; el.addEventListener("input",recompute); el.addEventListener("change",recompute);});
+$("seeBtn").addEventListener("click",()=>{buildPrompt();toast("Payload generated.")});
+$("copyBtn").addEventListener("click",()=>copyText(buildPrompt()).then(()=>toast("Payload copied."),()=>toast("Clipboard blocked.")));
+$("copilotBtn").addEventListener("click",openCopilot);
+$("openEvidenceBtn").addEventListener("click",openOpenEvidence);
+$("clearBtn").addEventListener("click",clearAll);$("talkBtn").addEventListener("click",talk);$("shareLinkBtn").addEventListener("click",shareThisLink);$("continuePhoneBtn").addEventListener("click",()=>{sessionStorage.setItem("imagingAllowPhone","1");applyDeviceMode();toast("Phone mode bypassed for this session.")});window.addEventListener("resize",applyDeviceMode);applyDeviceMode();
+})();
+</script>
+</body>
+</html>
