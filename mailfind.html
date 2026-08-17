@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UPMC Email Knowledge Finder</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:780px;margin:45px auto;padding:24px;background:#f4f4f4}
+.card{background:#fff;border-radius:16px;padding:32px;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.setup{border:2px solid #aaa;border-radius:12px;padding:20px;margin:22px 0}
+.setup.done{border-color:#4a8}
+button,input{font-size:20px;padding:14px 18px;border-radius:10px;border:1px solid #888;margin:6px 6px 6px 0}
+button{cursor:pointer} button:disabled{opacity:.45;cursor:not-allowed}
+input{width:min(92%,460px)}
+.instructions{font-size:19px;line-height:1.7;margin-top:24px}
+#permissionStatus,#emailStatus,#status{margin-top:12px;font-weight:bold;font-size:17px}
+.accountBox{margin-top:18px;padding:16px;border-radius:10px;background:#f7f7f7;font-size:18px}
+.small{margin-top:18px;font-size:14px;color:#555;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>UPMC Email Knowledge Finder</h1>
+<p>Use your UPMC work mailbox as a simple searchable knowledge store.</p>
+
+<div class="setup">
+<h2>1. Set your UPMC email</h2>
+<p>Enter your <b>@upmc.edu</b> work email once.</p>
+<input id="upmcEmail" type="email" placeholder="yourname@upmc.edu" autocomplete="username">
+<br>
+<button onclick="saveUPMCEmail()">Remember UPMC Email</button>
+<div id="emailStatus">No UPMC email saved yet.</div>
+<div class="small">Stored only in this browser.</div>
+</div>
+
+<div id="setupBox" class="setup">
+<h2>2. Enable Copy</h2>
+<p>Click once. If the browser asks about clipboard access, choose <b>Allow</b>.</p>
+<button id="enableButton" onclick="enableCopy()">Enable Copy</button>
+<div id="permissionStatus">Copy has not been tested yet.</div>
+</div>
+
+<h2>3. Search UPMC Email</h2>
+<div id="accountBox" class="accountBox">Intended account: <b>not set</b></div>
+
+<button id="searchButton" onclick="goToUPMC()" disabled>Find Shared Savings</button>
+
+<div class="instructions">
+<b>When you click the button:</b><br><br>
+1. <b>"Shared Savings"</b> is copied automatically<br>
+2. UPMC webmail opens<br>
+3. If Microsoft shows more than one account, choose the <b>@upmc.edu account shown above</b><br>
+4. Click Outlook's <b>Search</b> box<br>
+5. Press <b>Ctrl + V</b><br>
+6. Press <b>Enter</b>
+</div>
+
+<div id="status"></div>
+<div class="small"><a href="https://mail.upmc.edu/">Open UPMC email directly</a></div>
+</div>
+
+<script>
+const EMAIL_KEY="upmcKnowledgeFinderEmail";
+const CLIP_KEY="upmcClipboardOK";
+const SEARCH_TEXT='"Shared Savings"';
+const UPMC_MAIL="https://mail.upmc.edu/";
+
+function validUPMCEmail(v){return /^[^\s@]+@upmc\.edu$/i.test(v.trim())}
+function getEmail(){return localStorage.getItem(EMAIL_KEY)||""}
+function esc(t){const d=document.createElement("div");d.textContent=t;return d.innerHTML}
+
+function saveUPMCEmail(){
+  const v=document.getElementById("upmcEmail").value.trim();
+  if(!validUPMCEmail(v)){
+    document.getElementById("emailStatus").textContent="Please enter an email ending in @upmc.edu";
+    return;
+  }
+  localStorage.setItem(EMAIL_KEY,v);
+  updateUI();
+}
+
+function updateUI(){
+  const email=getEmail();
+  const clip=localStorage.getItem(CLIP_KEY)==="yes";
+  if(email){
+    document.getElementById("upmcEmail").value=email;
+    document.getElementById("emailStatus").textContent="UPMC email remembered ✓";
+    document.getElementById("accountBox").innerHTML='Intended account: <b>'+esc(email)+'</b>';
+  }else{
+    document.getElementById("emailStatus").textContent="No UPMC email saved yet.";
+    document.getElementById("accountBox").innerHTML='Intended account: <b>not set</b>';
+  }
+  const box=document.getElementById("setupBox");
+  const eb=document.getElementById("enableButton");
+  const ps=document.getElementById("permissionStatus");
+  if(clip){box.classList.add("done");eb.textContent="Copy Enabled ✓";ps.textContent="Ready."}
+  else{box.classList.remove("done");eb.textContent="Enable Copy";ps.textContent="Copy has not been tested yet."}
+  document.getElementById("searchButton").disabled=!(email&&clip);
+}
+
+async function enableCopy(){
+  try{
+    await navigator.clipboard.writeText("UPMC Email Knowledge Finder ready");
+    localStorage.setItem(CLIP_KEY,"yes");
+  }catch(e){
+    localStorage.removeItem(CLIP_KEY);
+    document.getElementById("permissionStatus").textContent=
+      "Clipboard was blocked. Allow Clipboard in browser permissions, then click Enable Copy again.";
+  }
+  updateUI();
+}
+
+function legacyCopy(text){
+  const ta=document.createElement("textarea");
+  ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+  document.body.appendChild(ta);ta.focus();ta.select();
+  let ok=false;try{ok=document.execCommand("copy")}catch(e){}
+  document.body.removeChild(ta);return ok;
+}
+
+async function goToUPMC(){
+  const email=getEmail();
+  if(!validUPMCEmail(email)){
+    document.getElementById("status").textContent="Please save your @upmc.edu email first.";
+    return;
+  }
+  let copied=false;
+  try{await navigator.clipboard.writeText(SEARCH_TEXT);copied=true}catch(e){copied=legacyCopy(SEARCH_TEXT)}
+  if(!copied){
+    document.getElementById("status").textContent='Could not copy automatically. Search for: "Shared Savings"';
+    return;
+  }
+  localStorage.setItem(CLIP_KEY,"yes");
+  window.location.href=UPMC_MAIL;
+}
+updateUI();
+</script>
+</body>
+</html>
