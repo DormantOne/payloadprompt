@@ -1,139 +1,430 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
+<!-- saved from url=(0061)file:///C:/Users/sohne/Downloads/upmc_email_finder_slick.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UPMC Email Knowledge Finder</title>
+<title>UPMC Email Finder</title>
 <style>
-body{font-family:Arial,sans-serif;max-width:780px;margin:45px auto;padding:24px;background:#f4f4f4}
-.card{background:#fff;border-radius:16px;padding:32px;box-shadow:0 4px 18px rgba(0,0,0,.12)}
-.setup{border:2px solid #aaa;border-radius:12px;padding:20px;margin:22px 0}
-.setup.done{border-color:#4a8}
-button,input{font-size:20px;padding:14px 18px;border-radius:10px;border:1px solid #888;margin:6px 6px 6px 0}
-button{cursor:pointer} button:disabled{opacity:.45;cursor:not-allowed}
-input{width:min(92%,460px)}
-.instructions{font-size:19px;line-height:1.7;margin-top:24px}
-#permissionStatus,#emailStatus,#status{margin-top:12px;font-weight:bold;font-size:17px}
-.accountBox{margin-top:18px;padding:16px;border-radius:10px;background:#f7f7f7;font-size:18px}
-.small{margin-top:18px;font-size:14px;color:#555;line-height:1.5}
+  :root{
+    --bg:#f5f7f6;
+    --card:#ffffff;
+    --ink:#17201c;
+    --muted:#6d7771;
+    --line:#dfe5e1;
+    --accent:#1f5f4a;
+    --accent2:#eaf4ef;
+    --soft:#f8faf9;
+    --shadow:0 18px 48px rgba(22,34,28,.10);
+    --r:22px;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 10%, #eef7f2 0, transparent 34%),
+      radial-gradient(circle at 85% 0%, #edf2f8 0, transparent 30%),
+      var(--bg);
+    color:var(--ink);
+    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  }
+
+  .wrap{
+    max-width:860px;
+    margin:0 auto;
+    padding:54px 20px 70px;
+  }
+
+  .hero{
+    text-align:center;
+    margin-bottom:24px;
+  }
+
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 11px;
+    border:1px solid var(--line);
+    border-radius:999px;
+    background:rgba(255,255,255,.72);
+    color:var(--muted);
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+
+  h1{
+    margin:16px 0 8px;
+    font-size:44px;
+    line-height:1.02;
+    letter-spacing:-.045em;
+  }
+
+  .sub{
+    color:var(--muted);
+    font-size:18px;
+    line-height:1.55;
+    max-width:650px;
+    margin:0 auto;
+  }
+
+  .card{
+    background:rgba(255,255,255,.94);
+    border:1px solid rgba(216,224,219,.95);
+    border-radius:var(--r);
+    box-shadow:var(--shadow);
+    padding:28px;
+    backdrop-filter:blur(8px);
+  }
+
+  label{
+    display:block;
+    margin-bottom:8px;
+    font-size:14px;
+    font-weight:800;
+  }
+
+  .searchbox{
+    width:100%;
+    border:1px solid var(--line);
+    background:var(--soft);
+    color:var(--ink);
+    border-radius:16px;
+    padding:17px 18px;
+    font:inherit;
+    font-size:22px;
+    outline:none;
+    transition:.15s ease;
+  }
+
+  .searchbox:focus{
+    border-color:#8ab5a4;
+    box-shadow:0 0 0 4px rgba(31,95,74,.08);
+    background:#fff;
+  }
+
+  .actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:16px;
+  }
+
+  button{
+    border:0;
+    border-radius:14px;
+    padding:16px 18px;
+    font:inherit;
+    font-weight:850;
+    font-size:17px;
+    cursor:pointer;
+    transition:transform .08s ease,filter .12s ease,background .12s ease;
+  }
+
+  button:hover{filter:brightness(.98)}
+  button:active{transform:translateY(1px)}
+
+  .primary{
+    background:var(--accent);
+    color:#fff;
+  }
+
+  .secondary{
+    background:#fff;
+    color:var(--ink);
+    border:1px solid var(--line);
+  }
+
+  .status{
+    min-height:22px;
+    margin-top:14px;
+    color:var(--accent);
+    font-size:14px;
+    font-weight:800;
+    text-align:center;
+  }
+
+  .flow{
+    margin-top:24px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
+
+  .flowitem{
+    background:var(--soft);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px;
+    text-align:center;
+  }
+
+  .num{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    display:inline-grid;
+    place-items:center;
+    background:var(--accent2);
+    color:var(--accent);
+    font-weight:900;
+    margin-bottom:6px;
+  }
+
+  .flowitem b{
+    display:block;
+    font-size:14px;
+  }
+
+  .flowitem span{
+    display:block;
+    margin-top:3px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.35;
+  }
+
+  details{
+    margin-top:20px;
+    border-top:1px solid var(--line);
+    padding-top:18px;
+  }
+
+  summary{
+    cursor:pointer;
+    color:var(--accent);
+    font-weight:850;
+    list-style:none;
+  }
+
+  summary::-webkit-details-marker{display:none}
+
+  .fallback{
+    margin-top:14px;
+    padding:16px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:var(--soft);
+  }
+
+  .fallback p{
+    margin:0 0 12px;
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.5;
+  }
+
+  .emailrow{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:10px;
+  }
+
+  .emailinput{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:13px 14px;
+    font:inherit;
+    outline:none;
+    background:#fff;
+  }
+
+  .mini{
+    padding:13px 15px;
+    background:#fff;
+    color:var(--accent);
+    border:1px solid #b9d0c4;
+    white-space:nowrap;
+  }
+
+  .privacy{
+    margin-top:18px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.45;
+    text-align:center;
+  }
+
+  .tiny-link{
+    color:inherit;
+  }
+
+  @media(max-width:650px){
+    .wrap{padding-top:34px}
+    h1{font-size:36px}
+    .actions{grid-template-columns:1fr}
+    .flow{grid-template-columns:1fr}
+    .emailrow{grid-template-columns:1fr}
+    .mini{width:100%}
+  }
 </style>
 </head>
+
 <body>
-<div class="card">
-<h1>UPMC Email Knowledge Finder</h1>
-<p>Use your UPMC work mailbox as a simple searchable knowledge store.</p>
+<div class="wrap">
 
-<div class="setup">
-<h2>1. Set your UPMC email</h2>
-<p>Enter your <b>@upmc.edu</b> work email once.</p>
-<input id="upmcEmail" type="email" placeholder="yourname@upmc.edu" autocomplete="username">
-<br>
-<button onclick="saveUPMCEmail()">Remember UPMC Email</button>
-<div id="emailStatus">No UPMC email saved yet.</div>
-<div class="small">Stored only in this browser.</div>
-</div>
+  <div class="hero">
+    <div class="eyebrow">UPMC · Outlook</div>
+    <h1>Email Finder</h1>
+    <p class="sub">
+      Copy a word or phrase, open your UPMC mailbox, paste into Outlook Search.
+      No mailbox access. No hidden links. No extra permissions.
+    </p>
+  </div>
 
-<div id="setupBox" class="setup">
-<h2>2. Enable Copy</h2>
-<p>Click once. If the browser asks about clipboard access, choose <b>Allow</b>.</p>
-<button id="enableButton" onclick="enableCopy()">Enable Copy</button>
-<div id="permissionStatus">Copy has not been tested yet.</div>
-</div>
+  <main class="card">
+    <label for="searchText">What are you looking for?</label>
+    <input id="searchText" class="searchbox" type="text" value="Shared Savings" placeholder="Example: Shared Savings" autocomplete="off" oninput="rememberSearch()" onkeydown="if(event.key===&#39;Enter&#39;){copySearch();}">
 
-<h2>3. Search UPMC Email</h2>
-<div id="accountBox" class="accountBox">Intended account: <b>not set</b></div>
+    <div class="actions">
+      <button class="primary" onclick="copySearch()">Copy search phrase</button>
+      <button class="secondary" onclick="openUPMC()">Open UPMC Email</button>
+    </div>
 
-<button id="searchButton" onclick="goToUPMC()" disabled>Find Shared Savings</button>
+    <div id="status" class="status">UPMC Outlook opened. Click Search → Ctrl+V → Enter.</div>
 
-<div class="instructions">
-<b>When you click the button:</b><br><br>
-1. <b>"Shared Savings"</b> is copied automatically<br>
-2. UPMC webmail opens<br>
-3. If Microsoft shows more than one account, choose the <b>@upmc.edu account shown above</b><br>
-4. Click Outlook's <b>Search</b> box<br>
-5. Press <b>Ctrl + V</b><br>
-6. Press <b>Enter</b>
-</div>
+    <div class="flow">
+      <div class="flowitem">
+        <div class="num">1</div>
+        <b>Copy</b>
+        <span>Copies the phrase above</span>
+      </div>
+      <div class="flowitem">
+        <div class="num">2</div>
+        <b>Open Outlook</b>
+        <span>Uses the upmc.edu realm</span>
+      </div>
+      <div class="flowitem">
+        <div class="num">3</div>
+        <b>Paste + Enter</b>
+        <span>Click Search, then Ctrl+V</span>
+      </div>
+    </div>
 
-<div id="status"></div>
-<div class="small"><a href="https://mail.upmc.edu/">Open UPMC email directly</a></div>
+    <details>
+      <summary>Wrong account or Microsoft keeps choosing the wrong mailbox?</summary>
+
+      <div class="fallback">
+        <p>
+          Enter your UPMC email once. This adds a Microsoft <b>login hint</b>
+          so Outlook is steered to that specific UPMC account.
+        </p>
+
+        <div class="emailrow">
+          <input id="upmcEmail" class="emailinput" type="email" placeholder="name@upmc.edu" autocomplete="email" oninput="rememberEmail()">
+          <button class="mini" onclick="openSpecificUPMC()">Open this UPMC account</button>
+        </div>
+
+        <div id="fallbackStatus" class="status" style="text-align:left;margin-top:10px"></div>
+      </div>
+    </details>
+
+    <div class="privacy">
+      Your search phrase and optional UPMC email are stored only in this browser.
+      This page never reads your mailbox or password.
+    </div>
+  </main>
+
 </div>
 
 <script>
-const EMAIL_KEY="upmcKnowledgeFinderEmail";
-const CLIP_KEY="upmcClipboardOK";
-const SEARCH_TEXT='"Shared Savings"';
-const UPMC_MAIL="https://mail.upmc.edu/";
+const SEARCH_KEY = 'upmcFinder:lastSearch';
+const EMAIL_KEY  = 'upmcFinder:upmcEmail';
 
-function validUPMCEmail(v){return /^[^\s@]+@upmc\.edu$/i.test(v.trim())}
-function getEmail(){return localStorage.getItem(EMAIL_KEY)||""}
-function esc(t){const d=document.createElement("div");d.textContent=t;return d.innerHTML}
+const REALM_URL = 'https://outlook.cloud.microsoft/mail/?realm=upmc.edu';
 
-function saveUPMCEmail(){
-  const v=document.getElementById("upmcEmail").value.trim();
-  if(!validUPMCEmail(v)){
-    document.getElementById("emailStatus").textContent="Please enter an email ending in @upmc.edu";
+function setStatus(message){
+  document.getElementById('status').textContent = message;
+}
+
+function rememberSearch(){
+  localStorage.setItem(
+    SEARCH_KEY,
+    document.getElementById('searchText').value
+  );
+}
+
+function rememberEmail(){
+  localStorage.setItem(
+    EMAIL_KEY,
+    document.getElementById('upmcEmail').value.trim()
+  );
+}
+
+function validUPMCEmail(email){
+  return /^[^\s@]+@upmc\.edu$/i.test(email);
+}
+
+async function copySearch(){
+  const text = document.getElementById('searchText').value.trim();
+
+  if(!text){
+    setStatus('Enter a search phrase first.');
+    document.getElementById('searchText').focus();
     return;
   }
-  localStorage.setItem(EMAIL_KEY,v);
-  updateUI();
-}
 
-function updateUI(){
-  const email=getEmail();
-  const clip=localStorage.getItem(CLIP_KEY)==="yes";
-  if(email){
-    document.getElementById("upmcEmail").value=email;
-    document.getElementById("emailStatus").textContent="UPMC email remembered ✓";
-    document.getElementById("accountBox").innerHTML='Intended account: <b>'+esc(email)+'</b>';
-  }else{
-    document.getElementById("emailStatus").textContent="No UPMC email saved yet.";
-    document.getElementById("accountBox").innerHTML='Intended account: <b>not set</b>';
-  }
-  const box=document.getElementById("setupBox");
-  const eb=document.getElementById("enableButton");
-  const ps=document.getElementById("permissionStatus");
-  if(clip){box.classList.add("done");eb.textContent="Copy Enabled ✓";ps.textContent="Ready."}
-  else{box.classList.remove("done");eb.textContent="Enable Copy";ps.textContent="Copy has not been tested yet."}
-  document.getElementById("searchButton").disabled=!(email&&clip);
-}
-
-async function enableCopy(){
   try{
-    await navigator.clipboard.writeText("UPMC Email Knowledge Finder ready");
-    localStorage.setItem(CLIP_KEY,"yes");
+    await navigator.clipboard.writeText(text);
+    setStatus('Copied: “' + text + '” ✓');
   }catch(e){
-    localStorage.removeItem(CLIP_KEY);
-    document.getElementById("permissionStatus").textContent=
-      "Clipboard was blocked. Allow Clipboard in browser permissions, then click Enable Copy again.";
+    const box = document.getElementById('searchText');
+    box.focus();
+    box.select();
+
+    try{
+      document.execCommand('copy');
+      setStatus('Copied: “' + text + '” ✓');
+    }catch(err){
+      setStatus('Copy was blocked — select the phrase and press Ctrl+C.');
+    }
   }
-  updateUI();
 }
 
-function legacyCopy(text){
-  const ta=document.createElement("textarea");
-  ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
-  document.body.appendChild(ta);ta.focus();ta.select();
-  let ok=false;try{ok=document.execCommand("copy")}catch(e){}
-  document.body.removeChild(ta);return ok;
+function openUPMC(){
+  window.open(REALM_URL,'_blank','noopener');
+  setStatus('UPMC Outlook opened. Click Search → Ctrl+V → Enter.');
 }
 
-async function goToUPMC(){
-  const email=getEmail();
+function openSpecificUPMC(){
+  const email = document.getElementById('upmcEmail').value.trim();
+  const out = document.getElementById('fallbackStatus');
+
   if(!validUPMCEmail(email)){
-    document.getElementById("status").textContent="Please save your @upmc.edu email first.";
+    out.textContent = 'Enter a valid @upmc.edu email address.';
+    document.getElementById('upmcEmail').focus();
     return;
   }
-  let copied=false;
-  try{await navigator.clipboard.writeText(SEARCH_TEXT);copied=true}catch(e){copied=legacyCopy(SEARCH_TEXT)}
-  if(!copied){
-    document.getElementById("status").textContent='Could not copy automatically. Search for: "Shared Savings"';
-    return;
-  }
-  localStorage.setItem(CLIP_KEY,"yes");
-  window.location.href=UPMC_MAIL;
+
+  localStorage.setItem(EMAIL_KEY,email);
+
+  const url =
+    REALM_URL +
+    '&login_hint=' +
+    encodeURIComponent(email);
+
+  window.open(url,'_blank','noopener');
+  out.textContent = 'Opening Outlook with ' + email + ' as the login hint.';
 }
-updateUI();
+
+(function init(){
+  const savedSearch = localStorage.getItem(SEARCH_KEY);
+  if(savedSearch){
+    document.getElementById('searchText').value = savedSearch;
+  }
+
+  const savedEmail = localStorage.getItem(EMAIL_KEY);
+  if(savedEmail){
+    document.getElementById('upmcEmail').value = savedEmail;
+  }
+})();
 </script>
-</body>
-</html>
+
+
+
+</body></html>
