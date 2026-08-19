@@ -1,430 +1,262 @@
 <!DOCTYPE html>
-<!-- saved from url=(0061)file:///C:/Users/sohne/Downloads/upmc_email_finder_slick.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UPMC Email Finder</title>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#173f35">
+<title>UPMC Mail Index</title>
 <style>
   :root{
-    --bg:#f5f7f6;
+    --bg:#f4f7f5;
     --card:#ffffff;
-    --ink:#17201c;
-    --muted:#6d7771;
-    --line:#dfe5e1;
-    --accent:#1f5f4a;
-    --accent2:#eaf4ef;
-    --soft:#f8faf9;
-    --shadow:0 18px 48px rgba(22,34,28,.10);
-    --r:22px;
+    --ink:#16201c;
+    --muted:#66736d;
+    --line:#dbe4df;
+    --accent:#185b47;
+    --accent-dark:#103f32;
+    --accent-soft:#e9f4ef;
+    --shadow:0 18px 46px rgba(18,45,34,.11);
+    --radius:20px;
   }
-
   *{box-sizing:border-box}
-
+  html{min-height:100%;background:var(--bg)}
   body{
     margin:0;
     min-height:100vh;
-    background:
-      radial-gradient(circle at 15% 10%, #eef7f2 0, transparent 34%),
-      radial-gradient(circle at 85% 0%, #edf2f8 0, transparent 30%),
-      var(--bg);
     color:var(--ink);
     font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    background:
+      radial-gradient(circle at 12% 4%,#e5f3ec 0,transparent 31%),
+      radial-gradient(circle at 93% 0%,#e8edf5 0,transparent 28%),
+      var(--bg);
   }
-
-  .wrap{
-    max-width:860px;
+  button{font:inherit}
+  .shell{
+    width:min(100% - 28px,560px);
     margin:0 auto;
-    padding:54px 20px 70px;
+    padding:28px 0 max(34px,env(safe-area-inset-bottom));
   }
-
-  .hero{
-    text-align:center;
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
     margin-bottom:24px;
   }
-
-  .eyebrow{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding:7px 11px;
+  .brand{font-size:12px;font-weight:900;letter-spacing:.1em;color:var(--accent);text-transform:uppercase}
+  .explain{
     border:1px solid var(--line);
+    background:rgba(255,255,255,.82);
+    color:var(--accent-dark);
+    padding:9px 13px;
     border-radius:999px;
-    background:rgba(255,255,255,.72);
-    color:var(--muted);
-    font-size:12px;
     font-weight:800;
-    letter-spacing:.08em;
-    text-transform:uppercase;
+    cursor:pointer;
   }
-
-  h1{
-    margin:16px 0 8px;
-    font-size:44px;
-    line-height:1.02;
-    letter-spacing:-.045em;
-  }
-
-  .sub{
-    color:var(--muted);
-    font-size:18px;
-    line-height:1.55;
-    max-width:650px;
-    margin:0 auto;
-  }
-
-  .card{
-    background:rgba(255,255,255,.94);
-    border:1px solid rgba(216,224,219,.95);
-    border-radius:var(--r);
+  .hero{margin-bottom:20px}
+  h1{margin:0;font-size:clamp(34px,8vw,47px);line-height:.98;letter-spacing:-.045em}
+  .tagline{margin:12px 0 0;color:var(--muted);font-size:16px;line-height:1.5}
+  .index{
+    padding:10px;
+    background:rgba(255,255,255,.88);
+    border:1px solid rgba(216,225,220,.95);
+    border-radius:26px;
     box-shadow:var(--shadow);
-    padding:28px;
-    backdrop-filter:blur(8px);
+    backdrop-filter:blur(10px);
   }
-
-  label{
-    display:block;
-    margin-bottom:8px;
-    font-size:14px;
-    font-weight:800;
-  }
-
-  .searchbox{
+  .item{
     width:100%;
-    border:1px solid var(--line);
-    background:var(--soft);
-    color:var(--ink);
-    border-radius:16px;
-    padding:17px 18px;
-    font:inherit;
-    font-size:22px;
-    outline:none;
-    transition:.15s ease;
-  }
-
-  .searchbox:focus{
-    border-color:#8ab5a4;
-    box-shadow:0 0 0 4px rgba(31,95,74,.08);
-    background:#fff;
-  }
-
-  .actions{
     display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-    margin-top:16px;
-  }
-
-  button{
+    grid-template-columns:44px 1fr auto;
+    gap:14px;
+    align-items:center;
+    text-align:left;
     border:0;
-    border-radius:14px;
-    padding:16px 18px;
-    font:inherit;
-    font-weight:850;
-    font-size:17px;
-    cursor:pointer;
-    transition:transform .08s ease,filter .12s ease,background .12s ease;
-  }
-
-  button:hover{filter:brightness(.98)}
-  button:active{transform:translateY(1px)}
-
-  .primary{
-    background:var(--accent);
-    color:#fff;
-  }
-
-  .secondary{
-    background:#fff;
+    border-radius:18px;
+    background:transparent;
     color:var(--ink);
-    border:1px solid var(--line);
-  }
-
-  .status{
-    min-height:22px;
-    margin-top:14px;
-    color:var(--accent);
-    font-size:14px;
-    font-weight:800;
-    text-align:center;
-  }
-
-  .flow{
-    margin-top:24px;
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
-  }
-
-  .flowitem{
-    background:var(--soft);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:14px;
-    text-align:center;
-  }
-
-  .num{
-    width:28px;
-    height:28px;
-    border-radius:50%;
-    display:inline-grid;
-    place-items:center;
-    background:var(--accent2);
-    color:var(--accent);
-    font-weight:900;
-    margin-bottom:6px;
-  }
-
-  .flowitem b{
-    display:block;
-    font-size:14px;
-  }
-
-  .flowitem span{
-    display:block;
-    margin-top:3px;
-    color:var(--muted);
-    font-size:12px;
-    line-height:1.35;
-  }
-
-  details{
-    margin-top:20px;
-    border-top:1px solid var(--line);
-    padding-top:18px;
-  }
-
-  summary{
+    padding:17px 14px;
     cursor:pointer;
-    color:var(--accent);
-    font-weight:850;
-    list-style:none;
+    transition:background .14s ease,transform .08s ease;
   }
-
-  summary::-webkit-details-marker{display:none}
-
-  .fallback{
-    margin-top:14px;
-    padding:16px;
-    border:1px solid var(--line);
-    border-radius:14px;
-    background:var(--soft);
+  .item:hover,.item:focus-visible{background:var(--accent-soft);outline:none}
+  .item:active{transform:scale(.99)}
+  .item + .item{border-top:1px solid var(--line);border-top-left-radius:0;border-top-right-radius:0}
+  .item:has(+ .item){border-bottom-left-radius:0;border-bottom-right-radius:0}
+  .icon{
+    width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+    background:var(--accent-soft);color:var(--accent);font-size:20px;font-weight:950;
   }
-
-  .fallback p{
-    margin:0 0 12px;
-    color:var(--muted);
-    font-size:14px;
-    line-height:1.5;
-  }
-
-  .emailrow{
-    display:grid;
-    grid-template-columns:1fr auto;
-    gap:10px;
-  }
-
-  .emailinput{
-    width:100%;
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:13px 14px;
-    font:inherit;
-    outline:none;
-    background:#fff;
-  }
-
-  .mini{
-    padding:13px 15px;
-    background:#fff;
-    color:var(--accent);
-    border:1px solid #b9d0c4;
-    white-space:nowrap;
-  }
-
-  .privacy{
-    margin-top:18px;
-    color:var(--muted);
-    font-size:12px;
-    line-height:1.45;
+  .copy{font-size:16px;font-weight:900;line-height:1.22}
+  .hint{display:block;margin-top:4px;color:var(--muted);font-size:12px;font-weight:650;line-height:1.35}
+  .arrow{color:var(--accent);font-size:21px;font-weight:900}
+  .status{
+    min-height:48px;
+    margin:14px 4px 0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     text-align:center;
+    color:var(--accent);
+    font-size:14px;
+    font-weight:850;
+    line-height:1.4;
   }
-
-  .tiny-link{
-    color:inherit;
+  .outlook{
+    width:100%;border:0;border-radius:16px;padding:15px 18px;
+    background:var(--accent);color:#fff;font-weight:900;font-size:16px;cursor:pointer;
+    box-shadow:0 10px 24px rgba(24,91,71,.17);
   }
-
-  @media(max-width:650px){
-    .wrap{padding-top:34px}
-    h1{font-size:36px}
-    .actions{grid-template-columns:1fr}
-    .flow{grid-template-columns:1fr}
-    .emailrow{grid-template-columns:1fr}
-    .mini{width:100%}
+  .outlook:hover{background:var(--accent-dark)}
+  .foot{margin:16px 10px 0;text-align:center;color:var(--muted);font-size:11px;line-height:1.45}
+  dialog{
+    width:min(100% - 30px,500px);
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:0;
+    color:var(--ink);
+    background:var(--card);
+    box-shadow:0 30px 90px rgba(11,28,21,.28);
   }
+  dialog::backdrop{background:rgba(12,24,19,.46);backdrop-filter:blur(3px)}
+  .modal{padding:26px}
+  .modal h2{margin:0;font-size:27px;letter-spacing:-.025em}
+  .modal p{color:var(--muted);font-size:15px;line-height:1.58}
+  .steps{display:grid;gap:10px;margin:19px 0}
+  .step{display:grid;grid-template-columns:30px 1fr;gap:11px;align-items:start}
+  .stepnum{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:950}
+  .steptext{padding-top:4px;font-size:14px;line-height:1.45}
+  .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+  .modal-actions button{border-radius:13px;padding:13px;border:1px solid var(--line);font-weight:850;cursor:pointer}
+  .hear{background:#fff;color:var(--accent)}
+  .close{background:var(--accent);color:white;border-color:var(--accent)!important}
+  @media(max-width:430px){
+    .shell{padding-top:20px}.topbar{margin-bottom:20px}.item{padding:16px 11px;gap:11px}
+    .modal-actions{grid-template-columns:1fr}.tagline{font-size:15px}
+  }
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
-
 <body>
-<div class="wrap">
+<div class="shell">
+  <header class="topbar">
+    <div class="brand">UPMC · Outlook</div>
+    <button type="button" class="explain" onclick="openExplanation(false)">Explain</button>
+  </header>
 
-  <div class="hero">
-    <div class="eyebrow">UPMC · Outlook</div>
-    <h1>Email Finder</h1>
-    <p class="sub">
-      Copy a word or phrase, open your UPMC mailbox, paste into Outlook Search.
-      No mailbox access. No hidden links. No extra permissions.
-    </p>
-  </div>
+  <section class="hero">
+    <h1>Mail Index</h1>
+    <p class="tagline">Your email is already a book. This gives the useful pages an index.</p>
+  </section>
 
-  <main class="card">
-    <label for="searchText">What are you looking for?</label>
-    <input id="searchText" class="searchbox" type="text" value="Shared Savings" placeholder="Example: Shared Savings" autocomplete="off" oninput="rememberSearch()" onkeydown="if(event.key===&#39;Enter&#39;){copySearch();}">
+  <main class="index" aria-label="Indexed email searches">
+    <button type="button" class="item" onclick="copyEntry('Your Panel Stats', '&quot;Provider Panel Report&quot; &quot;Primary Care Service Line&quot;')">
+      <span class="icon" aria-hidden="true">P</span>
+      <span><span class="copy">Your Panel Stats</span><span class="hint">Copy its Outlook search line</span></span>
+      <span class="arrow" aria-hidden="true">›</span>
+    </button>
 
-    <div class="actions">
-      <button class="primary" onclick="copySearch()">Copy search phrase</button>
-      <button class="secondary" onclick="openUPMC()">Open UPMC Email</button>
-    </div>
+    <button type="button" class="item" onclick="copyEntry('Your RVU', 'web#simpliphyinc.com')">
+      <span class="icon" aria-hidden="true">R</span>
+      <span><span class="copy">Your RVU</span><span class="hint">Copy its Outlook search line</span></span>
+      <span class="arrow" aria-hidden="true">›</span>
+    </button>
 
-    <div id="status" class="status">UPMC Outlook opened. Click Search → Ctrl+V → Enter.</div>
-
-    <div class="flow">
-      <div class="flowitem">
-        <div class="num">1</div>
-        <b>Copy</b>
-        <span>Copies the phrase above</span>
-      </div>
-      <div class="flowitem">
-        <div class="num">2</div>
-        <b>Open Outlook</b>
-        <span>Uses the upmc.edu realm</span>
-      </div>
-      <div class="flowitem">
-        <div class="num">3</div>
-        <b>Paste + Enter</b>
-        <span>Click Search, then Ctrl+V</span>
-      </div>
-    </div>
-
-    <details>
-      <summary>Wrong account or Microsoft keeps choosing the wrong mailbox?</summary>
-
-      <div class="fallback">
-        <p>
-          Enter your UPMC email once. This adds a Microsoft <b>login hint</b>
-          so Outlook is steered to that specific UPMC account.
-        </p>
-
-        <div class="emailrow">
-          <input id="upmcEmail" class="emailinput" type="email" placeholder="name@upmc.edu" autocomplete="email" oninput="rememberEmail()">
-          <button class="mini" onclick="openSpecificUPMC()">Open this UPMC account</button>
-        </div>
-
-        <div id="fallbackStatus" class="status" style="text-align:left;margin-top:10px"></div>
-      </div>
-    </details>
-
-    <div class="privacy">
-      Your search phrase and optional UPMC email are stored only in this browser.
-      This page never reads your mailbox or password.
-    </div>
+    <button type="button" class="item" onclick="copyEntry('May Compensation Update', '&quot;CMI Compensation Update&quot; &quot;Quality Incentive&quot; &quot;attaching&quot;')">
+      <span class="icon" aria-hidden="true">$</span>
+      <span><span class="copy">May Compensation Update</span><span class="hint">Copy its Outlook search line</span></span>
+      <span class="arrow" aria-hidden="true">›</span>
+    </button>
   </main>
 
+  <div id="status" class="status" role="status" aria-live="polite">Choose a page from the index.</div>
+  <button type="button" class="outlook" onclick="openOutlook()">Open UPMC Outlook</button>
+
+  <p class="foot">This page only copies search text and opens Outlook. It does not read your mailbox or password.</p>
 </div>
 
-<script>
-const SEARCH_KEY = 'upmcFinder:lastSearch';
-const EMAIL_KEY  = 'upmcFinder:upmcEmail';
+<dialog id="explanation" aria-labelledby="explainTitle">
+  <div class="modal">
+    <h2 id="explainTitle">Email, now with an index</h2>
+    <p>Important information gets buried in email. This page gives selected messages a simple, human-readable index.</p>
+    <div class="steps">
+      <div class="step"><span class="stepnum">1</span><span class="steptext">Choose what you want to find.</span></div>
+      <div class="step"><span class="stepnum">2</span><span class="steptext">Its precise search line is copied for you.</span></div>
+      <div class="step"><span class="stepnum">3</span><span class="steptext">Open UPMC Outlook, select Search, paste, and press Enter.</span></div>
+    </div>
+    <p>The titles stay simple. The search wording underneath can become more exact as the index grows.</p>
+    <div class="modal-actions">
+      <button type="button" class="hear" onclick="speakExplanation()">Hear explanation</button>
+      <button type="button" class="close" onclick="closeExplanation()">Got it</button>
+    </div>
+  </div>
+</dialog>
 
+<script>
+const FIRST_USE_KEY = 'upmcMailIndex:explained:v1';
 const REALM_URL = 'https://outlook.cloud.microsoft/mail/?realm=upmc.edu';
+const spokenExplanation = 'Your email is already a book. This page gives useful messages an index. Choose what you want to find, and its search line will be copied. Then open UPMC Outlook, select Search, paste, and press Enter.';
 
 function setStatus(message){
   document.getElementById('status').textContent = message;
 }
 
-function rememberSearch(){
-  localStorage.setItem(
-    SEARCH_KEY,
-    document.getElementById('searchText').value
-  );
-}
-
-function rememberEmail(){
-  localStorage.setItem(
-    EMAIL_KEY,
-    document.getElementById('upmcEmail').value.trim()
-  );
-}
-
-function validUPMCEmail(email){
-  return /^[^\s@]+@upmc\.edu$/i.test(email);
-}
-
-async function copySearch(){
-  const text = document.getElementById('searchText').value.trim();
-
-  if(!text){
-    setStatus('Enter a search phrase first.');
-    document.getElementById('searchText').focus();
-    return;
-  }
-
+async function copyEntry(label, query){
   try{
-    await navigator.clipboard.writeText(text);
-    setStatus('Copied: “' + text + '” ✓');
-  }catch(e){
-    const box = document.getElementById('searchText');
-    box.focus();
-    box.select();
-
-    try{
-      document.execCommand('copy');
-      setStatus('Copied: “' + text + '” ✓');
-    }catch(err){
-      setStatus('Copy was blocked — select the phrase and press Ctrl+C.');
-    }
+    await navigator.clipboard.writeText(query);
+    setStatus(label + ' copied. Open Outlook, paste into Search, and press Enter.');
+  }catch(error){
+    const helper = document.createElement('textarea');
+    helper.value = query;
+    helper.setAttribute('readonly','');
+    helper.style.position = 'fixed';
+    helper.style.opacity = '0';
+    document.body.appendChild(helper);
+    helper.select();
+    const copied = document.execCommand('copy');
+    helper.remove();
+    setStatus(copied ? label + ' copied. Open Outlook and paste into Search.' : 'Copy was blocked by the browser.');
   }
 }
 
-function openUPMC(){
-  window.open(REALM_URL,'_blank','noopener');
-  setStatus('UPMC Outlook opened. Click Search → Ctrl+V → Enter.');
+function openOutlook(){
+  window.open(REALM_URL,'_blank','noopener,noreferrer');
+  setStatus('UPMC Outlook opened. Select Search, paste, and press Enter.');
 }
 
-function openSpecificUPMC(){
-  const email = document.getElementById('upmcEmail').value.trim();
-  const out = document.getElementById('fallbackStatus');
+function openExplanation(firstUse){
+  const dialog = document.getElementById('explanation');
+  if(!dialog.open) dialog.showModal();
+  if(firstUse){
+    localStorage.setItem(FIRST_USE_KEY,'yes');
+    window.setTimeout(speakExplanation,350);
+  }
+}
 
-  if(!validUPMCEmail(email)){
-    out.textContent = 'Enter a valid @upmc.edu email address.';
-    document.getElementById('upmcEmail').focus();
+function closeExplanation(){
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  document.getElementById('explanation').close();
+}
+
+function speakExplanation(){
+  if(!('speechSynthesis' in window)){
+    setStatus('Spoken explanation is not available in this browser.');
     return;
   }
-
-  localStorage.setItem(EMAIL_KEY,email);
-
-  const url =
-    REALM_URL +
-    '&login_hint=' +
-    encodeURIComponent(email);
-
-  window.open(url,'_blank','noopener');
-  out.textContent = 'Opening Outlook with ' + email + ' as the login hint.';
+  window.speechSynthesis.cancel();
+  const speech = new SpeechSynthesisUtterance(spokenExplanation);
+  speech.rate = 0.96;
+  speech.pitch = 1;
+  window.speechSynthesis.speak(speech);
 }
 
-(function init(){
-  const savedSearch = localStorage.getItem(SEARCH_KEY);
-  if(savedSearch){
-    document.getElementById('searchText').value = savedSearch;
-  }
+window.addEventListener('DOMContentLoaded',()=>{
+  if(!localStorage.getItem(FIRST_USE_KEY)) openExplanation(true);
+});
 
-  const savedEmail = localStorage.getItem(EMAIL_KEY);
-  if(savedEmail){
-    document.getElementById('upmcEmail').value = savedEmail;
-  }
-})();
+document.getElementById('explanation').addEventListener('click',(event)=>{
+  if(event.target === event.currentTarget) closeExplanation();
+});
 </script>
-
-
-
-</body></html>
+</body>
+</html>
