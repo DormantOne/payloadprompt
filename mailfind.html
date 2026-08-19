@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,256 +7,311 @@
 <meta name="theme-color" content="#173f35">
 <title>UPMC Mail Index</title>
 <style>
-  :root{
-    --bg:#f4f7f5;
-    --card:#ffffff;
-    --ink:#16201c;
-    --muted:#66736d;
-    --line:#dbe4df;
-    --accent:#185b47;
-    --accent-dark:#103f32;
-    --accent-soft:#e9f4ef;
-    --shadow:0 18px 46px rgba(18,45,34,.11);
-    --radius:20px;
-  }
-  *{box-sizing:border-box}
-  html{min-height:100%;background:var(--bg)}
-  body{
-    margin:0;
-    min-height:100vh;
-    color:var(--ink);
-    font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-    background:
-      radial-gradient(circle at 12% 4%,#e5f3ec 0,transparent 31%),
-      radial-gradient(circle at 93% 0%,#e8edf5 0,transparent 28%),
-      var(--bg);
-  }
-  button{font:inherit}
-  .shell{
-    width:min(100% - 28px,560px);
-    margin:0 auto;
-    padding:28px 0 max(34px,env(safe-area-inset-bottom));
-  }
-  .topbar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:14px;
-    margin-bottom:24px;
-  }
-  .brand{font-size:12px;font-weight:900;letter-spacing:.1em;color:var(--accent);text-transform:uppercase}
-  .explain{
-    border:1px solid var(--line);
-    background:rgba(255,255,255,.82);
-    color:var(--accent-dark);
-    padding:9px 13px;
-    border-radius:999px;
-    font-weight:800;
-    cursor:pointer;
-  }
-  .hero{margin-bottom:20px}
-  h1{margin:0;font-size:clamp(34px,8vw,47px);line-height:.98;letter-spacing:-.045em}
-  .tagline{margin:12px 0 0;color:var(--muted);font-size:16px;line-height:1.5}
-  .index{
-    padding:10px;
-    background:rgba(255,255,255,.88);
-    border:1px solid rgba(216,225,220,.95);
-    border-radius:26px;
-    box-shadow:var(--shadow);
-    backdrop-filter:blur(10px);
-  }
-  .item{
-    width:100%;
-    display:grid;
-    grid-template-columns:44px 1fr auto;
-    gap:14px;
-    align-items:center;
-    text-align:left;
-    border:0;
-    border-radius:18px;
-    background:transparent;
-    color:var(--ink);
-    padding:17px 14px;
-    cursor:pointer;
-    transition:background .14s ease,transform .08s ease;
-  }
-  .item:hover,.item:focus-visible{background:var(--accent-soft);outline:none}
-  .item:active{transform:scale(.99)}
-  .item + .item{border-top:1px solid var(--line);border-top-left-radius:0;border-top-right-radius:0}
-  .item:has(+ .item){border-bottom-left-radius:0;border-bottom-right-radius:0}
-  .icon{
-    width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
-    background:var(--accent-soft);color:var(--accent);font-size:20px;font-weight:950;
-  }
-  .copy{font-size:16px;font-weight:900;line-height:1.22}
-  .hint{display:block;margin-top:4px;color:var(--muted);font-size:12px;font-weight:650;line-height:1.35}
-  .arrow{color:var(--accent);font-size:21px;font-weight:900}
-  .status{
-    min-height:48px;
-    margin:14px 4px 0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    color:var(--accent);
-    font-size:14px;
-    font-weight:850;
-    line-height:1.4;
-  }
-  .outlook{
-    width:100%;border:0;border-radius:16px;padding:15px 18px;
-    background:var(--accent);color:#fff;font-weight:900;font-size:16px;cursor:pointer;
-    box-shadow:0 10px 24px rgba(24,91,71,.17);
-  }
-  .outlook:hover{background:var(--accent-dark)}
-  .foot{margin:16px 10px 0;text-align:center;color:var(--muted);font-size:11px;line-height:1.45}
-  dialog{
-    width:min(100% - 30px,500px);
-    border:1px solid var(--line);
-    border-radius:24px;
-    padding:0;
-    color:var(--ink);
-    background:var(--card);
-    box-shadow:0 30px 90px rgba(11,28,21,.28);
-  }
-  dialog::backdrop{background:rgba(12,24,19,.46);backdrop-filter:blur(3px)}
-  .modal{padding:26px}
-  .modal h2{margin:0;font-size:27px;letter-spacing:-.025em}
-  .modal p{color:var(--muted);font-size:15px;line-height:1.58}
-  .steps{display:grid;gap:10px;margin:19px 0}
-  .step{display:grid;grid-template-columns:30px 1fr;gap:11px;align-items:start}
-  .stepnum{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:950}
-  .steptext{padding-top:4px;font-size:14px;line-height:1.45}
-  .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
-  .modal-actions button{border-radius:13px;padding:13px;border:1px solid var(--line);font-weight:850;cursor:pointer}
-  .hear{background:#fff;color:var(--accent)}
-  .close{background:var(--accent);color:white;border-color:var(--accent)!important}
-  @media(max-width:430px){
-    .shell{padding-top:20px}.topbar{margin-bottom:20px}.item{padding:16px 11px;gap:11px}
-    .modal-actions{grid-template-columns:1fr}.tagline{font-size:15px}
-  }
-  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+:root{
+--bg:#f4f7f5;
+--card:#ffffff;
+--ink:#16201c;
+--muted:#66736d;
+--line:#dbe4df;
+--accent:#185b47;
+--accent-dark:#103f32;
+--accent-soft:#e9f4ef;
+--shadow:0 18px 46px rgba(18,45,34,.11);
+--radius:20px;
+}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg)}
+body{
+margin:0;
+min-height:100vh;
+color:var(--ink);
+font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+background:
+radial-gradient(circle at 12% 4%,#e5f3ec 0,transparent 31%),
+radial-gradient(circle at 93% 0%,#e8edf5 0,transparent 28%),
+var(--bg);
+}
+button{font:inherit}
+.shell{
+width:min(100% - 28px,560px);
+margin:0 auto;
+padding:28px 0 max(34px,env(safe-area-inset-bottom));
+}
+.topbar{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:14px;
+margin-bottom:24px;
+}
+.brand{font-size:12px;font-weight:900;letter-spacing:.1em;color:var(--accent);text-transform:uppercase}
+.explain{
+border:1px solid var(--line);
+background:rgba(255,255,255,.82);
+color:var(--accent-dark);
+padding:9px 13px;
+border-radius:999px;
+font-weight:800;
+cursor:pointer;
+}
+.hero{margin-bottom:20px}
+h1{margin:0;font-size:clamp(34px,8vw,47px);line-height:.98;letter-spacing:-.045em}
+.tagline{margin:12px 0 0;color:var(--muted);font-size:16px;line-height:1.5}
+.index{
+padding:10px;
+background:rgba(255,255,255,.88);
+border:1px solid rgba(216,225,220,.95);
+border-radius:26px;
+box-shadow:var(--shadow);
+backdrop-filter:blur(10px);
+}
+.item{
+width:100%;
+display:grid;
+grid-template-columns:44px 1fr auto;
+gap:14px;
+align-items:center;
+text-align:left;
+border:0;
+border-radius:18px;
+background:transparent;
+color:var(--ink);
+padding:17px 14px;
+cursor:pointer;
+transition:background .14s ease,transform .08s ease;
+}
+.item:hover,.item:focus-visible{background:var(--accent-soft);outline:none}
+.item:active{transform:scale(.99)}
+.item + .item{border-top:1px solid var(--line);border-top-left-radius:0;border-top-right-radius:0}
+.item:has(+ .item){border-bottom-left-radius:0;border-bottom-right-radius:0}
+.icon{
+width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+background:var(--accent-soft);color:var(--accent);font-size:20px;font-weight:950;
+}
+.copy{font-size:16px;font-weight:900;line-height:1.22}
+.hint{display:block;margin-top:4px;color:var(--muted);font-size:12px;font-weight:650;line-height:1.35}
+.arrow{color:var(--accent);font-size:21px;font-weight:900}
+.status{
+min-height:48px;
+margin:14px 4px 0;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+color:var(--accent);
+font-size:14px;
+font-weight:850;
+line-height:1.4;
+}
+.outlook{
+width:100%;border:0;border-radius:16px;padding:15px 18px;
+background:var(--accent);color:#fff;font-weight:900;font-size:16px;cursor:pointer;
+box-shadow:0 10px 24px rgba(24,91,71,.17);
+}
+.outlook:hover{background:var(--accent-dark)}
+.account-change{
+  display:block;
+  margin:10px auto 0;
+  border:0;
+  background:transparent;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:750;
+  text-decoration:underline;
+  text-underline-offset:3px;
+  cursor:pointer;
+}
+.foot{margin:16px 10px 0;text-align:center;color:var(--muted);font-size:11px;line-height:1.45}
+dialog{
+width:min(100% - 30px,500px);
+border:1px solid var(--line);
+border-radius:24px;
+padding:0;
+color:var(--ink);
+background:var(--card);
+box-shadow:0 30px 90px rgba(11,28,21,.28);
+}
+dialog::backdrop{background:rgba(12,24,19,.46);backdrop-filter:blur(3px)}
+.modal{padding:26px}
+.modal h2{margin:0;font-size:27px;letter-spacing:-.025em}
+.modal p{color:var(--muted);font-size:15px;line-height:1.58}
+.steps{display:grid;gap:10px;margin:19px 0}
+.step{display:grid;grid-template-columns:30px 1fr;gap:11px;align-items:start}
+.stepnum{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:950}
+.steptext{padding-top:4px;font-size:14px;line-height:1.45}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+.modal-actions button{border-radius:13px;padding:13px;border:1px solid var(--line);font-weight:850;cursor:pointer}
+.hear{background:#fff;color:var(--accent)}
+.close{background:var(--accent);color:white;border-color:var(--accent)!important}
+@media(max-width:430px){
+.shell{padding-top:20px}.topbar{margin-bottom:20px}.item{padding:16px 11px;gap:11px}
+.modal-actions{grid-template-columns:1fr}.tagline{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="shell">
-  <header class="topbar">
-    <div class="brand">UPMC · Outlook</div>
-    <button type="button" class="explain" onclick="openExplanation(false)">Explain</button>
-  </header>
+<header class="topbar">
+<div class="brand">UPMC · Outlook</div>
+<button type="button" class="explain" onclick="openExplanation(false)">Explain</button>
+</header>
 
-  <section class="hero">
-    <h1>Mail Index</h1>
-    <p class="tagline">Your email is already a book. This gives the useful pages an index.</p>
-  </section>
+<section class="hero">
+<h1>Mail Index</h1>
+<p class="tagline">Your email is already a book. This gives the useful pages an index.</p>
+</section>
 
-  <main class="index" aria-label="Indexed email searches">
-    <button type="button" class="item" onclick="copyEntry('Your Panel Stats', '&quot;Provider Panel Report&quot; &quot;Primary Care Service Line&quot;')">
-      <span class="icon" aria-hidden="true">P</span>
-      <span><span class="copy">Your Panel Stats</span><span class="hint">Copy its Outlook search line</span></span>
-      <span class="arrow" aria-hidden="true">›</span>
-    </button>
+<main class="index" aria-label="Indexed email searches">
+<button type="button" class="item" onclick="copyEntry('Your Panel Stats', '&quot;Provider Panel Report&quot; &quot;Primary Care Service Line&quot;')">
+<span class="icon" aria-hidden="true">P</span>
+<span><span class="copy">Your Panel Stats</span><span class="hint">Copy its Outlook search line</span></span>
+<span class="arrow" aria-hidden="true">›</span>
+</button>
 
-    <button type="button" class="item" onclick="copyEntry('Your RVU', 'web#simpliphyinc.com')">
-      <span class="icon" aria-hidden="true">R</span>
-      <span><span class="copy">Your RVU</span><span class="hint">Copy its Outlook search line</span></span>
-      <span class="arrow" aria-hidden="true">›</span>
-    </button>
+<button type="button" class="item" onclick="copyEntry('Your RVU', 'web#simpliphyinc.com')">
+<span class="icon" aria-hidden="true">R</span>
+<span><span class="copy">Your RVU</span><span class="hint">Copy its Outlook search line</span></span>
+<span class="arrow" aria-hidden="true">›</span>
+</button>
 
-    <button type="button" class="item" onclick="copyEntry('May Compensation Update', '&quot;CMI Compensation Update&quot; &quot;Quality Incentive&quot; &quot;attaching&quot;')">
-      <span class="icon" aria-hidden="true">$</span>
-      <span><span class="copy">May Compensation Update</span><span class="hint">Copy its Outlook search line</span></span>
-      <span class="arrow" aria-hidden="true">›</span>
-    </button>
-  </main>
+<button type="button" class="item" onclick="copyEntry('May Compensation Update', '&quot;CMI Compensation Update&quot; &quot;Quality Incentive&quot; &quot;attaching&quot;')">
+<span class="icon" aria-hidden="true">$</span>
+<span><span class="copy">May Compensation Update</span><span class="hint">Copy its Outlook search line</span></span>
+<span class="arrow" aria-hidden="true">›</span>
+</button>
+</main>
 
-  <div id="status" class="status" role="status" aria-live="polite">Choose a page from the index.</div>
-  <button type="button" class="outlook" onclick="openOutlook()">Open UPMC Outlook</button>
+<div id="status" class="status" role="status" aria-live="polite">Choose a page from the index.</div>
+<button type="button" class="outlook" onclick="openOutlook()">Open UPMC Outlook</button>
+<button type="button" class="account-change" onclick="changeUPMCAccount()">Change UPMC account</button>
 
-  <p class="foot">This page only copies search text and opens Outlook. It does not read your mailbox or password.</p>
+<p class="foot">This page only copies search text and opens Outlook. It does not read your mailbox or password.</p>
 </div>
 
 <dialog id="explanation" aria-labelledby="explainTitle">
-  <div class="modal">
-    <h2 id="explainTitle">Email, now with an index</h2>
-    <p>Important information gets buried in email. This page gives selected messages a simple, human-readable index.</p>
-    <div class="steps">
-      <div class="step"><span class="stepnum">1</span><span class="steptext">Choose what you want to find.</span></div>
-      <div class="step"><span class="stepnum">2</span><span class="steptext">Its precise search line is copied for you.</span></div>
-      <div class="step"><span class="stepnum">3</span><span class="steptext">Open UPMC Outlook, select Search, paste, and press Enter.</span></div>
-    </div>
-    <p>The titles stay simple. The search wording underneath can become more exact as the index grows.</p>
-    <div class="modal-actions">
-      <button type="button" class="hear" onclick="speakExplanation()">Hear explanation</button>
-      <button type="button" class="close" onclick="closeExplanation()">Got it</button>
-    </div>
-  </div>
+<div class="modal">
+<h2 id="explainTitle">Email, now with an index</h2>
+<p>Important information gets buried in email. This page gives selected messages a simple, human-readable index.</p>
+<div class="steps">
+<div class="step"><span class="stepnum">1</span><span class="steptext">Choose what you want to find.</span></div>
+<div class="step"><span class="stepnum">2</span><span class="steptext">Its precise search line is copied for you.</span></div>
+<div class="step"><span class="stepnum">3</span><span class="steptext">Open UPMC Outlook, select Search, paste, and press Enter.</span></div>
+</div>
+<p>The titles stay simple. The search wording underneath can become more exact as the index grows.</p>
+<div class="modal-actions">
+<button type="button" class="hear" onclick="speakExplanation()">Hear explanation</button>
+<button type="button" class="close" onclick="closeExplanation()">Got it</button>
+</div>
+</div>
 </dialog>
 
 <script>
 const FIRST_USE_KEY = 'upmcMailIndex:explained:v1';
-const REALM_URL = 'https://outlook.cloud.microsoft/mail/?realm=upmc.edu';
+const UPMC_EMAIL_KEY = 'upmcMailIndex:upmcEmail:v1';
+const OUTLOOK_BASE = 'https://outlook.cloud.microsoft/mail/';
 const spokenExplanation = 'Your email is already a book. This page gives useful messages an index. Choose what you want to find, and its search line will be copied. Then open UPMC Outlook, select Search, paste, and press Enter.';
 
 function setStatus(message){
-  document.getElementById('status').textContent = message;
+document.getElementById('status').textContent = message;
 }
 
 async function copyEntry(label, query){
-  try{
-    await navigator.clipboard.writeText(query);
-    setStatus(label + ' copied. Open Outlook, paste into Search, and press Enter.');
-  }catch(error){
-    const helper = document.createElement('textarea');
-    helper.value = query;
-    helper.setAttribute('readonly','');
-    helper.style.position = 'fixed';
-    helper.style.opacity = '0';
-    document.body.appendChild(helper);
-    helper.select();
-    const copied = document.execCommand('copy');
-    helper.remove();
-    setStatus(copied ? label + ' copied. Open Outlook and paste into Search.' : 'Copy was blocked by the browser.');
-  }
+try{
+await navigator.clipboard.writeText(query);
+setStatus(label + ' copied. Open Outlook, paste into Search, and press Enter.');
+}catch(error){
+const helper = document.createElement('textarea');
+helper.value = query;
+helper.setAttribute('readonly','');
+helper.style.position = 'fixed';
+helper.style.opacity = '0';
+document.body.appendChild(helper);
+helper.select();
+const copied = document.execCommand('copy');
+helper.remove();
+setStatus(copied ? label + ' copied. Open Outlook and paste into Search.' : 'Copy was blocked by the browser.');
+}
+}
+
+function validUPMCEmail(email){
+return /^[^\s@]+@upmc\.edu$/i.test(email);
+}
+
+function savedUPMCEmail(){
+const email = (localStorage.getItem(UPMC_EMAIL_KEY) || '').trim();
+return validUPMCEmail(email) ? email : '';
+}
+
+function buildUPMCOutlookURL(email){
+const url = new URL(OUTLOOK_BASE);
+url.searchParams.set('realm','upmc.edu');
+url.searchParams.set('login_hint',email);
+return url.toString();
+}
+
+function askForUPMCEmail(current=''){
+const answer = window.prompt(
+'Enter your UPMC email address.\n\nThis page stores only the @upmc.edu address in this browser. Microsoft handles your password and MFA.',
+current
+);
+if(answer === null) return '';
+const email = answer.trim();
+if(!validUPMCEmail(email)){
+setStatus('Please enter a valid @upmc.edu email address.');
+return '';
+}
+localStorage.setItem(UPMC_EMAIL_KEY,email);
+return email;
 }
 
 function openOutlook(){
-  window.open(REALM_URL,'_blank','noopener,noreferrer');
-  setStatus('UPMC Outlook opened. Select Search, paste, and press Enter.');
+let email = savedUPMCEmail();
+if(!email) email = askForUPMCEmail();
+if(!email) return;
+
+window.open(buildUPMCOutlookURL(email),'_blank','noopener,noreferrer');
+setStatus('Opening UPMC Outlook for ' + email + '. Microsoft will ask for sign-in or MFA only if needed.');
+}
+
+function changeUPMCAccount(){
+const current = savedUPMCEmail();
+const email = askForUPMCEmail(current);
+if(email) setStatus('UPMC account set to ' + email + '.');
 }
 
 function openExplanation(firstUse){
-  const dialog = document.getElementById('explanation');
-  if(!dialog.open) dialog.showModal();
-  if(firstUse){
-    localStorage.setItem(FIRST_USE_KEY,'yes');
-    window.setTimeout(speakExplanation,350);
-  }
+const dialog = document.getElementById('explanation');
+if(!dialog.open) dialog.showModal();
+if(firstUse){
+localStorage.setItem(FIRST_USE_KEY,'yes');
+window.setTimeout(speakExplanation,350);
+}
 }
 
 function closeExplanation(){
-  if('speechSynthesis' in window) window.speechSynthesis.cancel();
-  document.getElementById('explanation').close();
+if('speechSynthesis' in window) window.speechSynthesis.cancel();
+document.getElementById('explanation').close();
 }
 
 function speakExplanation(){
-  if(!('speechSynthesis' in window)){
-    setStatus('Spoken explanation is not available in this browser.');
-    return;
-  }
-  window.speechSynthesis.cancel();
-  const speech = new SpeechSynthesisUtterance(spokenExplanation);
-  speech.rate = 0.96;
-  speech.pitch = 1;
-  window.speechSynthesis.speak(speech);
+if(!('speechSynthesis' in window)){
+setStatus('Spoken explanation is not available in this browser.');
+return;
+}
+window.speechSynthesis.cancel();
+const speech = new SpeechSynthesisUtterance(spokenExplanation);
+speech.rate = 0.96;
+speech.pitch = 1;
+window.speechSynthesis.speak(speech);
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
-  if(!localStorage.getItem(FIRST_USE_KEY)) openExplanation(true);
+if(!localStorage.getItem(FIRST_USE_KEY)) openExplanation(true);
 });
 
 document.getElementById('explanation').addEventListener('click',(event)=>{
-  if(event.target === event.currentTarget) closeExplanation();
+if(event.target === event.currentTarget) closeExplanation();
 });
 </script>
 </body>
