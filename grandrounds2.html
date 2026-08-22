@@ -312,11 +312,68 @@
       z-index:9999;
       max-width:90vw;
     }
+
+    /* ---- Phone-to-desktop handoff ---- */
+    .phoneGate{
+      display:none;
+      margin-bottom:14px;
+      background:#eff6ff;
+      border:1px solid rgba(37,99,235,.38);
+      border-radius:16px;
+      box-shadow:var(--shadow);
+      padding:14px;
+      line-height:1.45;
+    }
+    .phoneGateTitle{
+      font-weight:900;
+      color:var(--accent2);
+      font-size:1.02rem;
+    }
+    .phoneGate p{
+      margin-top:6px;
+      color:#1e3a8a;
+    }
+    .phoneGateActions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .deviceToggle{
+      font-size:.78rem;
+      color:var(--muted);
+      margin-top:8px;
+    }
+    body.phoneMode .phoneGate{ display:block; }
+    body.phoneMode:not(.allowPhone) .layout{ display:none; }
+    body.phoneMode.allowPhone .phoneGate{
+      display:block;
+      background:#f0fdf4;
+      border-color:rgba(34,197,94,.38);
+    }
+
   </style>
 </head>
 
 <body>
 <div class="wrap">
+
+  <section class="phoneGate" id="phoneGate" aria-live="polite">
+    <div class="phoneGateTitle">Use Ask Grand Rounds from a computer.</div>
+    <p>
+      This tool works best on a desktop or laptop, where Microsoft 365 Copilot and the Grand Rounds source files are easier to open side by side.
+      Send yourself this page, then reopen it on your computer.
+    </p>
+    <div class="phoneGateActions">
+      <button class="mini" id="shareLinkBtn" type="button">Share this link</button>
+      <a class="ghost" id="emailSelfBtn" href="mailto:">Email link to myself</a>
+      <button class="ghost" id="continuePhoneBtn" type="button">Continue on phone anyway</button>
+    </div>
+    <div class="deviceToggle">
+      Phone mode appears automatically on small touch devices. Desktop and laptop users go straight to Ask Grand Rounds.
+    </div>
+  </section>
+
   <header class="header">
     <div class="htop">
       <div>
@@ -464,6 +521,11 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
   const get365Btn = document.getElementById('get365Btn');
   const copilotBtn = document.getElementById('copilotBtn');
 
+  const phoneGate = document.getElementById('phoneGate');
+  const shareLinkBtn = document.getElementById('shareLinkBtn');
+  const emailSelfBtn = document.getElementById('emailSelfBtn');
+  const continuePhoneBtn = document.getElementById('continuePhoneBtn');
+
   let catalog = null;
   let sessions = [];
   let selectedIds = new Set();
@@ -487,6 +549,78 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
       u.pitch = 1;
       window.speechSynthesis.speak(u);
     }catch(e){}
+  }
+
+  const FALLBACK_PAGE_URL = "https://dormantone.github.io/payloadprompt/grandrounds2.html";
+
+  function shareUrl(){
+    return (location.protocol === "http:" || location.protocol === "https:")
+      ? location.href
+      : FALLBACK_PAGE_URL;
+  }
+
+  function isLikelyPhone(){
+    const ua = navigator.userAgent || navigator.vendor || "";
+    const uaPhone = /iPhone|iPod|Windows Phone|webOS|BlackBerry|IEMobile|Opera Mini|Android.*Mobile|Mobile Safari/i.test(ua);
+    const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    const sw = (window.screen && window.screen.width) || 9999;
+    const sh = (window.screen && window.screen.height) || 9999;
+    const shortSide = Math.min(window.innerWidth || 9999, sw, sh);
+    const longSide = Math.max(window.innerWidth || 0, window.innerHeight || 0, sw === 9999 ? 0 : sw, sh === 9999 ? 0 : sh);
+    const touchPhoneSize = !!coarse && shortSide <= 820 && longSide <= 1180;
+    const narrowTouch = (navigator.maxTouchPoints || 0) > 1 && (window.innerWidth || 9999) <= 820;
+    return uaPhone || touchPhoneSize || narrowTouch;
+  }
+
+  function phoneAllowed(){
+    return sessionStorage.getItem("grandRoundsAllowPhone") === "1";
+  }
+
+  function applyDeviceMode(){
+    const phone = isLikelyPhone();
+    document.body.classList.toggle("phoneMode", phone);
+    document.body.classList.toggle("allowPhone", phone && phoneAllowed());
+
+    const body =
+      "Open Ask Grand Rounds on your computer.\\n\\n" +
+      "Current page link:\\n" + shareUrl();
+
+    emailSelfBtn.href =
+      "mailto:?subject=" + encodeURIComponent("Ask Grand Rounds") +
+      "&body=" + encodeURIComponent(body);
+  }
+
+  function showPhoneMessage(){
+    sessionStorage.removeItem("grandRoundsAllowPhone");
+    applyDeviceMode();
+    phoneGate.scrollIntoView({behavior:"smooth", block:"start"});
+    toast("Ask Grand Rounds works best on a computer.", 3600);
+    speak("Ask Grand Rounds works best on a computer. Share or email yourself this page, then reopen it on your desktop or laptop.");
+  }
+
+  function continueOnPhone(){
+    sessionStorage.setItem("grandRoundsAllowPhone", "1");
+    applyDeviceMode();
+    toast("Phone mode bypassed for this session.");
+  }
+
+  async function shareThisLink(){
+    try{
+      if(navigator.share){
+        await navigator.share({
+          title:"Ask Grand Rounds",
+          text:"Open Ask Grand Rounds on a computer.",
+          url:shareUrl()
+        });
+      } else if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(shareUrl());
+        toast("Link copied. Paste it into email or messages.");
+      } else {
+        window.prompt("Copy this link:", shareUrl());
+      }
+    }catch(e){
+      toast("Share canceled or unavailable.");
+    }
   }
 
   function fillTemplate(tpl, vars){
@@ -696,6 +830,11 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
   }
 
   function openCopilot(){
+    if(isLikelyPhone() && !phoneAllowed()){
+      showPhoneMessage();
+      return;
+    }
+
     const prompt = buildPrompt();
     if(!prompt) return;
 
@@ -717,6 +856,11 @@ Click "See Prompt" or "Build & Open Copilot" to construct it.
 
   clearBtn.addEventListener("click", clearAll);
   copilotBtn.addEventListener("click", openCopilot);
+
+  shareLinkBtn.addEventListener("click", shareThisLink);
+  continuePhoneBtn.addEventListener("click", continueOnPhone);
+  window.addEventListener("resize", applyDeviceMode);
+  applyDeviceMode();
 
   optTakehomes.addEventListener("change", () => {
     updateHintTakehomes();
