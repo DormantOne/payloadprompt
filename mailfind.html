@@ -16,11 +16,15 @@
 --accent:#185b47;
 --accent-dark:#103f32;
 --accent-soft:#e9f4ef;
+--pick:#d42a3c;
+--pick-soft:#fde8eb;
+--pick-tint:#fff6f7;
 --shadow:0 18px 46px rgba(18,45,34,.11);
 --radius:20px;
 }
 *{box-sizing:border-box}
-html{min-height:100%;background:var(--bg)}
+[hidden]{display:none!important}
+html{min-height:100%;background:var(--bg);-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{
 margin:0;
 min-height:100vh;
@@ -31,7 +35,7 @@ radial-gradient(circle at 12% 4%,#e5f3ec 0,transparent 31%),
 radial-gradient(circle at 93% 0%,#e8edf5 0,transparent 28%),
 var(--bg);
 }
-button{font:inherit}
+button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .shell{
 width:min(100% - 28px,560px);
 margin:0 auto;
@@ -66,6 +70,7 @@ box-shadow:var(--shadow);
 backdrop-filter:blur(10px);
 }
 .item{
+position:relative;
 width:100%;
 display:grid;
 grid-template-columns:44px 1fr auto;
@@ -78,11 +83,15 @@ background:transparent;
 color:var(--ink);
 padding:17px 14px;
 cursor:pointer;
-transition:background .14s ease,transform .08s ease;
+transition:background .14s ease,box-shadow .14s ease,transform .08s ease;
 }
-.item:hover,.item:focus-visible{background:var(--accent-soft);outline:none}
+.item:focus-visible{background:var(--accent-soft);outline:none}
+@media(hover:hover){
+.item:hover{background:var(--accent-soft)}
+.copied-open:hover{background:var(--accent-dark)}
+}
 .item:active{transform:scale(.99)}
-.item + .item{border-top:1px solid var(--line);border-top-left-radius:0;border-top-right-radius:0}
+.item + .item,.copied + .item{border-top:1px solid var(--line);border-top-left-radius:0;border-top-right-radius:0}
 .item:has(+ .item){border-bottom-left-radius:0;border-bottom-right-radius:0}
 .icon{
 width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
@@ -90,7 +99,39 @@ background:var(--accent-soft);color:var(--accent);font-size:20px;font-weight:950
 }
 .copy{font-size:16px;font-weight:900;line-height:1.22}
 .hint{display:block;margin-top:4px;color:var(--muted);font-size:12px;font-weight:650;line-height:1.35}
-.arrow{color:var(--accent);font-size:21px;font-weight:900}
+.arrow{color:var(--accent);font-size:21px;font-weight:900;transition:transform .14s ease}
+.item.selected{
+z-index:1;
+border-radius:18px;
+border-top-color:transparent;
+background:var(--pick-tint);
+box-shadow:0 0 0 3px var(--pick);
+}
+.item.selected .icon{background:var(--pick-soft);color:var(--pick)}
+.item.selected .arrow{color:var(--pick);transform:rotate(90deg)}
+.item.selected.flash{animation:picked .6s ease-out}
+@keyframes picked{
+from{box-shadow:0 0 0 3px var(--pick),0 0 0 3px rgba(212,42,60,.4)}
+to{box-shadow:0 0 0 3px var(--pick),0 0 0 14px rgba(212,42,60,0)}
+}
+.copied{display:grid;gap:9px;margin:13px 14px 15px}
+.copied-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px}
+.copied-msg{color:var(--pick);font-size:16px;font-weight:900;line-height:1.3}
+.copied-open{
+border:0;border-radius:13px;min-height:44px;padding:11px 16px;
+background:var(--accent);color:#fff;font-size:15px;font-weight:900;cursor:pointer;
+box-shadow:0 8px 18px rgba(24,91,71,.16);
+}
+.copied-text{
+padding:11px 12px;border:1px dashed var(--pick);border-radius:12px;background:#fff;
+font:600 15px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+word-break:break-word;-webkit-user-select:all;user-select:all;cursor:text;
+}
+.copied-tip{margin:0;color:var(--muted);font-size:12px;font-weight:650;line-height:1.4}
+.copied.failed .copied-row{display:contents}
+.copied.failed .copied-text{order:1}
+.copied.failed .copied-tip{order:2}
+.copied.failed .copied-open{order:3;justify-self:start}
 .status{
 min-height:48px;
 margin:14px 4px 0;
@@ -103,12 +144,6 @@ font-size:14px;
 font-weight:850;
 line-height:1.4;
 }
-.outlook{
-width:100%;border:0;border-radius:16px;padding:15px 18px;
-background:var(--accent);color:#fff;font-weight:900;font-size:16px;cursor:pointer;
-box-shadow:0 10px 24px rgba(24,91,71,.17);
-}
-.outlook:hover{background:var(--accent-dark)}
 .account-change{
   display:block;
   margin:10px auto 0;
@@ -122,6 +157,7 @@ box-shadow:0 10px 24px rgba(24,91,71,.17);
   cursor:pointer;
 }
 .foot{margin:16px 10px 0;text-align:center;color:var(--muted);font-size:11px;line-height:1.45}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 dialog{
 width:min(100% - 30px,500px);
 border:1px solid var(--line);
@@ -145,9 +181,11 @@ dialog::backdrop{background:rgba(12,24,19,.46);backdrop-filter:blur(3px)}
 .close{background:var(--accent);color:white;border-color:var(--accent)!important}
 @media(max-width:430px){
 .shell{padding-top:20px}.topbar{margin-bottom:20px}.item{padding:16px 11px;gap:11px}
+.copied{margin:13px 11px 15px}
 .modal-actions{grid-template-columns:1fr}.tagline{font-size:15px}
 }
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+@media(max-width:350px){.copied-open{width:100%}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
@@ -163,27 +201,42 @@ dialog::backdrop{background:rgba(12,24,19,.46);backdrop-filter:blur(3px)}
 </section>
 
 <main class="index" aria-label="Indexed email searches">
-<button type="button" class="item" onclick="copyEntry('Your Panel Stats', '&quot;Provider Panel Report&quot; &quot;Primary Care Service Line&quot;')">
+<button type="button" class="item" onclick="copyEntry(this)" data-query='"Provider Panel Report" "Primary Care Service Line"'>
 <span class="icon" aria-hidden="true">P</span>
 <span><span class="copy">Your Panel Stats</span><span class="hint">Copy its Outlook search line</span></span>
 <span class="arrow" aria-hidden="true">›</span>
 </button>
 
-<button type="button" class="item" onclick="copyEntry('Your RVU', 'web#simpliphyinc.com')">
+<button type="button" class="item" onclick="copyEntry(this)" data-query="web#simpliphyinc.com">
 <span class="icon" aria-hidden="true">R</span>
 <span><span class="copy">Your RVU</span><span class="hint">Copy its Outlook search line</span></span>
 <span class="arrow" aria-hidden="true">›</span>
 </button>
 
-<button type="button" class="item" onclick="copyEntry('May Compensation Update', '&quot;CMI Compensation Update&quot; &quot;Quality Incentive&quot; &quot;attaching&quot;')">
+<button type="button" class="item" onclick="copyEntry(this)" data-query="Primary Care Quality Incentive (PCQI) Guide">
+<span class="icon" aria-hidden="true">$</span>
+<span><span class="copy">June Compensation Guide</span><span class="hint">Copy its Outlook search line</span></span>
+<span class="arrow" aria-hidden="true">›</span>
+</button>
+
+<button type="button" class="item" onclick="copyEntry(this)" data-query='"CMI Compensation Update" "Quality Incentive" "attaching"'>
 <span class="icon" aria-hidden="true">$</span>
 <span><span class="copy">May Compensation Update</span><span class="hint">Copy its Outlook search line</span></span>
 <span class="arrow" aria-hidden="true">›</span>
 </button>
+
+<div id="copied" class="copied" hidden>
+<div class="copied-row">
+<span id="copiedMsg" class="copied-msg">✓ Copied</span>
+<button type="button" class="copied-open" onclick="openOutlook()">Open UPMC Outlook ›</button>
+</div>
+<div id="copiedText" class="copied-text" hidden></div>
+<p id="copiedTip" class="copied-tip">Then paste into Outlook Search and press Enter.</p>
+</div>
 </main>
 
 <div id="status" class="status" role="status" aria-live="polite">Choose a page from the index.</div>
-<button type="button" class="outlook" onclick="openOutlook()">Open UPMC Outlook</button>
+<div id="announce" class="sr-only" aria-live="polite"></div>
 <button type="button" class="account-change" onclick="changeUPMCAccount()">Change UPMC account</button>
 
 <p class="foot">This page only copies search text and opens Outlook. It does not read your mailbox or password.</p>
@@ -211,27 +264,80 @@ const FIRST_USE_KEY = 'upmcMailIndex:explained:v1';
 const UPMC_EMAIL_KEY = 'upmcMailIndex:upmcEmail:v1';
 const OUTLOOK_BASE = 'https://outlook.cloud.microsoft/mail/';
 const spokenExplanation = 'Your email is already a book. This page gives useful messages an index. Choose what you want to find, and its search line will be copied. Then open UPMC Outlook, select Search, paste, and press Enter.';
+let announceTimer = 0;
 
 function setStatus(message){
 document.getElementById('status').textContent = message;
 }
 
-async function copyEntry(label, query){
+function announce(message){
+const region = document.getElementById('announce');
+region.textContent = '';
+window.clearTimeout(announceTimer);
+announceTimer = window.setTimeout(()=>{ region.textContent = message; },80);
+}
+
+async function copyText(text){
 try{
-await navigator.clipboard.writeText(query);
-setStatus(label + ' copied. Open Outlook, paste into Search, and press Enter.');
+await navigator.clipboard.writeText(text);
+return true;
 }catch(error){
 const helper = document.createElement('textarea');
-helper.value = query;
+helper.value = text;
 helper.setAttribute('readonly','');
 helper.style.position = 'fixed';
+helper.style.top = '0';
 helper.style.opacity = '0';
 document.body.appendChild(helper);
 helper.select();
-const copied = document.execCommand('copy');
+helper.setSelectionRange(0,text.length);
+let copied = false;
+try{ copied = document.execCommand('copy'); }catch(err){ copied = false; }
 helper.remove();
-setStatus(copied ? label + ' copied. Open Outlook and paste into Search.' : 'Copy was blocked by the browser.');
+return copied;
 }
+}
+
+async function copyEntry(item){
+const label = item.querySelector('.copy').textContent;
+const query = item.dataset.query;
+const copied = await copyText(query);
+selectEntry(item,label,query,copied);
+}
+
+function selectEntry(item,label,query,copied){
+document.querySelectorAll('.item.selected').forEach(other=>{
+if(other !== item){
+other.classList.remove('selected','flash');
+other.removeAttribute('aria-current');
+}
+});
+item.classList.add('selected');
+item.setAttribute('aria-current','true');
+
+const panel = document.getElementById('copied');
+item.after(panel);
+panel.classList.toggle('failed',!copied);
+document.getElementById('copiedMsg').textContent = copied ? '✓ Copied' : 'Could not copy automatically';
+const manual = document.getElementById('copiedText');
+manual.textContent = query;
+manual.hidden = copied;
+document.getElementById('copiedTip').textContent = copied
+? 'Then paste into Outlook Search and press Enter.'
+: 'Select and copy the line above, then paste it into Outlook Search.';
+panel.hidden = false;
+
+item.classList.remove('flash');
+void item.offsetWidth;
+item.classList.add('flash');
+
+setStatus('');
+announce(copied
+? label + ' copied. Open UPMC Outlook, paste into Search, and press Enter.'
+: 'Could not copy automatically. The search line for ' + label + ' is shown below it.');
+
+const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+panel.scrollIntoView({block:'nearest',behavior:calm ? 'auto' : 'smooth'});
 }
 
 function validUPMCEmail(email){
