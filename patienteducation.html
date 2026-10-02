@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light" />
+<title>CareScript Studio — Patient Education Prompt Builder</title>
+<style>
+:root{
+--ink:#10273a;
+--ink-2:#24465d;
+--paper:#f4f7f9;
+--card:#ffffff;
+--line:#ccdae3;
+--teal:#007f89;
+--teal-dark:#005e66;
+--signal:#d9f56d;
+--blue:#2474d2;
+--warn:#b14820;
+--warn-bg:#fff2e8;
+--danger:#a32626;
+--danger-bg:#fff0f0;
+--muted:#567082;
+--shadow:0 14px 35px rgba(16,39,58,.09);
+--radius:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+margin:0;
+color:var(--ink);
+background:
+linear-gradient(90deg, rgba(16,39,58,.035) 1px, transparent 1px) 0 0/24px 24px,
+var(--paper);
+font-family:"Aptos","Segoe UI",Tahoma,Arial,sans-serif;
+line-height:1.45;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+a{color:inherit}
+.shell{max-width:1500px;margin:0 auto;padding:22px}
+.masthead{
+display:grid;
+grid-template-columns:minmax(0,1fr) auto;
+gap:22px;
+align-items:end;
+padding:28px 30px;
+color:#fff;
+background:var(--ink);
+border-radius:26px;
+box-shadow:var(--shadow);
+position:relative;
+overflow:hidden;
+}
+.masthead:after{
+content:"";
+position:absolute;
+width:240px;height:240px;border:34px solid var(--signal);border-radius:50%;
+right:-96px;top:-122px;opacity:.95;
+}
+.eyebrow{font-size:.77rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--signal);margin:0 0 8px}
+h1{font-family:"Arial Narrow","Aptos Display","Segoe UI",sans-serif;font-stretch:condensed;letter-spacing:-.045em;font-size:clamp(2.3rem,5vw,4.8rem);line-height:.92;margin:0;max-width:900px}
+.masthead p{max-width:760px;margin:16px 0 0;color:#dbe7ee;font-size:1.02rem}
+.version{position:relative;z-index:1;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:7px 12px;font-weight:800;font-size:.75rem;white-space:nowrap;align-self:start}
+.privacy-strip{
+display:flex;gap:12px;align-items:flex-start;
+margin:14px 0 20px;padding:13px 16px;border-left:5px solid var(--teal);
+background:#e8f6f6;border-radius:0 12px 12px 0;color:#193d50;font-size:.91rem;
+}
+.privacy-strip strong{white-space:nowrap}
+.layout{display:grid;grid-template-columns:220px minmax(430px,.9fr) minmax(540px,1.25fr);gap:18px;align-items:start}
+.rail,.panel,.workspace{background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.rail{position:sticky;top:16px;padding:18px}
+.rail h2,.panel h2,.workspace h2{margin:0;letter-spacing:-.02em}
+.rail h2{font-size:1rem;text-transform:uppercase;letter-spacing:.09em}
+.steps{list-style:none;padding:0;margin:18px 0 0;counter-reset:step}
+.steps li{counter-increment:step;position:relative;padding:0 0 24px 44px;color:var(--muted);font-weight:700;font-size:.88rem}
+.steps li:before{content:counter(step);position:absolute;left:0;top:-3px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;border:2px solid var(--line);background:white;color:var(--muted);font-size:.78rem;z-index:2}
+.steps li:after{content:"";position:absolute;left:13px;top:25px;bottom:0;width:2px;background:var(--line)}
+.steps li:last-child{padding-bottom:0}.steps li:last-child:after{display:none}
+.steps li.active{color:var(--ink)}.steps li.active:before{background:var(--signal);border-color:var(--ink);color:var(--ink)}
+.rail-note{margin-top:22px;padding:12px;background:var(--paper);border-radius:12px;font-size:.78rem;color:var(--muted)}
+.panel{padding:22px;margin-bottom:18px}
+.panel-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:17px}
+.kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.13em;font-weight:900;color:var(--teal);margin-bottom:3px}
+.panel h2{font-size:1.35rem}
+.small{font-size:.81rem;color:var(--muted)}
+.grid{display:grid;gap:13px}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+label.field{display:flex;flex-direction:column;gap:6px;font-size:.82rem;font-weight:800;color:var(--ink-2)}
+input[type="text"],input[type="email"],select,textarea{
+width:100%;border:1px solid #aec1cd;background:#fff;color:var(--ink);border-radius:11px;padding:10px 12px;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,127,137,.15)}
+textarea{resize:vertical;min-height:92px}
+.search-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;margin-bottom:14px}
+.segmented{display:flex;gap:6px;flex-wrap:wrap}
+.segment{border:1px solid var(--line);background:white;color:var(--ink-2);border-radius:999px;padding:7px 11px;font-size:.77rem;font-weight:800}
+.segment.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.topic-groups{display:grid;gap:14px}
+.topic-group h3{margin:0 0 8px;font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.topic-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.topic-card{
+text-align:left;border:1px solid var(--line);background:white;border-radius:13px;padding:12px 13px;color:var(--ink);
+transition:transform .15s ease,border-color .15s ease,background .15s ease;
+}
+.topic-card:hover{transform:translateY(-1px);border-color:var(--teal)}
+.topic-card.selected{background:#e8f6f6;border-color:var(--teal);box-shadow:inset 4px 0 0 var(--teal)}
+.topic-title{display:block;font-weight:900;font-size:.9rem}.topic-sub{display:block;color:var(--muted);font-size:.73rem;margin-top:2px}
+.selection-zone{margin-top:18px;padding-top:17px;border-top:1px dashed var(--line)}
+.selection-zone h3{margin:0 0 10px;font-size:.93rem}
+.focus-block{padding:13px;border:1px solid var(--line);border-radius:13px;background:#fbfdfe;margin-top:9px}
+.focus-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px;font-weight:900;font-size:.88rem}
+.remove-link{border:0;background:transparent;color:var(--danger);font-size:.75rem;font-weight:800;padding:2px 0}
+.check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.check-chip{display:flex;align-items:flex-start;gap:8px;border:1px solid #d7e2e8;border-radius:9px;padding:8px;background:#fff;font-size:.77rem;font-weight:700;color:var(--ink-2)}
+.check-chip input{margin-top:2px;accent-color:var(--teal)}
+.switch-row{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:12px 0;border-top:1px solid #e3ebef}
+.switch-row:first-child{border-top:0}.switch-copy strong{display:block;font-size:.86rem}.switch-copy span{display:block;font-size:.75rem;color:var(--muted);margin-top:2px}
+.toggle{position:relative;width:44px;height:24px;flex:none}.toggle input{opacity:0;width:0;height:0}.slider{position:absolute;inset:0;background:#a9bac5;border-radius:999px;transition:.2s}.slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.25)}.toggle input:checked+.slider{background:var(--teal)}.toggle input:checked+.slider:before{transform:translateX(20px)}
+.locked{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;font-weight:900;color:var(--teal);border:1px solid #8ac9cd;padding:4px 7px;border-radius:999px}
+.experimental{border-color:#efbb99;background:var(--warn-bg)}
+.experimental .kicker{color:var(--warn)}
+.warning{display:flex;gap:10px;padding:11px;border:1px solid #e2a67f;border-radius:11px;background:#fff8f2;color:#69321c;font-size:.79rem;font-weight:700;margin-bottom:12px}
+.workspace{position:sticky;top:16px;overflow:hidden;border-color:#93b3c5;box-shadow:0 18px 46px rgba(16,39,58,.14)}
+.workspace-head{padding:19px 20px;background:var(--ink);color:white}
+.workspace-head .kicker{color:var(--signal)}.workspace-head h2{font-size:1.65rem;line-height:1.05}.workspace-head p{margin:7px 0 0;color:#dbe7ee;font-size:.82rem}
+.workspace-body{padding:18px}
+.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.77rem;margin-bottom:13px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#95a9b5}.status.ready .status-dot{background:#4ea12e}.status.ready{color:#356e21}
+.action-stack{display:grid;gap:8px;margin-top:10px}
+.btn{border:0;border-radius:10px;padding:11px 14px;font-weight:900;font-size:.85rem;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn-primary{background:var(--signal);color:var(--ink);box-shadow:inset 0 -2px 0 rgba(16,39,58,.18)}
+.btn-secondary{background:var(--teal);color:#fff}.btn-ghost{background:#edf3f6;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}.btn:not(:disabled):hover{filter:brightness(.97);transform:translateY(-1px)}
+.output-tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin:16px 0 12px}
+.tab{border:0;background:transparent;color:var(--muted);padding:8px 10px;border-bottom:3px solid transparent;font-weight:900;font-size:.77rem}
+.tab.active{color:var(--ink);border-bottom-color:var(--teal)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.output-box{min-height:250px;max-height:420px;font-family:"Cascadia Mono","SFMono-Regular",Consolas,monospace;font-size:.76rem;line-height:1.45;background:#f8fbfc}
+.response-box{min-height:520px;font-family:"Aptos","Segoe UI",Tahoma,Arial,sans-serif;font-size:1rem;line-height:1.58;padding:18px;border:2px solid #77a9bc;background:#fff;box-shadow:inset 0 2px 8px rgba(16,39,58,.05)}
+.word-count{text-align:right;color:var(--muted);font-size:.7rem;margin-top:4px}
+.email-card{margin-top:18px;padding-top:17px;border-top:1px dashed var(--line)}
+.paste-stage{padding:14px;background:#eef7f8;border:1px solid #9bc8cc;border-radius:15px;margin-top:15px}.paste-stage .field{font-size:1rem}.paste-stage .field>span{display:block;margin-bottom:3px}.paste-stage-note{font-size:.76rem;color:var(--muted);margin:0 0 10px}.prompt-launch{padding:13px;border:1px solid var(--line);background:#f8fbfc;border-radius:13px}.prompt-details{margin-top:14px;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}.prompt-details summary{padding:11px 13px;font-size:.8rem;font-weight:900;color:var(--ink-2);cursor:pointer;background:#edf3f6}.prompt-details[open] summary{border-bottom:1px solid var(--line)}.prompt-details-inner{padding:12px}.prompt-details .output-box{min-height:180px;max-height:300px}.voice-note{display:flex;gap:8px;align-items:flex-start;margin-top:9px;color:var(--muted);font-size:.73rem}.voice-note strong{color:var(--teal-dark)}
+.email-card h3{margin:0 0 10px;font-size:.96rem}
+.email-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.helper{padding:9px 11px;background:#f0f5f7;border-radius:9px;color:var(--muted);font-size:.73rem;margin-top:9px}
+.danger-link{border:0;background:transparent;color:var(--danger);padding:7px 0;font-size:.74rem;font-weight:800;text-decoration:underline}
+.empty{padding:18px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:.82rem}
+.footer{display:flex;justify-content:space-between;gap:20px;margin:20px 2px 8px;color:var(--muted);font-size:.73rem}
+.toast{position:fixed;right:22px;bottom:22px;z-index:50;background:var(--ink);color:#fff;padding:12px 16px;border-radius:11px;box-shadow:var(--shadow);font-size:.83rem;font-weight:800;opacity:0;transform:translateY(12px);pointer-events:none;transition:.22s}.toast.show{opacity:1;transform:none}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:1280px){.layout{grid-template-columns:210px minmax(0,1fr)}.workspace{position:static;grid-column:1/-1}.workspace-body{max-width:980px;margin:0 auto}.response-box{min-height:500px}}
+@media(max-width:760px){.shell{padding:10px}.masthead{grid-template-columns:1fr;padding:23px 20px}.version{display:none}.layout{display:block}.rail{position:static;margin-bottom:14px}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.steps li{padding:34px 4px 0;text-align:center;font-size:.7rem}.steps li:before{left:50%;transform:translateX(-50%)}.steps li:after{left:calc(50% + 15px);right:calc(-50% + 15px);top:11px;bottom:auto;width:auto;height:2px}.rail-note{display:none}.grid-2,.grid-3,.topic-list,.check-grid{grid-template-columns:1fr}.workspace-body{display:block}.panel{padding:17px}.email-actions{grid-template-columns:1fr}.footer{display:block}}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="masthead">
+<div>
+<p class="eyebrow">Clinician-supervised drafting utility</p>
+<h1>CareScript Studio</h1>
+<p>Build a precise OpenEvidence prompt, paste the result back, then package the patient-facing education for your own review.</p>
+</div>
+<div class="version">LOCAL • NO ACCOUNT</div>
+</header>
+
+<div class="privacy-strip" role="note">
+<strong>Keep it de-identified.</strong>
+<span>Do not enter a patient name, date of birth, medical record number, address, phone number, or other identifying information. This file stores only the self-email address you choose, in this browser.</span>
+</div>
+
+<div class="layout">
+<aside class="rail" aria-label="Workflow">
+<h2>Care path</h2>
+<ol class="steps">
+<li class="active">Patient lens</li>
+<li class="active">Topic & focus</li>
+<li class="active">Build prompt</li>
+<li class="active">Paste & review</li>
+</ol>
+<div class="rail-note">This tool drafts prompts and organizes pasted text. It does not diagnose, prescribe, or send clinical information to a server.</div>
+</aside>
+
+<section>
+<div class="panel" id="patient-panel">
+<div class="panel-head">
+<div><div class="kicker">01 · Patient lens</div><h2>Set the communication target</h2></div>
+<span class="small">No identifiers</span>
+</div>
+<div class="grid grid-3">
+<label class="field">Age group
+<select id="ageBand">
+<option>Adult (18–64)</option><option>Older adult (65+)</option><option>Adolescent</option><option>Pediatric — caregiver-facing</option><option>Pregnant/postpartum adult</option>
+</select>
+</label>
+<label class="field">Reading level
+<select id="readingLevel">
+<option>Grade 6, plain language</option><option>Grade 5, very simple</option><option>Grade 8, standard</option><option>High health literacy</option>
+</select>
+</label>
+<label class="field">Language
+<select id="language">
+<option>English</option><option>Spanish</option><option>French</option><option>Arabic</option><option>Chinese (Simplified)</option><option>Other — specify in context</option>
+</select>
+</label>
+<label class="field">Handout style
+<select id="format">
+<option>One-page action plan</option><option>Two-page teaching handout</option><option>Visit after-summary</option><option>Checklist + teach-back</option><option>FAQ</option><option>Exercise instruction sheet</option>
+</select>
+</label>
+<label class="field">Tone
+<select id="tone">
+<option>Warm, direct, nonjudgmental</option><option>Motivational interviewing style</option><option>Concise and clinical</option><option>Caregiver-supportive</option>
+</select>
+</label>
+<label class="field">Locale / guideline context
+<select id="locale">
+<option>United States</option><option>Canada</option><option>United Kingdom</option><option>General / not specified</option>
+</select>
+</label>
+</div>
+<label class="field" style="margin-top:13px">De-identified context and constraints
+<textarea id="context" placeholder="Example: Symptoms worsen after prolonged sitting; limited floor access; prefers 10-minute routines. Do not include names, exact dates, or identifiers."></textarea>
+</label>
+</div>
+
+<div class="panel" id="topic-panel">
+<div class="panel-head">
+<div><div class="kicker">02 · Topic & focus</div><h2>Choose one or combine carefully</h2></div>
+<span class="small" id="selectedCount">0 selected</span>
+</div>
+<div class="search-row">
+<label class="field"><span class="sr-only">Search topics</span><input id="topicSearch" type="text" placeholder="Search topics: sciatica, insulin, portion…" /></label>
+<div class="segmented" id="categoryFilters" aria-label="Topic category filters"></div>
+</div>
+<div id="topicGroups" class="topic-groups"></div>
+<div class="selection-zone">
+<h3>Granular focus</h3>
+<div id="focusControls" class="empty">Choose a topic above to reveal focused subtopics.</div>
+<label class="field" style="margin-top:12px">Custom focus or question
+<input id="customFocus" type="text" placeholder="Example: return-to-work lifting plan; fasting glucose interpretation; medication cost discussion" />
+</label>
+</div>
+</div>
+
+<div class="panel" id="guardrail-panel">
+<div class="panel-head">
+<div><div class="kicker">03 · Clinical guardrails</div><h2>Make the draft safer to review</h2></div>
+<span class="locked">Core rules locked</span>
+</div>
+<div class="switch-row">
+<div class="switch-copy"><strong>Red flags and escalation</strong><span>Ask for urgent symptoms and when to call the clinician, urgent care, or emergency services.</span></div><span class="locked">Always on</span>
+</div>
+<div class="switch-row">
+<div class="switch-copy"><strong>Separate patient copy from clinician notes</strong><span>Patient content first; references and uncertainties after a clear review divider.</span></div><span class="locked">Always on</span>
+</div>
+<div class="switch-row">
+<div class="switch-copy"><strong>Teach-back checks</strong><span>Add 2–3 questions the patient can answer to confirm understanding.</span></div>
+<label class="toggle"><input id="teachBack" type="checkbox" checked><span class="slider"></span></label>
+</div>
+<div class="switch-row">
+<div class="switch-copy"><strong>Accessibility adaptations</strong><span>Offer seated, balance-supported, low-vision, dexterity, and caregiver alternatives when relevant.</span></div>
+<label class="toggle"><input id="accessibility" type="checkbox" checked><span class="slider"></span></label>
+</div>
+<div class="switch-row">
+<div class="switch-copy"><strong>Medication comparison frame</strong><span>When medications are selected, distinguish indication, benefit, common/serious harms, monitoring, cost/access, and questions for the prescriber.</span></div>
+<label class="toggle"><input id="medCompare" type="checkbox" checked><span class="slider"></span></label>
+</div>
+</div>
+
+<div class="panel experimental" id="image-panel">
+<div class="panel-head">
+<div><div class="kicker">Experimental · Optional</div><h2>Image directions for an LLM</h2></div>
+<label class="toggle" title="Enable image directions"><input id="enableImages" type="checkbox"><span class="slider"></span></label>
+</div>
+<div class="warning"><span aria-hidden="true">▲</span><span>Do not use generated clinical or exercise images with a patient without consulting the treating MD and checking every position, label, laterality cue, and safety detail.</span></div>
+<label class="field">Directions appended to the prompt
+<textarea id="imageDirections" disabled>After the written handout, provide a separate section titled “EXPERIMENTAL IMAGE BRIEF — CLINICIAN REVIEW REQUIRED.” For each exercise or technique, describe one simple, high-contrast instructional image with: start and end positions, body orientation, support surface, movement arrow, neutral clothing, uncluttered background, and concise alt text. Do not claim diagnostic findings, show internal anatomy as patient-specific, or include exact joint angles unless the cited source requires them. Explicitly flag laterality, range, weight-bearing, and balance details for physician verification. Do not embed or present the images as approved patient instructions.</textarea>
+</label>
+</div>
+</section>
+
+<aside class="workspace" id="workspace">
+<div class="workspace-head">
+<div class="kicker">04 · Patient-ready workspace</div>
+<h2>Paste patient instructions here</h2>
+<p>This is the primary working area. Paste only the patient-facing instructions you intend to review and email.</p>
+</div>
+<div class="workspace-body">
+<div class="prompt-launch">
+<div class="status" id="promptStatus"><span class="status-dot"></span><span>Select at least one topic to prepare the prompt.</span></div>
+<button class="btn btn-primary" id="launchOE">Copy prompt &amp; open OpenEvidence ↗</button>
+<div class="voice-note"><strong>Audio cue:</strong><span>After copying, the browser will say: “Prompt copied. Paste into OpenEvidence, then copy the patient instructions.”</span></div>
+<div class="helper">The selected options are assembled immediately before copying. OpenEvidence runs outside this file; follow your organization’s privacy policy.</div>
+</div>
+
+<div class="paste-stage">
+<label class="field">
+<span>Paste patient instructions here</span>
+<p class="paste-stage-note">Paste the patient-facing portion from OpenEvidence. Review it before emailing.</p>
+<textarea id="responseInput" class="response-box" spellcheck="true" placeholder="Paste patient instructions here."></textarea>
+</label>
+<div class="word-count" id="responseCount">0 words</div>
+<label class="check-chip" style="margin-top:10px"><input id="reviewConfirmed" type="checkbox"><span>I reviewed the pasted content for diagnosis fit, contraindications, dosing/exercise instructions, red flags, medication labeling, references, and patient-specific safety.</span></label>
+</div>
+
+<div class="email-card">
+<h3>Email the pasted instructions to yourself</h3>
+<label class="field">Your email (saved only in this browser)
+<input id="selfEmail" type="email" autocomplete="email" placeholder="you@organization.org" />
+</label>
+<label class="field" style="margin-top:8px">Subject
+<input id="emailSubject" type="text" value="Patient education draft for clinician review" />
+</label>
+<div class="email-actions">
+<button id="emailSelf" class="btn btn-secondary">Email pasted instructions to self</button>
+<button id="downloadTxt" class="btn btn-ghost">Download instructions .txt</button>
+</div>
+<div class="action-stack">
+<button id="copyPatient" class="btn btn-ghost">Copy patient instructions</button>
+</div>
+<div class="helper" id="emailHint">The email body is the pasted patient education—not the prompt. Whitespace is cleaned for readability while the wording is preserved. Uses your default mail app and does not send automatically.</div>
+<button id="clearLocal" class="danger-link">Forget saved email and clear this form</button>
+</div>
+
+<details class="prompt-details">
+<summary>View the most recently generated prompt</summary>
+<div class="prompt-details-inner">
+<label class="field">Generated prompt
+<textarea id="promptOutput" class="output-box" placeholder="Choose topics, then use “Copy prompt & open OpenEvidence.”"></textarea>
+</label>
+<div class="word-count" id="promptCount">0 words</div>
+</div>
+</details>
+</div>
+</aside>
+</div>
+
+<footer class="footer">
+<span>Drafting aid only — clinician review remains required.</span>
+<span>Everything stays in the open browser page except when you choose to visit another site or open your mail app.</span>
+</footer>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const topics = [
+{id:'low-back',category:'Musculoskeletal',title:'Low back pain',sub:'Mobility, strength, pacing, return to activity',focus:['Acute nonspecific pain','Recurrent/mechanical pain','Core endurance & motor control','Hip mobility & gluteal strength','Desk/sitting plan','Lifting & return-to-work','Sleep positioning','Flare self-management']},
+{id:'sciatica',category:'Musculoskeletal',title:'Sciatica / radicular symptoms',sub:'Leg-dominant symptoms, nerve mobility, precautions',focus:['Lumbar radicular pain overview','Symptom-guided movement','Nerve mobility / glides','Sitting & driving tolerance','Walking progression','Sleep positioning','Return to work/activity','Urgent neurologic red flags']},
+{id:'shoulder',category:'Musculoskeletal',title:'Shoulder pain',sub:'Range of motion, rotator cuff, scapular control',focus:['Painful shoulder movement','Rotator cuff loading','Scapular control','Overhead activity modification','Desk/posture setup','Sleep positioning','Return to sport/work','When imaging/referral may be discussed']},
+{id:'frozen-shoulder',category:'Musculoskeletal',title:'Prevent frozen shoulder',sub:'After pain, immobilization, or limited use',focus:['Gentle active range of motion','Pendulum exercise','Table slides','Wall walks','Wand-assisted range','External rotation mobility','Post-immobilization plan','Postoperative limits — follow surgeon/PT only']},
+{id:'knee',category:'Musculoskeletal',title:'Knee pain',sub:'OA, patellofemoral, strength, stairs',focus:['Knee osteoarthritis','Patellofemoral pain','Quadriceps strengthening','Hip abductor strengthening','Sit-to-stand','Stairs & hills','Walking progression','Swelling/load management']},
+{id:'hip',category:'Musculoskeletal',title:'Hip pain',sub:'OA, lateral hip pain, mobility, strength',focus:['Hip osteoarthritis','Lateral hip pain','Gluteal strengthening','Hip mobility','Walking tolerance','Stairs','Sleep positioning','Fall-safe modifications']},
+{id:'neck',category:'Musculoskeletal',title:'Neck pain',sub:'Mobility, posture, headache-aware precautions',focus:['Nonspecific neck pain','Desk/phone ergonomics','Gentle mobility','Deep neck flexor endurance','Scapular support','Sleep positioning','Tension-type headache overlap','Neurologic red flags']},
+{id:'fall',category:'Musculoskeletal',title:'Balance & fall prevention',sub:'Home safety, strength, assistive supports',focus:['Chair-rise strength','Supported balance','Walking aid discussion','Home hazard check','Footwear','Vision/hearing review prompts','Medication review prompts','When to request PT']},
+{id:'t1d',category:'Metabolic',title:'Type 1 diabetes',sub:'Insulin, glucose, ketones, exercise, emergencies',focus:['Insulin role & daily basics','Hypoglycemia recognition and treatment','Glucagon plan','Hyperglycemia & ketone checks','Sick-day plan','Exercise and glucose planning','CGM basics','Pump basics','Travel/school/work planning','Emergency escalation']},
+{id:'t2d-noinsulin',category:'Metabolic',title:'Type 2 diabetes — no insulin',sub:'Nutrition, activity, monitoring, non-insulin medicines',focus:['What type 2 diabetes means','Food pattern & carbohydrate awareness','Activity plan','Home glucose monitoring','A1C discussion','Non-insulin medication classes','Foot care','Sick-day questions','Cardiovascular/kidney risk discussion','Follow-up plan']},
+{id:'t2d-insulin',category:'Metabolic',title:'Type 2 diabetes — using insulin',sub:'Safe use, monitoring, hypoglycemia, sick days',focus:['Basal insulin basics','Mealtime insulin basics','Injection technique','Site rotation','Storage & travel','Glucose monitoring','Hypoglycemia plan','Sick-day plan','Sharps disposal','Questions before dose changes']},
+{id:'prediabetes',category:'Metabolic',title:'Prediabetes',sub:'Risk, sustainable habits, monitoring',focus:['Meaning of prediabetes','Food pattern','Activity progression','Weight goals discussion','Sleep','Stress','Monitoring schedule questions','Diabetes prevention programs']},
+{id:'htn',category:'Cardiometabolic',title:'High blood pressure',sub:'Home checks, lifestyle, medicine adherence',focus:['Correct home BP technique','Choosing/validating a cuff','BP log','Sodium reduction','DASH-style eating','Activity','Alcohol & tobacco discussion','Medication adherence','Common medication concerns','Urgent symptom escalation']},
+{id:'lipids',category:'Cardiometabolic',title:'High cholesterol',sub:'Risk, food pattern, statin discussion',focus:['LDL/HDL/triglycerides basics','Cardiovascular risk','Fiber & food swaps','Activity','Statin benefit/harms discussion','Adherence barriers','When to recheck labs','Shared decision questions']},
+{id:'weight-foundations',category:'Weight management',title:'Weight management foundations',sub:'Portion control, patterns, activity, sleep',focus:['Portion-control plate method','Hunger/fullness cues','Protein & fiber planning','Food environment','Meal timing','Beverage choices','Activity progression','Sleep & stress','Relapse/maintenance planning','Weight-neutral functional goals']},
+{id:'weight-apps',category:'Weight management',title:'Apps & structured programs',sub:'Food logging, WeightWatchers, coaching, privacy',focus:['Food logging apps','Portion-control apps','WeightWatchers (WW)','Diabetes Prevention Program','Habit trackers','Wearables','Coaching/community programs','Cost comparison','Data privacy questions','Avoiding obsessive tracking']},
+{id:'weight-meds',category:'Weight management',title:'Weight-loss medicines',sub:'Eligibility discussion, benefits, harms, access',focus:['Medication candidacy questions','Expected benefit framing','Common vs serious adverse effects','Contraindications & interactions','Pregnancy/contraception discussion','Cost & coverage','Supply/access','Monitoring','Stopping & weight regain','Long-term maintenance']},
+{id:'glp1',category:'Weight management',title:'GLP-1–based options',sub:'Semaglutide, liraglutide, dual GIP/GLP-1',focus:['Semaglutide','Liraglutide','Tirzepatide — dual GIP/GLP-1','Weight-management vs diabetes labels','Weekly vs daily administration','Dose-escalation concept — no patient-specific dosing','GI adverse effects','Serious warnings/contraindications','Peri-procedural questions','Cost/coverage/access','Long-term treatment & maintenance']},
+{id:'custom',category:'Custom',title:'Custom education topic',sub:'Add the exact focus below',focus:['Overview in plain language','Self-management steps','Monitoring','Common questions','Red flags','Follow-up plan','Medication safety','Lifestyle support']}
+];
+
+const selected = new Set();
+let activeCategory = 'All';
+const $ = (id) => document.getElementById(id);
+const groupsEl = $('topicGroups');
+const focusEl = $('focusControls');
+const toastEl = $('toast');
+
+function escapeHTML(s){return String(s).replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+function showToast(message){toastEl.textContent=message;toastEl.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>toastEl.classList.remove('show'),2400);}
+function wordCount(text){const t=text.trim();return t?t.split(/\s+/).length:0;}
+
+function renderFilters(){
+const cats=['All',...new Set(topics.map(t=>t.category))];
+$('categoryFilters').innerHTML=cats.map(cat=>`<button class="segment ${cat===activeCategory?'active':''}" data-category="${escapeHTML(cat)}">${escapeHTML(cat)}</button>`).join('');
+document.querySelectorAll('[data-category]').forEach(btn=>btn.addEventListener('click',()=>{activeCategory=btn.dataset.category;renderFilters();renderTopics();}));
+}
+
+function renderTopics(){
+const q=$('topicSearch').value.trim().toLowerCase();
+const filtered=topics.filter(t=>(activeCategory==='All'||t.category===activeCategory)&&(!q||`${t.title} ${t.sub} ${t.focus.join(' ')}`.toLowerCase().includes(q)));
+const cats=[...new Set(filtered.map(t=>t.category))];
+groupsEl.innerHTML=cats.length?cats.map(cat=>{
+const items=filtered.filter(t=>t.category===cat);
+return `<div class="topic-group"><h3>${escapeHTML(cat)}</h3><div class="topic-list">${items.map(t=>`<button class="topic-card ${selected.has(t.id)?'selected':''}" data-topic="${t.id}" aria-pressed="${selected.has(t.id)}"><span class="topic-title">${escapeHTML(t.title)}</span><span class="topic-sub">${escapeHTML(t.sub)}</span></button>`).join('')}</div></div>`;
+}).join(''):'<div class="empty">No topics match that search.</div>';
+document.querySelectorAll('[data-topic]').forEach(btn=>btn.addEventListener('click',()=>toggleTopic(btn.dataset.topic)));
+}
+
+function toggleTopic(id){selected.has(id)?selected.delete(id):selected.add(id);renderTopics();renderFocus();updateStatus();}
+
+function renderFocus(){
+$('selectedCount').textContent=`${selected.size} selected`;
+if(!selected.size){focusEl.className='empty';focusEl.innerHTML='Choose a topic above to reveal focused subtopics.';return;}
+focusEl.className='';
+focusEl.innerHTML=[...selected].map(id=>{
+const t=topics.find(x=>x.id===id);
+return `<div class="focus-block"><div class="focus-title"><span>${escapeHTML(t.title)}</span><button class="remove-link" data-remove="${t.id}">Remove</button></div><div class="check-grid">${t.focus.map((f,i)=>`<label class="check-chip"><input type="checkbox" data-focus-topic="${t.id}" value="${escapeHTML(f)}" ${i<2?'checked':''}><span>${escapeHTML(f)}</span></label>`).join('')}</div></div>`;
+}).join('');
+document.querySelectorAll('[data-remove]').forEach(btn=>btn.addEventListener('click',()=>toggleTopic(btn.dataset.remove)));
+document.querySelectorAll('[data-focus-topic]').forEach(cb=>cb.addEventListener('change',updateStatus));
+}
+
+function selectedDetails(){
+return [...selected].map(id=>{
+const t=topics.find(x=>x.id===id);
+const checked=[...document.querySelectorAll(`[data-focus-topic="${id}"]:checked`)].map(x=>x.value);
+return {title:t.title,focus:checked};
+});
+}
+
+function buildPromptText(){
+const details=selectedDetails();
+const custom=$('customFocus').value.trim();
+const exerciseIds=['low-back','sciatica','shoulder','frozen-shoulder','knee','hip','neck','fall'];
+const medicationIds=['t1d','t2d-noinsulin','t2d-insulin','htn','lipids','weight-meds','glp1'];
+const hasExercise=[...selected].some(id=>exerciseIds.includes(id));
+const hasMedication=[...selected].some(id=>medicationIds.includes(id));
+const lines=[];
+lines.push('Create a copy-ready, patient-facing education handout for clinician review.');
+lines.push('');
+lines.push('PATIENT COMMUNICATION TARGET');
+lines.push(`- Age group: ${$('ageBand').value}`);
+lines.push(`- Reading level: ${$('readingLevel').value}`);
+lines.push(`- Language: ${$('language').value}`);
+lines.push(`- Format: ${$('format').value}`);
+lines.push(`- Tone: ${$('tone').value}`);
+lines.push(`- Guideline / medication-label context: ${$('locale').value}`);
+if($('context').value.trim()) lines.push(`- De-identified context and constraints: ${$('context').value.trim()}`);
+lines.push('');
+lines.push('TOPICS AND FOCUS');
+details.forEach(d=>lines.push(`- ${d.title}${d.focus.length?`: ${d.focus.join('; ')}`:''}`));
+if(custom) lines.push(`- Custom focus: ${custom}`);
+lines.push('');
+lines.push('CORE INSTRUCTIONS');
+lines.push('1. Write directly to the patient using plain, respectful, non-stigmatizing language. Start with a short “What this means” explanation, then practical steps the patient can act on today.');
+lines.push('2. Do not diagnose, claim this is a personalized treatment plan, recommend a patient-specific medication or dose change, or imply that the handout replaces care from the treating clinician. Clearly label any choice that requires clinician confirmation.');
+lines.push('3. Use current, high-quality evidence and authoritative guidance appropriate to the requested locale. Reconcile material differences between sources rather than hiding them.');
+lines.push('4. Include a clearly labeled “Get help now / contact your care team” section. Separate emergency symptoms from non-urgent reasons to call. Do not give false reassurance.');
+lines.push('5. Include “What to track” and “Questions to ask at the next visit.” Use ranges only when supported; avoid unsupported precision.');
+if($('teachBack').checked) lines.push('6. End the patient section with 2–3 brief teach-back questions that check the most safety-critical points.');
+if($('accessibility').checked) lines.push('7. When relevant, include practical adaptations for limited mobility, fall risk, low vision, low dexterity, limited equipment, low digital access, or caregiver support.');
+if(hasExercise){
+lines.push('');
+lines.push('EXERCISE-SPECIFIC REQUIREMENTS');
+lines.push('- For each exercise, give: purpose; start position; numbered steps; general frequency/repetition range; expected sensation; what symptoms mean stop; easier option; harder option; and equipment/support needs.');
+lines.push('- Use symptom-guided progression and clear stop rules. Flag weakness, bowel/bladder change, saddle numbness, fever/systemic illness, major trauma, progressive neurologic change, hot/swollen joint, inability to bear weight, or other relevant urgent features for clinician/emergency evaluation.');
+lines.push('- For postoperative, fracture, dislocation, severe osteoporosis, pregnancy/postpartum, significant neurologic disease, or recent immobilization contexts, state that the surgeon/MD/PT restrictions override the handout.');
+lines.push('- Do not promise that an exercise prevents adhesive capsulitis or guarantees recovery. Explain the role of gentle movement and adherence without overstating evidence.');
+}
+if(hasMedication){
+lines.push('');
+lines.push('MEDICATION / CHRONIC-CONDITION REQUIREMENTS');
+lines.push('- Keep education general. Tell the patient not to start, stop, share, or change prescription medication or insulin without the prescribing clinician’s plan.');
+lines.push('- Distinguish routine self-management, same-day contact, and emergency action. For diabetes, address hypoglycemia, sick-day safety, ketones when relevant, and access to rescue treatment without inventing a personal correction plan.');
+if($('medCompare').checked) lines.push('- If comparing medicines, use a balanced table: class/example; approved role in the selected locale; administration concept; typical benefit described without guarantees; common effects; serious warnings/contraindications; monitoring; pregnancy considerations; cost/access; and questions for the prescriber. Verify current labels and do not conflate diabetes-labeled and weight-management-labeled products.');
+lines.push('- For blood pressure or glucose values, use current guideline context and tell the patient to follow their clinician’s individualized targets.');
+}
+if(selected.has('weight-apps')){
+lines.push('');
+lines.push('APPS / PROGRAMS REQUIREMENTS');
+lines.push('- Compare portion-control or food-logging apps, WeightWatchers (WW), structured prevention programs, wearables, and coaching by workflow, cost, privacy/data sharing, accessibility, level of support, and risk of overly restrictive or compulsive tracking. Do not endorse one option as universally best.');
+}
+if(selected.has('weight-meds')||selected.has('glp1')){
+lines.push('');
+lines.push('WEIGHT-MEDICATION REQUIREMENTS');
+lines.push('- Explain that candidacy depends on clinical criteria, comorbidities, contraindications, pregnancy plans, interactions, coverage, availability, and willingness to use long-term treatment.');
+lines.push('- For semaglutide, liraglutide, and tirzepatide when selected, distinguish GLP-1 receptor agonism from dual GIP/GLP-1 action, and verify current indications, formulations, label warnings, shortages/access issues, and peri-procedural advice. Do not provide a patient-specific titration schedule.');
+lines.push('- Discuss side-effect prevention/management in general terms, symptoms requiring urgent review, lean-mass-preserving nutrition/activity considerations, maintenance, and the possibility of weight regain after discontinuation. Avoid shame or moral framing.');
+}
+lines.push('');
+lines.push('OUTPUT CONTRACT');
+lines.push(`- Deliver the patient handout first in ${$('language').value}, formatted as a ${$('format').value}. Make it ready to copy with no preamble about being an AI.`);
+lines.push('- Use short headings, bullets, ample white space, and no unexplained abbreviations.');
+lines.push('- After the patient handout, insert a divider and a section titled “CLINICIAN REVIEW NOTES — REMOVE BEFORE SHARING.” In that section only, list source links/citations, publication or update dates, key uncertainties, contraindications to verify, and any statement that needs localization or individualized confirmation.');
+lines.push('- Do not invent a source, quote, statistic, brand feature, insurance rule, or drug availability claim. If current evidence cannot be verified, say so in the clinician notes and use cautious patient wording.');
+if($('enableImages').checked){lines.push('');lines.push($('imageDirections').value.trim());}
+return lines.join('\n');
+}
+
+function updateStatus(){
+const ready=selected.size>0;
+$('promptStatus').className=`status ${ready?'ready':''}`;
+$('promptStatus').innerHTML=`<span class="status-dot"></span><span>${ready?`${selected.size} topic${selected.size>1?'s':''} ready to copy and open.`:'Select at least one topic to prepare the prompt.'}</span>`;
+}
+
+async function copyText(text){
+if(!text.trim()){showToast('Nothing to copy yet.');return false;}
+try{await navigator.clipboard.writeText(text);showToast('Copied to clipboard.');return true;}
+catch(e){
+const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+const ok=document.execCommand('copy');ta.remove();showToast(ok?'Copied to clipboard.':'Select and copy the text manually.');return ok;
+}
+}
+
+function cleanPatientEducation(){
+return $('responseInput').value
+.replace(/\r\n?/g,'\n')
+.split('\n')
+.map(line=>line.replace(/[ \t]+$/g,''))
+.join('\n')
+.replace(/\n{3,}/g,'\n\n')
+.trim();
+}
+
+function speakPromptCopied(){
+const message='Prompt copied. Paste into OpenEvidence, then copy the patient instructions.';
+if('speechSynthesis' in window && 'SpeechSynthesisUtterance' in window){
+try{
+window.speechSynthesis.cancel();
+const utterance=new SpeechSynthesisUtterance(message);
+utterance.rate=1; utterance.pitch=1; utterance.volume=1;
+window.speechSynthesis.speak(utterance);
+}catch(e){ /* visual confirmation remains available */ }
+}
+}
+
+$('launchOE').addEventListener('click',async()=>{
+if(!selected.size){showToast('Choose at least one topic first.');$('topic-panel').scrollIntoView({behavior:'smooth'});return;}
+const prompt=buildPromptText();
+$('promptOutput').value=prompt;
+$('promptCount').textContent=`${wordCount(prompt)} words`;
+const oeWindow=window.open('https://www.openevidence.com/','_blank');
+if(oeWindow) oeWindow.opener=null;
+const copied=await copyText(prompt);
+if(copied){
+speakPromptCopied();
+showToast(oeWindow?'Prompt copied. OpenEvidence opened.':'Prompt copied. Allow pop-ups to open OpenEvidence.');
+}
+});
+$('copyPatient').addEventListener('click',()=>copyText(cleanPatientEducation()));
+$('promptOutput').addEventListener('input',e=>{$('promptCount').textContent=`${wordCount(e.target.value)} words`;});
+$('responseInput').addEventListener('input',e=>{$('responseCount').textContent=`${wordCount(e.target.value)} words`;});
+$('topicSearch').addEventListener('input',renderTopics);
+$('enableImages').addEventListener('change',e=>{$('imageDirections').disabled=!e.target.checked;});
+$('customFocus').addEventListener('input',updateStatus);
+
+
+function validEmail(email){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);}
+$('selfEmail').addEventListener('change',e=>{const v=e.target.value.trim();if(validEmail(v)){localStorage.setItem('carescript-self-email',v);showToast('Email saved in this browser.');}});
+$('emailSelf').addEventListener('click',()=>{
+const email=$('selfEmail').value.trim();
+if(!validEmail(email)){showToast('Enter a valid self-email address.');$('selfEmail').focus();return;}
+localStorage.setItem('carescript-self-email',email);
+const subject=$('emailSubject').value.trim()||'Patient education draft for clinician review';
+const body=cleanPatientEducation();
+if(!body){showToast('Paste patient instructions before emailing.');$('responseInput').focus();return;}
+if(body.length>7000) showToast('Long instructions: your mail app may truncate them. Keep the .txt download too.');
+window.location.href=`mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+});
+$('downloadTxt').addEventListener('click',()=>{
+const body=cleanPatientEducation();
+if(!body){showToast('Paste patient instructions before downloading.');$('responseInput').focus();return;}
+const blob=new Blob([body],{type:'text/plain;charset=utf-8'});
+const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='patient-instructions.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);showToast('Patient instructions downloaded.');
+});
+$('clearLocal').addEventListener('click',()=>{
+localStorage.removeItem('carescript-self-email');
+selected.clear();
+document.querySelectorAll('textarea').forEach(t=>{if(t.id!=='imageDirections')t.value='';});
+$('selfEmail').value='';$('customFocus').value='';$('reviewConfirmed').checked=false;$('enableImages').checked=false;$('imageDirections').disabled=true;$('promptCount').textContent='0 words';$('responseCount').textContent='0 words';
+renderTopics();renderFocus();updateStatus();showToast('Saved email and form cleared.');
+});
+
+const savedEmail=localStorage.getItem('carescript-self-email');if(savedEmail)$('selfEmail').value=savedEmail;
+renderFilters();renderTopics();renderFocus();updateStatus();
+</script>
+</body>
+</html>
