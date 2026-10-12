@@ -1,0 +1,895 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Procedure Voice Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+<style>
+/* Layout: a single-column run sheet. Panel 1 builds and copies the GPT payload; panel 2 is the numbered voice probe sheet with a live survival score. */
+:root{
+  --bg:#e7ecee;
+  --panel:#fbfcfc;
+  --sunken:#eff3f4;
+  --ink:#0f1e28;
+  --muted:#4f616c;
+  --rule:#cdd7db;
+  --rule-strong:#adbcc3;
+  --accent:#1c5a86;
+  --accent-ink:#ffffff;
+  --accent-wash:#dae7f0;
+  --pass:#1a7647; --pass-wash:#d8eee1;
+  --partial:#8f5c08; --partial-wash:#f4e8cb;
+  --fail:#ad251e; --fail-wash:#f7dbd8;
+  --font-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --font-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0c1317; --panel:#131d23; --sunken:#0f181d; --ink:#e2ebef; --muted:#93a5af;
+    --rule:#24343e; --rule-strong:#364b59;
+    --accent:#74b5e4; --accent-ink:#06121a; --accent-wash:#16324a;
+    --pass:#64d198; --pass-wash:#112f1f; --partial:#e7b75c; --partial-wash:#32270f; --fail:#f18d84; --fail-wash:#3a1a17;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0c1317; --panel:#131d23; --sunken:#0f181d; --ink:#e2ebef; --muted:#93a5af;
+  --rule:#24343e; --rule-strong:#364b59;
+  --accent:#74b5e4; --accent-ink:#06121a; --accent-wash:#16324a;
+  --pass:#64d198; --pass-wash:#112f1f; --partial:#e7b75c; --partial-wash:#32270f; --fail:#f18d84; --fail-wash:#3a1a17;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--font-body);-webkit-text-size-adjust:100%}
+.wrap{max-width:46rem;margin:0 auto;padding-inline:16px;padding-block:28px 56px;display:flex;flex-direction:column;gap:20px}
+
+.mast{display:flex;flex-direction:column;gap:8px}
+.eyebrow{margin:0;font:600 12px/1.2 var(--font-mono);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+h1{margin:0;font:700 clamp(30px,6vw,40px)/1.04 var(--font-display);letter-spacing:-.01em;text-wrap:balance}
+.lede,.howto{margin:0;max-width:62ch;color:var(--muted)}
+
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.ph{display:flex;align-items:baseline;justify-content:space-between;gap:6px 14px;flex-wrap:wrap}
+h2{margin:0;font:600 21px/1.15 var(--font-display);letter-spacing:.005em;text-wrap:balance}
+.meta{font:500 13px/1.3 var(--font-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+
+.controls{display:flex;flex-direction:column}
+.ctl{display:grid;grid-template-columns:7.5rem minmax(0,1fr);gap:6px 14px;align-items:center;padding-block:11px;border-top:1px solid var(--rule)}
+.ctl:first-child{border-top:0;padding-top:0}
+.ctl-label{font:600 13px/1.2 var(--font-display);text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.seg{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.seg label{position:relative;display:inline-flex;cursor:pointer}
+.seg input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.seg span{display:inline-block;padding:8px 14px;border:1px solid var(--rule-strong);border-radius:6px;background:var(--sunken);color:var(--ink);font-size:15px;line-height:1.2;transition:background-color .12s,border-color .12s,color .12s}
+.seg label:hover span{border-color:var(--accent)}
+.seg input:checked + span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.ctl-hint{grid-column:2;margin:0;font-size:13.5px;line-height:1.4;color:var(--muted);max-width:56ch}
+
+.cwbox{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border:1px dashed var(--rule-strong);border-radius:8px;background:var(--sunken)}
+.cwrow{display:flex;align-items:center;justify-content:space-between;gap:10px 14px;flex-wrap:wrap}
+.cw{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;min-width:0}
+.cw-k{font:600 12px/1.2 var(--font-display);text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.cw-v{font:600 22px/1.1 var(--font-mono);letter-spacing:.02em;color:var(--ink)}
+.cw-note{margin:0;font-size:13.5px;line-height:1.4;color:var(--muted)}
+.btn-quiet{font:700 14px/1 var(--font-body);padding:9px 13px;border-radius:6px;border:1px solid var(--rule-strong);background:var(--panel);color:var(--ink);cursor:pointer}
+.btn-quiet:hover{border-color:var(--accent)}
+.btn-quiet.armed{border-color:var(--fail);color:var(--fail);background:var(--fail-wash)}
+
+.go{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap}
+.btn-primary{font:600 18px/1 var(--font-display);letter-spacing:.02em;padding:15px 24px;min-height:50px;border:0;border-radius:8px;background:var(--accent);color:var(--accent-ink);cursor:pointer}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-primary:active{transform:translateY(1px)}
+.btn-secondary{font:600 16px/1 var(--font-display);letter-spacing:.02em;padding:12px 18px;min-height:44px;border-radius:8px;border:1.5px solid var(--accent);background:var(--panel);color:var(--accent);cursor:pointer}
+.btn-secondary:hover{background:var(--accent-wash)}
+.out{font-weight:700;font-size:15px;color:var(--accent);text-underline-offset:3px}
+.status{margin:0;min-height:1.5em;font-size:14.5px;color:var(--muted)}
+.status.ok{color:var(--pass)}
+.status.warn{color:var(--partial)}
+
+.pv{border-top:1px solid var(--rule);padding-top:12px}
+.pv summary{cursor:pointer;font-weight:700;font-size:15px;width:max-content;max-width:100%}
+.pv textarea{display:block;width:100%;height:24rem;margin-top:10px;padding:12px 14px;resize:vertical;font:13px/1.55 var(--font-mono);color:var(--ink);background:var(--sunken);border:1px solid var(--rule);border-radius:6px}
+
+.scorebox{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px 16px;padding:14px 16px;border:1px solid var(--rule);border-radius:8px;background:var(--sunken)}
+.score-num{font:600 34px/1 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+.score-num small{font-size:17px;font-weight:500;color:var(--muted)}
+.score-side{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;min-width:0}
+.verdict{font:600 12.5px/1 var(--font-display);text-transform:uppercase;letter-spacing:.09em;padding:6px 9px;border-radius:4px;background:var(--rule);color:var(--ink)}
+.verdict.v-pass{background:var(--pass-wash);color:var(--pass)}
+.verdict.v-partial{background:var(--partial-wash);color:var(--partial)}
+.verdict.v-fail{background:var(--fail-wash);color:var(--fail)}
+.score-help{font-size:13px;color:var(--muted)}
+.bar{grid-column:1 / -1;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.bar i{display:block;height:8px;border-radius:2px;background:var(--rule)}
+.bar i.pass{background:var(--pass)}
+.bar i.partial{background:var(--partial)}
+.bar i.fail{background:var(--fail)}
+
+.probes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.probe{display:grid;grid-template-columns:2.25rem minmax(0,1fr) auto;gap:8px 14px;align-items:start;padding-block:14px;border-top:1px solid var(--rule)}
+.probe:first-child{border-top:0;padding-top:4px}
+.pn{display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;border:1.5px solid var(--rule-strong);font:600 14px/1 var(--font-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.probe[data-mark="pass"] .pn{border-color:var(--pass);background:var(--pass-wash);color:var(--pass)}
+.probe[data-mark="partial"] .pn{border-color:var(--partial);background:var(--partial-wash);color:var(--partial)}
+.probe[data-mark="fail"] .pn{border-color:var(--fail);background:var(--fail-wash);color:var(--fail)}
+.pbody{min-width:0}
+.pt{margin:0 0 6px;font:600 17.5px/1.25 var(--font-display)}
+.pd{display:grid;grid-template-columns:3.9rem minmax(0,1fr);gap:4px 10px;margin:0;font-size:15px;line-height:1.45}
+.pd dt{font:600 11.5px/1.9 var(--font-display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.pd dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.exact{font:500 13.5px/1.5 var(--font-mono);background:var(--accent-wash);color:var(--ink);padding:1px 5px;border-radius:4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.marks{display:flex;gap:6px;flex-wrap:wrap}
+.marks button{font:700 13.5px/1 var(--font-body);min-width:4.5rem;padding:9px 10px;border-radius:6px;border:1px solid var(--rule-strong);background:var(--panel);color:var(--muted);cursor:pointer}
+.marks button:hover{border-color:var(--ink);color:var(--ink)}
+.marks button[data-v="pass"][aria-pressed="true"]{background:var(--pass-wash);border-color:var(--pass);color:var(--pass)}
+.marks button[data-v="partial"][aria-pressed="true"]{background:var(--partial-wash);border-color:var(--partial);color:var(--partial)}
+.marks button[data-v="fail"][aria-pressed="true"]{background:var(--fail-wash);border-color:var(--fail);color:var(--fail)}
+
+.notes{display:flex;flex-direction:column;gap:6px}
+.notes label{font:600 12.5px/1.2 var(--font-display);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.notes textarea,.fallback{display:block;width:100%;min-height:4.75rem;padding:10px 12px;font:15px/1.45 var(--font-body);color:var(--ink);background:var(--panel);border:1px solid var(--rule-strong);border-radius:6px;resize:vertical}
+.fallback{font:13px/1.5 var(--font-mono);min-height:12rem;background:var(--sunken)}
+.foot{margin:0;font-size:13px;color:var(--muted)}
+
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:640px){
+  .probe{grid-template-columns:2.25rem minmax(0,1fr)}
+  .marks{grid-column:2}
+}
+@media (max-width:540px){
+  .panel{padding:16px}
+  .ctl{grid-template-columns:minmax(0,1fr)}
+  .ctl-hint{grid-column:1}
+  .btn-primary{width:100%}
+  .probe{gap:8px 10px}
+  .pd{grid-template-columns:minmax(0,1fr);gap:0}
+  .pd dd{margin-bottom:6px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important}
+  .btn-primary:active{transform:none}
+}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <p class="eyebrow">ChatGPT · text-to-voice handoff test</p>
+    <h1>Procedure Voice Coach</h1>
+    <p class="lede">Build a coaching payload, paste it into ChatGPT, switch to voice when it tells you, and score which instructions survive the switch.</p>
+  </header>
+
+  <section class="panel" aria-labelledby="build-h">
+    <div class="ph"><h2 id="build-h">Build the payload</h2><span class="meta" id="stats"></span></div>
+
+    <div class="controls" id="controls">
+      <div class="ctl" role="radiogroup" aria-labelledby="lbl-proc">
+        <span class="ctl-label" id="lbl-proc">Procedure</span>
+        <div class="seg">
+          <label for="proc-iv"><input type="radio" name="proc" id="proc-iv" value="iv"><span>Peripheral IV</span></label>
+          <label for="proc-draw"><input type="radio" name="proc" id="proc-draw" value="draw"><span>Blood draw</span></label>
+        </div>
+      </div>
+      <div class="ctl" role="radiogroup" aria-labelledby="lbl-guide">
+        <span class="ctl-label" id="lbl-guide">Guidance</span>
+        <div class="seg">
+          <label for="guide-landmark"><input type="radio" name="guide" id="guide-landmark" value="landmark"><span>Landmark</span></label>
+          <label for="guide-us"><input type="radio" name="guide" id="guide-us" value="us"><span>Ultrasound</span></label>
+        </div>
+      </div>
+      <div class="ctl" role="radiogroup" aria-labelledby="lbl-learner">
+        <span class="ctl-label" id="lbl-learner">Learner</span>
+        <div class="seg">
+          <label for="learner-first"><input type="radio" name="learner" id="learner-first" value="first"><span>First time</span></label>
+          <label for="learner-some"><input type="radio" name="learner" id="learner-some" value="some"><span>Some reps</span></label>
+          <label for="learner-refresher"><input type="radio" name="learner" id="learner-refresher" value="refresher"><span>Refresher</span></label>
+        </div>
+        <p class="ctl-hint">Sets the per-step limit: three sentences, two, or one.</p>
+      </div>
+      <div class="ctl" role="radiogroup" aria-labelledby="lbl-setting">
+        <span class="ctl-label" id="lbl-setting">Setting</span>
+        <div class="seg">
+          <label for="setting-sim"><input type="radio" name="setting" id="setting-sim" value="sim"><span>Sim arm</span></label>
+          <label for="setting-live"><input type="radio" name="setting" id="setting-live" value="live"><span>Live patient</span></label>
+        </div>
+        <p class="ctl-hint">Live patient adds a supervisor check to step 1 and patient-facing prompts.</p>
+      </div>
+      <div class="ctl" role="radiogroup" aria-labelledby="lbl-handoff">
+        <span class="ctl-label" id="lbl-handoff">Handoff</span>
+        <div class="seg">
+          <label for="handoff-clean"><input type="radio" name="handoff" id="handoff-clean" value="clean"><span>Clean</span></label>
+          <label for="handoff-recap"><input type="radio" name="handoff" id="handoff-recap" value="recap"><span>Recap</span></label>
+        </div>
+        <p class="ctl-hint">Clean tests the payload alone. Recap has GPT restate the voice rules right before you switch, so you can compare the two.</p>
+      </div>
+    </div>
+
+    <div class="cwbox">
+      <div class="cwrow">
+        <div class="cw"><span class="cw-k">Codeword</span><strong class="cw-v" id="cw">Kestrel 47</strong></div>
+        <button type="button" class="btn-quiet" id="newrun">New run</button>
+      </div>
+      <p class="cw-note">Buried in the payload. The voice coach should say it at the opener, at each checkpoint, and at the close. Start a new run for each chat, since ChatGPT memory can carry an old codeword over.</p>
+    </div>
+
+    <div class="go">
+      <button type="button" class="btn-primary" id="build">Build &amp; copy payload</button>
+      <a class="out" href="https://chatgpt.com/" target="_blank" rel="noopener">Open ChatGPT ↗</a>
+    </div>
+    <p class="status" id="copyinfo" role="status" aria-live="polite"></p>
+
+    <details class="pv" id="pv">
+      <summary>Show payload</summary>
+      <textarea id="payload" readonly spellcheck="false" aria-label="Payload text"></textarea>
+    </details>
+  </section>
+
+  <section class="panel" aria-labelledby="test-h">
+    <div class="ph"><h2 id="test-h">Voice survival test</h2><span class="meta">Pass 1 · Partial ½ · Fail 0</span></div>
+    <p class="howto">Paste the payload into a new ChatGPT chat and send it. When it tells you to, switch to voice and work down this list in order.</p>
+
+    <div class="scorebox">
+      <div class="score-num"><span id="score">0</span><small id="scoremax"> / 10</small></div>
+      <div class="score-side"><span class="verdict" id="verdict">Not started</span><span class="score-help">Intact 9+ · Degraded 6+ · Lost below 6</span></div>
+      <div class="bar" id="bar" aria-hidden="true"></div>
+    </div>
+
+    <ol class="probes" id="probes"></ol>
+
+    <div class="notes">
+      <label for="notes">Notes</label>
+      <textarea id="notes" rows="3" placeholder="App and model, phone or desktop, anything odd"></textarea>
+    </div>
+    <div class="go">
+      <button type="button" class="btn-secondary" id="copyres">Copy results</button>
+      <p class="status" id="resstatus" role="status" aria-live="polite"></p>
+    </div>
+    <textarea id="resultsOut" class="fallback" readonly hidden aria-label="Results text"></textarea>
+  </section>
+
+  <p class="foot">Teaching aid for simulation and supervised practice. Follow local policy.</p>
+</div>
+
+<script>
+const PVC = (() => {
+  'use strict';
+
+  const PROC = {
+    iv: {
+      name: 'Peripheral IV',
+      ctx: {
+        landmark: `Peripheral IV catheter placement by landmark technique: sight and touch, no ultrasound.`,
+        us: `Peripheral IV catheter placement under ultrasound guidance: short-axis view with dynamic needle tip tracking.`
+      }
+    },
+    draw: {
+      name: 'Blood draw',
+      ctx: {
+        landmark: `Venipuncture (routine blood draw) by landmark technique: sight and touch, no ultrasound.`,
+        us: `Venipuncture (blood draw) under ultrasound guidance with a butterfly needle: short-axis view with dynamic needle tip tracking.`
+      }
+    }
+  };
+
+  const GUIDE = { landmark: 'landmark technique', us: 'ultrasound-guided' };
+
+  const LEARNER = {
+    first: { label: 'first time', ctx: `First time doing this. Give the instruction, then the step's tip when it helps.`, len: 'at most three short sentences', lenShort: 'three sentences max', tips: true },
+    some: { label: 'some reps', ctx: `Has done a few. Give the instruction; add a tip only if they hesitate or ask.`, len: 'at most two short sentences', lenShort: 'two sentences max', tips: true },
+    refresher: { label: 'refresher', ctx: `Experienced and refreshing. Give only the core action of each step; no tips unless asked.`, len: 'one short sentence', lenShort: 'one sentence', tips: false }
+  };
+
+  const SETTING = {
+    sim: { label: 'sim arm', ctx: `Simulation arm or task trainer. Treat it like a real patient, and have the learner say the patient-facing lines out loud for practice.` },
+    live: { label: 'live patient', ctx: `Real patient, with a supervisor present or immediately available. Prompt the learner to tell the patient what is coming, and keep the patient's comfort in view.` }
+  };
+
+  const FLAG = {
+    artery: `Bright red or pulsing blood: possible artery. Remove the needle, hold firm pressure for at least five minutes, longer if they take blood thinners, and tell your supervisor.`,
+    nerve: `Sharp, shooting, or electric pain, or tingling or numbness down the arm: possible nerve contact. Stop and withdraw now, and do not redirect the needle.`,
+    hematoma: `A lump swelling up at the site: hematoma. Release the tourniquet, withdraw, and press firmly.`,
+    infiltration: `Swelling, coolness, blanching, or pain when you flush: infiltration. Stop flushing, remove the catheter, apply gentle pressure, and raise the arm.`,
+    vagal: `Pale, sweaty, dizzy, or nauseated: likely fainting. Stop, remove the needle, lay them flat with legs raised, and get help.`,
+    attempts: `Two unsuccessful attempts: stop and hand off to another clinician, per local policy.`
+  };
+  const FLAGS = {
+    iv: ['artery', 'nerve', 'hematoma', 'infiltration', 'vagal', 'attempts'],
+    draw: ['artery', 'nerve', 'hematoma', 'vagal', 'attempts']
+  };
+
+  /* Step library. c = coaching line, live = coaching line for a real patient, r = reason (for "why"), tip = optional, flag = the step where blood first appears. */
+  const S = {
+    prepIV: {
+      t: 'Prepare',
+      c: `Confirm the order and check two patient identifiers. Explain the procedure, get a verbal okay, and ask about allergies and any arm to avoid.`,
+      live: `Confirm your supervisor is with you or immediately available, then check the order and two patient identifiers. Explain the procedure, get a verbal okay, and ask about allergies and any arm to avoid.`,
+      r: `Right patient and right arm prevent the worst errors; skip any arm with a mastectomy or lymph node removal, a dialysis fistula or graft, an injury, or an infection.`,
+      tip: `Ask specifically about chlorhexidine, adhesive, and latex allergies.`
+    },
+    suppliesIV: {
+      t: 'Gather supplies',
+      c: `Clean your hands and gather gloves, a tourniquet, a chlorhexidine-alcohol swab, the IV catheter, an extension set, a saline flush, a clear dressing, a securement device, gauze, and a sharps container. Prime the extension set with saline now.`,
+      r: `Once the needle is in, one hand is committed, so everything has to be within reach and ready.`,
+      tip: `Twenty gauge suits most adults; use eighteen when you need fast flow and twenty-two for small, fragile veins.`
+    },
+    tourniquetIV: {
+      t: 'Position and tourniquet',
+      c: `Support the arm below heart level, in good light. Tie the tourniquet four to six inches above your planned site, snug enough to fill the veins but loose enough that you still feel a pulse below it.`,
+      r: `Gravity and blocked venous return fill the vein, while arterial blood has to keep flowing in.`,
+      tip: `Don't leave it on more than a couple of minutes; if the search drags, release it and reapply.`
+    },
+    veinIV: {
+      t: 'Choose the vein',
+      c: `Start low on the forearm and feel for a straight, soft, springy vein that refills when you press it. Avoid joints, the inner wrist, bumpy valves, bruises, and hard or scarred veins.`,
+      r: `Forearm veins hold a line longest and stay comfortable, and starting low leaves higher sites for a second try.`,
+      tip: `Feel more than you look; let the arm hang, ask for a gentle fist, or warm the arm to bring a vein up.`
+    },
+    cleanIV: {
+      t: 'Clean the site',
+      c: `Clean your hands and put on gloves. Scrub the site with the chlorhexidine swab, back and forth, for thirty seconds, then let it air-dry completely and don't touch it again.`,
+      r: `Friction plus full drying time is what kills skin bacteria; a wet prep stings and protects less.`,
+      tip: `No blowing or fanning to speed the drying.`
+    },
+    insertIV: {
+      t: 'Anchor and insert',
+      c: `Hold the catheter bevel up and pull the skin taut just below the site with your other thumb. Enter at fifteen to thirty degrees, in line with the vein, with one smooth, steady push.`,
+      r: `Traction stops the vein from rolling, and bevel up gives the cleanest entry.`,
+      tip: `Warn the patient first: small poke now.`
+    },
+    flashIV: {
+      t: 'Flash and thread',
+      c: `When blood shows in the flash chamber, flatten your angle and advance the whole unit one to two millimeters more. Then hold the needle still and slide the catheter off it into the vein, all the way to the hub.`,
+      r: `The needle tip sits ahead of the catheter tip, so that extra millimeter puts the catheter itself inside the vein.`,
+      tip: `If the catheter won't slide, don't force it, and never push the needle back into the catheter.`,
+      flag: true
+    },
+    removeIV: {
+      t: 'Release and remove the needle',
+      c: `Release the tourniquet. Press on the vein just beyond the catheter tip, withdraw the needle, activate the safety, and drop it straight into sharps.`,
+      r: `Releasing first lowers the pressure in the vein, and pressing beyond the tip stops blood running back out of the hub.`,
+      tip: `Keep your eyes on the needle until it is in the sharps container.`
+    },
+    flushIV: {
+      t: 'Connect and flush',
+      c: `Connect the primed extension set. Flush gently with saline and check for blood return; it should flow easily with no swelling, pain, or resistance.`,
+      r: `Easy flushing and blood return confirm the catheter is in the vein and open.`,
+      tip: `Watch and feel the skin over the catheter tip while you flush.`
+    },
+    secureIV: {
+      t: 'Secure and label',
+      c: `Cover the site with the clear dressing so the insertion point stays visible, and add the securement device. Label it with the date, time, gauge, and your initials.`,
+      r: `A secure, visible site lasts longer and lets anyone spot swelling or redness early.`,
+      tip: `Never put tape directly over the insertion point.`
+    },
+    finishIV: {
+      t: 'Finish and document',
+      c: `Remove your gloves, clean your hands, and make the patient comfortable. Document the site, gauge, number of attempts, flush and blood return, and how the patient tolerated it.`,
+      r: `Good documentation supports line tracking, dwell decisions, and handoffs.`
+    },
+
+    suppliesIVus: {
+      t: 'Gather supplies',
+      c: `Clean your hands and gather gloves, a tourniquet, a chlorhexidine-alcohol swab, a long IV catheter of one point eight eight inches or more, an extension set, saline flushes, a clear dressing, a securement device, and a sharps container, plus the ultrasound with a linear probe, a sterile probe cover, and sterile gel. Prime the extension set with saline now.`,
+      r: `Veins you can see on ultrasound sit deeper, and a short catheter slips out; aim for at least two-thirds of the catheter inside the vein.`,
+      tip: `Twenty gauge is a good default for ultrasound-guided lines.`
+    },
+    setupIVus: {
+      t: 'Position, tourniquet, probe',
+      c: `Support the arm and tie the tourniquet high on the upper arm. Choose a vascular preset and orient the probe so its marker matches the dot on the screen, usually on your left.`,
+      r: `A high tourniquet fills the forearm and upper-arm veins, and matched orientation means moving the probe left moves the image left.`,
+      tip: `Set up so the screen and the arm are in one line of sight.`
+    },
+    scanIVus: {
+      t: 'Scan and choose',
+      c: `In a cross-sectional view, find a vein that collapses completely with gentle pressure, then slide along it to make sure it runs straight. Aim for one at least four millimeters wide and about three to fifteen millimeters deep, clear of the artery and nerve.`,
+      r: `Veins compress while arteries pulse and resist, and width plus reachable depth predict both success and how long the line lasts.`,
+      tip: `If a vessel pulses or won't compress, it is an artery; leave it alone.`
+    },
+    cleanIVus: {
+      t: 'Clean and cover',
+      c: `Clean your hands, glove, scrub the site with chlorhexidine for thirty seconds, and let it dry completely. Cover the probe with the sterile cover and use sterile gel only.`,
+      r: `The probe and gel touch the puncture site, so they have to be as clean as your skin prep.`,
+      tip: `Find the vein again after the prep; it can shift.`
+    },
+    enterUS: {
+      t: 'Line up and enter',
+      c: `Center the vein on the screen and note its depth. Enter just in front of the probe, about as far from it as the vein is deep, at roughly forty-five degrees with the bevel up.`,
+      r: `At forty-five degrees, starting that far back brings the needle tip into the beam right as it reaches the vein.`,
+      tip: `Warn the patient first: small poke now.`
+    },
+    walkUS: {
+      t: 'Walk the tip',
+      c: `Find the needle tip as a bright dot, slide the probe slightly ahead until the dot disappears, then advance the needle until it reappears. Repeat until the tip dents the top of the vein and pops into its center.`,
+      r: `A bright dot can be the shaft rather than the tip; moving the probe ahead first keeps you watching the true tip.`,
+      tip: `Small moves: a few millimeters of probe, then a few of needle.`
+    },
+    threadIVus: {
+      t: 'Thread the catheter',
+      c: `Confirm flash, then lower your angle and walk the tip a few more millimeters up the middle of the vein. Hold the needle still and advance the catheter off it, all the way to the hub.`,
+      r: `Several millimeters of tip inside the vein make sure the catheter, not just the needle, ends up in the lumen.`,
+      tip: `If the tip touches the back wall, pull back slightly before you advance.`,
+      flag: true
+    },
+    flushIVus: {
+      t: 'Connect and flush under ultrasound',
+      c: `Connect the primed extension set and flush with saline while you watch on ultrasound; you should see it swirl inside the vein. Check for blood return, and stop if fluid collects outside the vein.`,
+      r: `Seeing the flush inside the vein is the best proof of placement, and a dark pocket outside the wall means infiltration.`
+    },
+    secureIVus: {
+      t: 'Secure and label',
+      c: `Wipe off the gel, cover the site with the clear dressing so the insertion point stays visible, and add the securement device. Label it with the date, time, gauge, and your initials.`,
+      r: `A secure, visible site lasts longer and lets anyone spot swelling or redness early.`,
+      tip: `Dressings won't stick over leftover gel.`
+    },
+    finishIVus: {
+      t: 'Finish and document',
+      c: `Remove your gloves, clean your hands and the probe, and make the patient comfortable. Document the site, gauge, catheter length, number of attempts, flush and blood return, and that ultrasound was used.`,
+      r: `Good documentation supports line tracking, dwell decisions, and handoffs.`
+    },
+
+    prepDraw: {
+      t: 'Prepare',
+      c: `Confirm the order and check two patient identifiers. Explain the draw, ask about fasting or timing requirements and allergies, and find out which arm to avoid.`,
+      live: `Confirm your supervisor is with you or immediately available, then check the order and two patient identifiers. Explain the draw, ask about fasting or timing requirements and allergies, and find out which arm to avoid.`,
+      r: `Right patient and right test come first; skip an arm with a mastectomy, lymph node removal, or dialysis fistula, and never draw above a running IV, which dilutes the sample.`,
+      tip: `Ask specifically about latex and adhesive allergies.`
+    },
+    suppliesDraw: {
+      t: 'Gather supplies',
+      c: `Clean your hands and gather gloves, a tourniquet, alcohol pads, a needle with holder or a butterfly, your tubes lined up in order of draw, gauze, a bandage, labels, and a sharps container.`,
+      r: `With the needle in the arm you can't go looking; tubes in order mean you just reach and push.`,
+      tip: `A twenty-one gauge needle is standard; a twenty-three gauge butterfly helps with small veins.`
+    },
+    tourniquetDraw: {
+      t: 'Position and tourniquet',
+      c: `Extend and support the arm, and tie the tourniquet three to four inches above the elbow crease. Keep it on for less than one minute.`,
+      r: `A tourniquet left on longer than a minute concentrates the blood and skews results like potassium and protein.`,
+      tip: `If the search runs long, release it, wait two minutes, then reapply.`
+    },
+    veinDraw: {
+      t: 'Choose the vein',
+      c: `Feel the elbow crease for the median cubital vein first, then the cephalic on the thumb side. Use the basilic on the pinky side only as a last resort.`,
+      r: `The median cubital is well anchored and away from nerves, while the basilic runs next to the brachial artery and median nerve.`,
+      tip: `Feel for bounce, and avoid hard, scarred, or bruised veins.`
+    },
+    cleanDraw: {
+      t: 'Clean the site',
+      c: `Put on gloves and clean the site with an alcohol pad. Let it air-dry completely, and don't touch it again.`,
+      r: `Wet alcohol stings and can damage red cells in the sample.`,
+      tip: `About thirty seconds of drying is enough.`
+    },
+    insertDraw: {
+      t: 'Anchor and insert',
+      c: `Hold the needle bevel up and pull the skin taut just below the site with your other thumb. Enter at fifteen to thirty degrees in one smooth motion.`,
+      r: `Traction stops the vein from rolling, and bevel up gives the cleanest entry.`,
+      tip: `Warn the patient first: small poke now.`
+    },
+    tubesDraw: {
+      t: 'Fill the tubes',
+      c: `Hold the holder steady, push the first tube on, and release the tourniquet once blood is flowing. Fill each tube in order of draw until it stops, and gently invert each one as you take it off.`,
+      r: `Order of draw keeps additives from carrying over between tubes; EDTA carryover, for example, falsely raises potassium.`,
+      tip: `The order is blood cultures, light blue, red or gold, green, lavender, then gray.`,
+      flag: true
+    },
+    endDraw: {
+      t: 'End the draw',
+      c: `Make sure the tourniquet is off, and pull the last tube off the holder before the needle comes out. Withdraw, activate the safety, drop it in sharps, and press gauze on the site with the arm straight.`,
+      r: `Removing the tube first prevents dripping and a vacuum tug, and a bent elbow traps blood under the skin.`,
+      tip: `Never recap the needle.`
+    },
+    labelDraw: {
+      t: 'Label at the bedside',
+      c: `Label every tube now with the patient in front of you: name, second identifier, date, time, and your initials. Don't walk away with unlabeled tubes.`,
+      r: `Labeling at the bedside is the main defense against wrong-blood-in-tube errors.`
+    },
+    sendDraw: {
+      t: 'Bandage and send',
+      c: `Check that the bleeding has stopped, apply a bandage, remove your gloves, and clean your hands. Send the tubes with any special handling, such as ice, light protection, or a time limit.`,
+      r: `Some tests are ruined by delay, warmth, or light.`
+    },
+
+    suppliesDrawUS: {
+      t: 'Gather supplies',
+      c: `Clean your hands and gather gloves, a tourniquet, a chlorhexidine or alcohol swab, a butterfly with holder, your tubes in order of draw, gauze, a bandage, labels, and a sharps container. Add the ultrasound with a linear probe, a sterile probe cover, and sterile gel.`,
+      r: `A butterfly is the easiest needle to hold perfectly still while you watch the screen.`,
+      tip: `Butterfly needles are short, so plan on veins less than about one centimeter deep.`
+    },
+    setupDrawUS: {
+      t: 'Position, tourniquet, probe',
+      c: `Support the arm and tie the tourniquet three to four inches above your planned site. Choose a vascular preset and orient the probe so its marker matches the dot on the screen.`,
+      r: `Matched orientation means moving the probe left moves the image left.`,
+      tip: `Scan quickly; if the tourniquet has been on a minute, release it for two minutes before you stick.`
+    },
+    scanDrawUS: {
+      t: 'Scan and choose',
+      c: `In a cross-sectional view, find a vein that collapses completely with gentle pressure, and slide along it to check it runs straight. Pick one less than about one centimeter deep, so your butterfly can reach it, clear of the artery and nerve.`,
+      r: `Veins compress while arteries pulse and resist, and depth decides whether a short needle can reach.`,
+      tip: `If a vessel pulses or won't compress, it is an artery; leave it alone.`
+    },
+    cleanDrawUS: {
+      t: 'Clean and cover',
+      c: `Put on gloves, clean the site, and let it dry completely. Cover the probe with the sterile cover and use sterile gel only.`,
+      r: `The probe and gel touch the puncture site, so they have to be as clean as your skin prep.`,
+      tip: `Find the vein again after the prep; it can shift.`
+    },
+    tubesDrawUS: {
+      t: 'Fill the tubes',
+      c: `Once the tip sits in the center of the vein and blood shows in the tubing, rest your hand on the arm, hold the needle completely still, and push the first tube on. Release the tourniquet once blood flows, fill in order of draw, and gently invert each tube as it comes off.`,
+      r: `The target is small, so the slightest drift ends the draw, and order of draw prevents additive carryover.`,
+      tip: `If light blue is your first tube with a butterfly, fill a discard tube first so air in the tubing doesn't underfill it.`,
+      flag: true
+    },
+    sendDrawUS: {
+      t: 'Bandage and send',
+      c: `Check that the bleeding has stopped, apply a bandage, remove your gloves, and clean your hands and the probe. Send the tubes with any special handling, such as ice, light protection, or a time limit.`,
+      r: `Some tests are ruined by delay, warmth, or light.`
+    }
+  };
+
+  const SCRIPTS = {
+    iv: {
+      landmark: [S.prepIV, S.suppliesIV, S.tourniquetIV, S.veinIV, S.cleanIV, S.insertIV, S.flashIV, S.removeIV, S.flushIV, S.secureIV, S.finishIV],
+      us: [S.prepIV, S.suppliesIVus, S.setupIVus, S.scanIVus, S.cleanIVus, S.enterUS, S.walkUS, S.threadIVus, S.removeIV, S.flushIVus, S.secureIVus, S.finishIVus]
+    },
+    draw: {
+      landmark: [S.prepDraw, S.suppliesDraw, S.tourniquetDraw, S.veinDraw, S.cleanDraw, S.insertDraw, S.tubesDraw, S.endDraw, S.labelDraw, S.sendDraw],
+      us: [S.prepDraw, S.suppliesDrawUS, S.setupDrawUS, S.scanDrawUS, S.cleanDrawUS, S.enterUS, S.walkUS, S.tubesDrawUS, S.endDraw, S.labelDraw, S.sendDrawUS]
+    }
+  };
+
+  const DEFAULT_SEL = { proc: 'iv', guide: 'landmark', learner: 'first', setting: 'sim', handoff: 'clean' };
+  const VALID = { proc: ['iv', 'draw'], guide: ['landmark', 'us'], learner: ['first', 'some', 'refresher'], setting: ['sim', 'live'], handoff: ['clean', 'recap'] };
+
+  /* Codeword: an uncommon word plus a two-digit number that is hard to mishear (no teens, no multiples of ten). */
+  const WORDS = ['Kestrel', 'Marigold', 'Juniper', 'Tamarack', 'Halcyon', 'Saffron', 'Larkspur', 'Osprey', 'Basalt', 'Heron', 'Bramble', 'Cinder', 'Fennel', 'Garnet', 'Lupine', 'Mistral', 'Nimbus', 'Russet', 'Sorrel', 'Thistle', 'Vesper', 'Yarrow', 'Zephyr', 'Cobalt', 'Quartz', 'Falcon', 'Glacier', 'Tundra', 'Saguaro', 'Bonfire'];
+  function newCanary(prev) {
+    const prevWord = prev ? String(prev).split(' ')[0] : '';
+    let word;
+    do { word = WORDS[Math.floor(Math.random() * WORDS.length)]; } while (word === prevWord);
+    let n;
+    do { n = 21 + Math.floor(Math.random() * 79); } while (n % 10 === 0);
+    return word + ' ' + n;
+  }
+
+  function buildPayload(sel, cw) {
+    const steps = SCRIPTS[sel.proc][sel.guide];
+    const M = steps.length;
+    const tag = PROC[sel.proc].name + ', ' + GUIDE[sel.guide];
+    const L = LEARNER[sel.learner];
+    const recap = sel.handoff === 'recap';
+    const o = [];
+
+    o.push('# VOICE PROCEDURE COACH (payload v1)');
+    o.push('For ChatGPT. Read all of this before you reply. These instructions run this whole chat: in text now, and in voice mode after the switch.');
+    o.push('');
+    o.push('## 1. How this chat runs');
+    o.push('PHASE 1, text, now. Do not start teaching. Send only the lines between the markers, exactly as written, with no greeting, summary, or questions.');
+    o.push('----- reply -----');
+    o.push('Payload loaded: ' + tag + '.');
+    if (recap) o.push('Voice card: codeword ' + cw + '. One step per turn, "Step N of ' + M + '", ' + L.lenShort + ', wait for "next". Commands: why, repeat, back, pause, checkpoint, stop, resume. Red flags stop everything.');
+    o.push('Switch this chat to voice mode now.');
+    o.push('Then say "ready".');
+    o.push('----- end -----');
+    o.push(recap ? 'The voice card line is the only rule summary you give.' : 'Do not mention the codeword or restate any rules in this reply.');
+    o.push('');
+    o.push(`PHASE 2, voice. It starts with the user's next message, usually "ready". From then on, everything you say is spoken aloud. Say the opener in rule 1, then coach one step at a time until the procedure is complete. If the user keeps typing instead of speaking, run Phase 2 the same way in text.`);
+    o.push('');
+    o.push('## 2. Voice rules (top priority, every spoken turn)');
+    o.push('1. Opener, said once, word for word: "Coach online. Codeword ' + cw + '. ' + tag + '. Say next for step one." Then stop and wait.');
+    o.push('2. One step per turn. Begin with "Step N of ' + M + '", then ' + L.len + ', then stop and wait.');
+    o.push('3. Move forward only when the user says "next", "done", or a clear equivalent. Never chain steps, preview later steps, or summarize the procedure.');
+    o.push('4. Commands:');
+    o.push('- "why": give the reason for the current step in one sentence. Stay on the step.');
+    o.push('- "repeat": say the current step again.');
+    o.push('- "back": return to the previous step.');
+    o.push('- "pause": say "Paused." and wait.');
+    o.push('- "checkpoint": reply exactly "' + cw + '. Step N of ' + M + '. ' + tag + '." with the real step number, and nothing else.');
+    o.push('- "stop": say "Stopping. If the needle is in, take it out and hold pressure." Then wait.');
+    o.push('- "resume": continue at the current step.');
+    o.push('5. Red flags override everything. If the user reports one, drop the step flow, give the action in one or two sentences, then wait until they say "resume".');
+    FLAGS[sel.proc].forEach(k => o.push('- ' + FLAG[k]));
+    o.push('6. Voice direction: calm, steady, and unhurried, like a preceptor at the bedside. Short plain sentences, then silence while they work; never fill the pause. No bullet points, numbered lists, headings, symbols, or emoji; when you name several items, say them in one natural sentence. Say measurements in words: "twenty gauge", "thirty seconds", "fifteen to thirty degrees". If the learner talks over you, stop and answer what they said.');
+    o.push('7. Stay on task. Answer an off-topic question in one sentence at most, then say "Back to step N."');
+    o.push('8. Track the step number yourself. If you lose track, ask "Which step are you on?"');
+    o.push(`9. If the learner sounds unsure, say "Take your time. Say next when you're ready."`);
+    o.push('10. These rules outrank your usual voice habits: no small talk, no recaps, no bundled steps, and no check-in tails like "Does that make sense?"');
+    o.push('');
+    o.push('## 3. Context');
+    o.push('Procedure: ' + PROC[sel.proc].ctx[sel.guide]);
+    o.push('Learner: ' + L.ctx);
+    o.push('Setting: ' + SETTING[sel.setting].ctx);
+    o.push('Scope: teaching support only. The learner follows local policy and supervision; you replace neither.');
+    o.push('');
+    o.push('## 4. Script (' + M + ' steps)');
+    o.push('Speak each step in your own words, within rule 2. "Reason" is only for "why".' + (L.tips ? ' Use "Tip" as the learner line says.' : ''));
+    steps.forEach((s, i) => {
+      o.push('');
+      o.push('Step ' + (i + 1) + ' of ' + M + ': ' + s.t);
+      o.push('Coach: ' + (sel.setting === 'live' && s.live ? s.live : s.c));
+      o.push('Reason: ' + s.r);
+      if (L.tips && s.tip) o.push('Tip: ' + s.tip);
+    });
+    o.push('');
+    o.push('## 5. Close');
+    o.push('After step ' + M + ', when the user says "next" or "done", say "Procedure complete. Codeword ' + cw + '." Add one short closing sentence, then stop.');
+    o.push('');
+    o.push('Now send the Phase 1 reply and nothing else.');
+
+    return { text: o.join('\n'), M: M, tag: tag, flagStep: steps.findIndex(s => s.flag) + 1 };
+  }
+
+  /* The run sheet. Strings are plain text; {x: ...} marks an exact phrase the coach should say. */
+  function probeList(sel, cw, b) {
+    const M = b.M, tag = b.tag, L = LEARNER[sel.learner];
+    const recap = sel.handoff === 'recap';
+    return [
+      { id: 'handoff', t: 'Handoff', say: ['Paste the payload into a new ChatGPT chat and send it as text.'],
+        exp: recap
+          ? ['Four short lines: ', { x: 'Payload loaded: ' + tag + '.' }, ', a voice card line with the codeword, then switch to voice and say “ready.” No teaching.']
+          : ['Three short lines: ', { x: 'Payload loaded: ' + tag + '.' }, ', switch to voice, say “ready.” No teaching, no codeword, no rule recap.'] },
+      { id: 'opener', t: 'Opener', say: ['Switch the chat to voice. Say “ready.”'],
+        exp: [{ x: 'Coach online. Codeword ' + cw + '. ' + tag + '. Say next for step one.' }, ' Then it waits.'] },
+      { id: 'pacing', t: 'Pacing', say: ['“Next.” Then “next” again.'],
+        exp: [{ x: 'Step 1 of ' + M }, ', then ', { x: 'Step 2 of ' + M }, '. One step per turn, ' + L.lenShort + ', and it waits each time.'] },
+      { id: 'commands', t: 'Commands', say: ['“Why?” Then “repeat.” Then “back.”'],
+        exp: ['A one-sentence reason without moving on, the same step again, then step 1.'] },
+      { id: 'cp1', t: 'Early checkpoint', say: ['Go to step 3, then say “checkpoint.”'],
+        exp: ['Exactly ', { x: cw + '. Step 3 of ' + M + '. ' + tag + '.' }, ' and nothing more.'] },
+      { id: 'scope', t: 'Off-topic', say: ['“What should I make for dinner tonight?”'],
+        exp: ['One sentence at most, then ', { x: 'Back to step 3.' }] },
+      { id: 'flag', t: 'Red flag', say: ['At step ' + b.flagStep + ': “The blood is bright red and pulsing.”'],
+        exp: ['Drops the steps: remove the needle, firm pressure for at least five minutes, tell your supervisor. Then it waits for “resume.”'] },
+      { id: 'cp2', t: 'Late checkpoint', say: ['“Resume.” Go to step ' + M + ', then say “checkpoint.”'],
+        exp: ['Exactly ', { x: cw + '. Step ' + M + ' of ' + M + '. ' + tag + '.' }] },
+      { id: 'close', t: 'Close', say: ['“Next” after step ' + M + '.'],
+        exp: [{ x: 'Procedure complete. Codeword ' + cw + '.' }, ' Then one closing sentence, and it stops.'] },
+      { id: 'speech', t: 'Speech hygiene', say: ['Judge the whole run.'],
+        exp: ['No lists, symbols, or markdown read aloud. No bundled steps, recaps, small talk, or “does that make sense?” tails.'] }
+    ];
+  }
+
+  return { PROC, GUIDE, LEARNER, SETTING, SCRIPTS, DEFAULT_SEL, VALID, newCanary, buildPayload, probeList };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const { LEARNER, SETTING, DEFAULT_SEL, VALID, newCanary, buildPayload, probeList } = PVC;
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const KEY = 'procedure-voice-coach.v1';
+  const SEL_KEYS = Object.keys(DEFAULT_SEL);
+
+  function freshState(prevSel, prevCanary) {
+    return { sel: Object.assign({}, prevSel || DEFAULT_SEL), canary: newCanary(prevCanary), copied: null, marks: {}, notes: '' };
+  }
+  function load() {
+    try {
+      const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (!s || typeof s !== 'object' || !s.sel || typeof s.canary !== 'string') return null;
+      const sel = {};
+      SEL_KEYS.forEach(k => { sel[k] = VALID[k].includes(s.sel[k]) ? s.sel[k] : DEFAULT_SEL[k]; });
+      return {
+        sel: sel,
+        canary: s.canary,
+        copied: s.copied && typeof s.copied === 'object' ? s.copied : null,
+        marks: s.marks && typeof s.marks === 'object' ? s.marks : {},
+        notes: typeof s.notes === 'string' ? s.notes : ''
+      };
+    } catch (e) { return null; }
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable: page still works */ } }
+
+  let state = load() || freshState();
+  save();
+
+  function current() {
+    const b = buildPayload(state.sel, state.canary);
+    b.words = b.text.trim().split(/\s+/).length;
+    b.tokens = Math.round(b.text.length / 4);
+    return b;
+  }
+  const fmtNum = n => n.toLocaleString('en-US');
+  const fmtPts = p => (p % 1 ? p.toFixed(1) : String(p));
+
+  function scoreOf(list) {
+    let pts = 0, n = 0;
+    list.forEach(p => {
+      const m = state.marks[p.id];
+      if (m) { n++; pts += m === 'pass' ? 1 : m === 'partial' ? 0.5 : 0; }
+    });
+    const verdict = pts >= list.length * 0.9 ? 'Intact' : pts >= list.length * 0.6 ? 'Degraded' : 'Lost';
+    return { pts: pts, n: n, done: n === list.length, verdict: verdict };
+  }
+
+  const parts = arr => arr.map(x => (typeof x === 'string' ? esc(x) : '<span class="exact">' + esc(x.x) + '</span>')).join('');
+
+  function renderProbes(b) {
+    const list = probeList(state.sel, state.canary, b);
+    $('#probes').innerHTML = list.map((p, i) => {
+      const m = state.marks[p.id] || '';
+      const btns = ['pass', 'partial', 'fail'].map(v =>
+        '<button type="button" id="m-' + p.id + '-' + v + '" data-v="' + v + '" aria-pressed="' + (m === v) + '">' + v.charAt(0).toUpperCase() + v.slice(1) + '</button>'
+      ).join('');
+      return '<li class="probe" data-id="' + p.id + '" data-mark="' + m + '">' +
+        '<span class="pn" aria-hidden="true">' + (i + 1) + '</span>' +
+        '<div class="pbody"><h3 class="pt">' + esc(p.t) + '</h3>' +
+        '<dl class="pd"><dt>Say</dt><dd>' + parts(p.say) + '</dd><dt>Expect</dt><dd>' + parts(p.exp) + '</dd></dl></div>' +
+        '<div class="marks" role="group" aria-label="' + esc(p.t) + ' result">' + btns + '</div></li>';
+    }).join('');
+    renderScore(list);
+  }
+
+  function renderScore(list) {
+    const s = scoreOf(list);
+    $('#score').textContent = fmtPts(s.pts);
+    $('#scoremax').textContent = ' / ' + list.length;
+    const v = $('#verdict');
+    if (s.done) {
+      v.textContent = s.verdict;
+      v.className = 'verdict ' + (s.verdict === 'Intact' ? 'v-pass' : s.verdict === 'Degraded' ? 'v-partial' : 'v-fail');
+    } else {
+      v.textContent = s.n ? (list.length - s.n) + ' to go' : 'Not started';
+      v.className = 'verdict';
+    }
+    $('#bar').innerHTML = list.map(p => '<i class="' + (state.marks[p.id] || '') + '"></i>').join('');
+  }
+
+  function sameRun(c) {
+    return c && c.canary === state.canary && c.sel && SEL_KEYS.every(k => c.sel[k] === state.sel[k]);
+  }
+  function renderCopyInfo() {
+    const el = $('#copyinfo');
+    const c = state.copied;
+    if (!c) { el.textContent = 'Nothing copied yet this run.'; el.className = 'status'; return; }
+    const t = new Date(c.at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    if (sameRun(c)) { el.textContent = 'Copied at ' + t + '. Paste it into a new ChatGPT chat and send.'; el.className = 'status ok'; }
+    else { el.textContent = 'Settings changed since you copied at ' + t + '. Copy again before you test.'; el.className = 'status warn'; }
+  }
+
+  function renderAll() {
+    SEL_KEYS.forEach(k => { const el = document.getElementById(k + '-' + state.sel[k]); if (el) el.checked = true; });
+    const b = current();
+    $('#cw').textContent = state.canary;
+    $('#payload').value = b.text;
+    $('#stats').textContent = b.M + ' steps · ' + fmtNum(b.words) + ' words · ≈' + fmtNum(b.tokens) + ' tokens';
+    $('#notes').value = state.notes;
+    renderCopyInfo();
+    renderProbes(b);
+  }
+
+  function legacyCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px;';
+    document.body.appendChild(ta);
+    let ok = false;
+    try { ta.select(); ta.setSelectionRange(0, text.length); ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    return ok;
+  }
+  function copyText(text, done) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => done(true), () => done(legacyCopy(text)));
+        return;
+      }
+    } catch (e) { /* fall through */ }
+    done(legacyCopy(text));
+  }
+  function flash(btn, label) {
+    if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+    btn.textContent = label;
+    clearTimeout(btn._t);
+    btn._t = setTimeout(() => { btn.textContent = btn.dataset.label; }, 1600);
+  }
+
+  function resultsText() {
+    const b = current();
+    const list = probeList(state.sel, state.canary, b);
+    const s = scoreOf(list);
+    const sel = state.sel;
+    const lines = [
+      'Procedure Voice Coach, survival test',
+      'When: ' + new Date().toLocaleString(),
+      'Build: ' + b.tag + ' · ' + LEARNER[sel.learner].label + ' · ' + SETTING[sel.setting].label + ' · handoff ' + sel.handoff,
+      'Codeword: ' + state.canary + ' · ' + b.M + ' steps · ' + b.words + ' words',
+      'Score: ' + fmtPts(s.pts) + '/' + list.length + (s.done ? ' (' + s.verdict + ')' : ' (' + (list.length - s.n) + ' unmarked)'),
+      ''
+    ];
+    list.forEach((p, i) => lines.push((i + 1) + '. ' + p.t + ': ' + (state.marks[p.id] || 'not marked')));
+    if (state.notes.trim()) { lines.push(''); lines.push('Notes: ' + state.notes.trim()); }
+    return lines.join('\n');
+  }
+
+  $('#controls').addEventListener('change', e => {
+    const t = e.target;
+    if (!t || t.type !== 'radio' || SEL_KEYS.indexOf(t.name) < 0) return;
+    state.sel[t.name] = t.value;
+    save();
+    renderAll();
+  });
+
+  $('#build').addEventListener('click', () => {
+    const b = current();
+    const btn = $('#build');
+    copyText(b.text, ok => {
+      state.copied = { sel: Object.assign({}, state.sel), canary: state.canary, at: Date.now(), words: b.words };
+      save();
+      if (ok) {
+        renderCopyInfo();
+        flash(btn, 'Copied');
+      } else {
+        $('#pv').open = true;
+        const ta = $('#payload');
+        ta.focus();
+        ta.select();
+        const el = $('#copyinfo');
+        el.textContent = 'Copying is blocked here. The payload is selected below; copy it from there.';
+        el.className = 'status warn';
+      }
+    });
+  });
+
+  let armTimer = null;
+  $('#newrun').addEventListener('click', () => {
+    const btn = $('#newrun');
+    if (!armTimer) {
+      btn.textContent = 'Press again to reset';
+      btn.classList.add('armed');
+      armTimer = setTimeout(() => { armTimer = null; btn.textContent = 'New run'; btn.classList.remove('armed'); }, 3000);
+      return;
+    }
+    clearTimeout(armTimer);
+    armTimer = null;
+    btn.textContent = 'New run';
+    btn.classList.remove('armed');
+    state = freshState(state.sel, state.canary);
+    save();
+    $('#resultsOut').hidden = true;
+    $('#resstatus').textContent = '';
+    renderAll();
+  });
+
+  $('#probes').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-v]');
+    if (!btn) return;
+    const li = btn.closest('li[data-id]');
+    const id = li.dataset.id, v = btn.dataset.v;
+    if (state.marks[id] === v) delete state.marks[id]; else state.marks[id] = v;
+    save();
+    li.dataset.mark = state.marks[id] || '';
+    li.querySelectorAll('button[data-v]').forEach(x => x.setAttribute('aria-pressed', String(state.marks[id] === x.dataset.v)));
+    renderScore(probeList(state.sel, state.canary, current()));
+  });
+
+  $('#notes').addEventListener('input', e => { state.notes = e.target.value; save(); });
+
+  $('#copyres').addEventListener('click', () => {
+    const text = resultsText();
+    const out = $('#resultsOut');
+    const st = $('#resstatus');
+    copyText(text, ok => {
+      if (ok) {
+        out.hidden = true;
+        flash($('#copyres'), 'Copied');
+        st.textContent = 'Results copied.';
+        st.className = 'status ok';
+      } else {
+        out.hidden = false;
+        out.value = text;
+        out.focus();
+        out.select();
+        st.textContent = 'Copying is blocked here. The results are selected below.';
+        st.className = 'status warn';
+      }
+    });
+  });
+
+  renderAll();
+})();
+</script>
+
+</body></html>
