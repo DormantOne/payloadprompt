@@ -1,0 +1,2045 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Board Review Voice Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Answer-sheet look: cool paper stock, graphite for anything you choose, drop-out blue for the printed bubbles.
+   Status colors are the only bright color on the page. */
+:root{
+  --paper:#eef0eb;
+  --panel:#fbfbf8;
+  --sunken:#f3f4ef;
+  --ink:#1e2321;
+  --muted:#59615c;
+  --rule:#d6dad3;
+  --rule-strong:#b2b9b1;
+  --form:#2c56a0;
+  --form-wash:#e2e9f6;
+  --solid:#232826;
+  --on-solid:#f7f8f4;
+  --right:#1d7a4c; --right-wash:#dcefe3; --on-right:#ffffff;
+  --partial:#8a5b06; --partial-wash:#f3e6c6;
+  --missed:#b2312a; --missed-wash:#f8dedb; --on-missed:#ffffff;
+  --display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#141716;
+    --panel:#1b1f1d;
+    --sunken:#171b19;
+    --ink:#e5e9e5;
+    --muted:#9fa8a2;
+    --rule:#2c322f;
+    --rule-strong:#434b47;
+    --form:#93b3ee;
+    --form-wash:#1d2a42;
+    --solid:#e5e9e5;
+    --on-solid:#141716;
+    --right:#6ccf9b; --right-wash:#14301f; --on-right:#0f1f16;
+    --partial:#e2b35b; --partial-wash:#33280f;
+    --missed:#f08a83; --missed-wash:#3b1b19; --on-missed:#2a0f0d;
+    color-scheme:dark;
+  }
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.5 var(--body)}
+.wrap{max-width:46rem;margin:0 auto;padding:30px 16px 64px;display:flex;flex-direction:column;gap:18px}
+:focus-visible{outline:2px solid var(--form);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* Masthead */
+.mast{display:flex;flex-direction:column;gap:12px;padding:4px 2px 6px}
+h1{margin:0;font-family:var(--display);font-weight:800;font-stretch:118%;font-size:clamp(31px,7.2vw,47px);line-height:.98;letter-spacing:-.018em;text-wrap:balance}
+.lede{margin:0;max-width:58ch;color:var(--muted);font-size:16.5px}
+.savebar{margin:0;display:flex;align-items:center;gap:9px;font-size:14px;line-height:1.35;color:var(--muted)}
+.savebar::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--rule-strong)}
+.savebar[data-kind="saved"]::before,.savebar[data-kind="fresh"]::before,.savebar[data-kind="loaded"]::before{background:var(--right);border-color:var(--right)}
+.savebar[data-kind="saving"]::before,.savebar[data-kind="loading"]::before{border-color:var(--form);border-style:dashed}
+.savebar[data-kind="failed"]::before,.savebar[data-kind="off"]::before{background:var(--partial);border-color:var(--partial)}
+.savebar[data-kind="error"]::before,.savebar[data-kind="corrupt"]::before{background:var(--missed);border-color:var(--missed)}
+
+/* Panels */
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
+.ph{display:flex;align-items:baseline;justify-content:space-between;gap:4px 14px;flex-wrap:wrap}
+h2{margin:0;font:700 22px/1.15 var(--display);font-stretch:106%;letter-spacing:-.005em}
+.meta{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.h3{margin:0;font:700 17px/1.2 var(--display)}
+.empty{margin:0;font-size:15px;color:var(--muted)}
+
+/* Controls */
+.controls{display:flex;flex-direction:column}
+.ctl{display:grid;grid-template-columns:6.4rem minmax(0,1fr);gap:8px 14px;align-items:start;padding-block:13px;border-top:1px solid var(--rule)}
+.ctl:first-child{border-top:0;padding-top:0}
+.ctl-label{padding-top:9px;font:600 15px/1.2 var(--display);color:var(--muted)}
+.ctl-body{min-width:0}
+.ctl-hint{grid-column:2;margin:0;font-size:14px;line-height:1.4;color:var(--muted);max-width:56ch}
+
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg label,.chip{position:relative;display:flex}
+.seg input,.chip input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:1}
+.opt{display:inline-flex;align-items:center;gap:9px;min-height:40px;padding:7px 15px 7px 11px;border:1px solid var(--rule-strong);border-radius:999px;background:var(--panel);font-size:15px;line-height:1.2;color:var(--ink);font-variant-numeric:tabular-nums}
+.opt::before{content:"";flex:none;width:14px;height:14px;border-radius:50%;border:1.5px solid var(--form);transition:background-color .12s,border-color .12s}
+.seg label:hover .opt{border-color:var(--ink)}
+.seg input:checked + .opt{border-color:var(--solid);box-shadow:inset 0 0 0 1px var(--solid)}
+.seg input:checked + .opt::before{background:var(--solid);border-color:var(--solid)}
+.seg input:focus-visible + .opt,.chip input:focus-visible + .chip-face{outline:2px solid var(--form);outline-offset:2px}
+
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.7rem,1fr));gap:6px}
+.chip-face{flex:1;display:flex;flex-direction:column;gap:7px;min-width:0;padding:8px 10px 10px;border:1px solid var(--rule-strong);border-radius:10px;background:var(--panel)}
+.chip-name{display:flex;align-items:center;gap:8px;font-size:14.5px;line-height:1.2;font-weight:700;color:var(--muted)}
+.chip-name::before{content:"";flex:none;width:13px;height:13px;border-radius:3px;border:1.5px solid var(--form);background-position:center;background-repeat:no-repeat}
+.chip:hover .chip-face{border-color:var(--ink)}
+.chip input:checked + .chip-face{border-color:var(--solid);box-shadow:inset 0 0 0 1px var(--solid)}
+.chip input:checked + .chip-face .chip-name{color:var(--ink)}
+.chip input:checked + .chip-face .chip-name::before{background-color:var(--solid);border-color:var(--solid);box-shadow:inset 0 0 0 2px var(--panel)}
+.dots{display:flex;flex-wrap:wrap;gap:3px}
+.d{width:7px;height:7px;border-radius:50%;border:1px solid var(--rule-strong)}
+.d-right{background:var(--right);border-color:var(--right)}
+.d-partial{background:linear-gradient(90deg,var(--partial) 50%,transparent 50%);border-color:var(--partial)}
+.d-missed{background:var(--missed);border-color:var(--missed)}
+.d-open{background:var(--form-wash);border-color:var(--form)}
+.chipacts{display:flex;gap:18px;margin-top:9px}
+.link{padding:0;border:0;background:none;font:inherit;font-size:14.5px;font-weight:700;color:var(--form);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* Next set */
+.setbox{display:flex;flex-direction:column;gap:11px;padding:14px;border:1.5px dashed var(--rule-strong);border-radius:12px;background:var(--sunken)}
+.setrow{display:flex;align-items:center;justify-content:space-between;gap:8px 14px;flex-wrap:wrap}
+.setsum{display:flex;flex-direction:column;gap:4px;min-width:0}
+.setsum strong{font:700 18px/1.2 var(--display)}
+.mix{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px;color:var(--muted)}
+.mix .k{display:inline-flex;align-items:center;gap:6px}
+.mix .k::before{content:"";width:9px;height:9px;border-radius:50%;border:1.5px solid var(--form)}
+.mix .k-missed::before{background:var(--missed);border-color:var(--missed)}
+.mix .k-right::before{background:var(--right);border-color:var(--right)}
+.setnote{margin:0;font-size:14px;color:var(--partial)}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid var(--rule-strong);background:var(--panel);font:600 13px/1.3 var(--display);font-variant-numeric:tabular-nums;color:var(--ink)}
+button.tag{cursor:pointer}
+.t-new{border-color:var(--form);color:var(--form)}
+.t-missed{border-color:var(--missed);background:var(--missed-wash);color:var(--missed)}
+.t-partial{border-color:var(--partial);background:var(--partial-wash);color:var(--partial)}
+.t-right{border-color:var(--right);background:var(--right-wash);color:var(--right)}
+.coderow{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap;padding-top:11px;border-top:1px solid var(--rule)}
+.code-k{font-size:14px;color:var(--muted)}
+.code-v{font:800 21px/1.1 var(--display);font-stretch:112%;letter-spacing:.01em}
+.code-note{flex-basis:100%;margin:0;font-size:13.5px;line-height:1.4;color:var(--muted)}
+
+/* Buttons and status */
+.go{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap}
+.btn-primary{font:700 17px/1 var(--display);font-stretch:106%;padding:15px 22px;min-height:50px;border:0;border-radius:10px;background:var(--solid);color:var(--on-solid);cursor:pointer}
+.btn-primary:hover{box-shadow:0 0 0 3px var(--form-wash)}
+.btn-primary:active{transform:translateY(1px)}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;transform:none}
+.btn-secondary{font:700 16px/1 var(--display);padding:12px 18px;min-height:44px;border-radius:10px;border:1.5px solid var(--solid);background:var(--panel);color:var(--ink);cursor:pointer}
+.btn-secondary:hover{background:var(--sunken)}
+.btn-quiet{font:700 14.5px/1 var(--body);padding:10px 13px;min-height:40px;border-radius:8px;border:1px solid var(--rule-strong);background:var(--panel);color:var(--ink);cursor:pointer}
+.btn-quiet:hover{border-color:var(--ink)}
+.btn-quiet.sm{min-height:34px;padding:7px 11px;font-size:13.5px}
+.btn-primary.armed,.btn-quiet.armed{background:var(--missed-wash);color:var(--missed);box-shadow:inset 0 0 0 1.5px var(--missed)}
+.out{font-weight:700;font-size:15.5px;color:var(--form);text-underline-offset:3px}
+.status{margin:0;min-height:1.4em;font-size:14.5px;line-height:1.45;color:var(--muted)}
+.status:empty{min-height:0}
+.panel > .status:empty{margin-top:-16px}
+.report > .status:empty{margin-top:-8px}
+.opencard > .status:empty{margin-top:-6px}
+.bk > .status:empty{margin-top:-10px}
+#hist-more{align-self:flex-start}
+.status.ok{color:var(--right)}
+.status.warn{color:var(--partial)}
+
+/* Run it in voice */
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:grid;grid-template-columns:2rem minmax(0,1fr);gap:12px;align-items:start}
+.sn{display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;border:1.5px solid var(--form);color:var(--form);font:700 15px/1 var(--display);font-variant-numeric:tabular-nums}
+.steps p{margin:0;padding-top:4px;font-size:15.5px;line-height:1.45}
+.steps b{font-family:var(--display);font-weight:700}
+.code{font-family:var(--display);font-weight:800;white-space:nowrap}
+.flow{display:flex;flex-direction:column;gap:16px}
+.opencard{display:flex;flex-direction:column;gap:6px;padding:14px;border:1.5px dashed var(--form);border-radius:12px;background:var(--form-wash)}
+.opencard .setrow{align-items:baseline}
+.open-note{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
+.pv summary{cursor:pointer;font-weight:700;font-size:15px;width:max-content;max-width:100%}
+.pv textarea,.box{display:block;width:100%;margin-top:10px;padding:12px 14px;resize:vertical;font:13px/1.55 var(--mono);color:var(--ink);background:var(--sunken);border:1px solid var(--rule);border-radius:8px}
+.pv textarea{height:22rem}
+.box{min-height:7.5rem}
+
+.scorebox{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:10px 16px;padding:14px 16px;border:1px solid var(--rule);border-radius:12px;background:var(--sunken)}
+.score-num{font:800 34px/1 var(--display);font-variant-numeric:tabular-nums;white-space:nowrap}
+.score-num small{font-size:17px;font-weight:600;color:var(--muted)}
+.score-side{display:flex;align-items:center;gap:8px 12px;flex-wrap:wrap;min-width:0}
+.verdict{font:700 13.5px/1 var(--display);padding:6px 9px;border-radius:6px;background:var(--rule);color:var(--ink)}
+.v-right{background:var(--right-wash);color:var(--right)}
+.v-partial{background:var(--partial-wash);color:var(--partial)}
+.v-missed{background:var(--missed-wash);color:var(--missed)}
+.score-help{font-size:13.5px;color:var(--muted)}
+.bar{grid-column:1/-1;display:grid;grid-template-columns:repeat(var(--n,10),minmax(0,1fr));gap:4px}
+.bar i{display:block;height:8px;border-radius:999px;background:var(--rule)}
+.bar i.b-R{background:var(--right)}
+.bar i.b-P{background:var(--partial)}
+.bar i.b-W{background:var(--missed)}
+
+.report{display:flex;flex-direction:column;gap:8px}
+.fld{font:700 15.5px/1.2 var(--display)}
+.report .box{margin-top:0}
+.sheethead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.tog{display:inline-flex;align-items:center;gap:8px;font-size:14.5px;cursor:pointer}
+.tog input{width:18px;height:18px;margin:0;accent-color:var(--solid)}
+.qs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.q{display:grid;grid-template-columns:2.25rem minmax(0,1fr) auto;gap:8px 14px;align-items:center;padding-block:11px;border-top:1px solid var(--rule)}
+.q:first-child{border-top:0;padding-top:2px}
+.qn{display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;border:1.5px solid var(--form);font:700 14px/1 var(--display);color:var(--form);font-variant-numeric:tabular-nums;transition:background-color .12s,color .12s}
+.q[data-mark="R"] .qn{background:var(--right);border-color:var(--right);color:var(--on-right)}
+.q[data-mark="P"] .qn{background:linear-gradient(90deg,var(--partial-wash) 50%,var(--panel) 50%);border-color:var(--partial);color:var(--partial)}
+.q[data-mark="W"] .qn{background:var(--missed);border-color:var(--missed);color:var(--on-missed)}
+.qbody{min-width:0}
+.qline{margin:0;display:flex;align-items:baseline;gap:4px 9px;flex-wrap:wrap}
+.idlink{padding:0;border:0;background:none;font:700 16px/1.2 var(--display);font-variant-numeric:tabular-nums;color:var(--form);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.qcat{font-size:15px;color:var(--muted)}
+.qtitle{margin:3px 0 0;font-size:15px;line-height:1.35}
+.qflag{margin:4px 0 0;font-size:14px;line-height:1.4;color:var(--partial)}
+.marks{display:flex;gap:6px;flex-wrap:wrap}
+.marks button{font:700 14px/1 var(--body);min-width:4.6rem;min-height:40px;padding:9px 10px;border-radius:8px;border:1px solid var(--rule-strong);background:var(--panel);color:var(--muted);cursor:pointer}
+.marks button:hover{border-color:var(--ink);color:var(--ink)}
+.marks button[data-v="R"][aria-pressed="true"]{background:var(--right-wash);border-color:var(--right);color:var(--right)}
+.marks button[data-v="P"][aria-pressed="true"]{background:var(--partial-wash);border-color:var(--partial);color:var(--partial)}
+.marks button[data-v="W"][aria-pressed="true"]{background:var(--missed-wash);border-color:var(--missed);color:var(--missed)}
+.last{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid var(--rule);border-radius:12px;background:var(--sunken)}
+.last p{margin:0}
+.last-h{font-size:14.5px;color:var(--muted)}
+.last-s{font-size:16px}
+.last-s .big{font:800 26px/1 var(--display);font-variant-numeric:tabular-nums}
+.last-m{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:14.5px;color:var(--muted)}
+
+/* Answer sheet */
+.sum{margin:0;font-size:16px;line-height:1.5}
+.sum b{font-family:var(--display);font-weight:800;font-variant-numeric:tabular-nums}
+.covtools{display:flex;flex-direction:column;gap:10px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0;padding:0;list-style:none;font-size:13.5px;color:var(--muted)}
+.legend li{display:inline-flex;align-items:center;gap:7px}
+.legend .bub{width:15px;height:15px;font-size:0;border-width:1.5px;cursor:default;pointer-events:none}
+.rows{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:11.5rem minmax(0,1fr);gap:8px 14px;padding-block:12px;border-top:1px solid var(--rule);align-items:start}
+.row:first-child{border-top:0;padding-top:2px}
+.row-h{display:flex;flex-direction:column;gap:2px;min-width:0;padding-top:4px}
+.row-name{font:700 15.5px/1.2 var(--display)}
+.row-nums{font-size:13.5px;line-height:1.35;color:var(--muted);font-variant-numeric:tabular-nums}
+.bubs{display:flex;flex-wrap:wrap;gap:7px}
+.bub{position:relative;isolation:isolate;flex:none;display:grid;place-items:center;width:30px;height:30px;padding:0;border-radius:50%;border:1.5px solid var(--form);background:transparent;color:var(--form);font:700 12.5px/1 var(--display);font-variant-numeric:tabular-nums;cursor:pointer;transition:transform .1s,opacity .15s}
+.bub:hover{transform:scale(1.08)}
+.bub.s-open{border-style:dashed;background:var(--form-wash)}
+.bub.s-right{background:var(--right);border-color:var(--right);color:var(--on-right)}
+.bub.s-partial{background:linear-gradient(90deg,var(--partial) 50%,transparent 50%);border-color:var(--partial);color:var(--ink);text-shadow:0 0 3px var(--panel),0 0 2px var(--panel)}
+.bub.s-missed{background:var(--missed);border-color:var(--missed);color:var(--on-missed)}
+.bub.s-missed::before{content:"";position:absolute;z-index:-1;left:4px;right:4px;top:calc(50% - 1px);height:2px;border-radius:2px;background:var(--on-missed);opacity:.45;transform:rotate(-45deg)}
+.bub.flagged::after{content:"";position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--ink);border:2px solid var(--panel)}
+.legend .bub.flagged{border-color:var(--rule-strong)}
+.legend .bub.flagged::after{width:8px;height:8px;top:-2px;right:-2px}
+.bub.dim{opacity:.22}
+.bub.sel{outline:2px solid var(--ink);outline-offset:2px}
+.detail{grid-column:1/-1;display:flex;flex-direction:column;gap:9px;margin-top:4px;padding:14px 16px;border:1px solid var(--rule-strong);border-radius:12px;background:var(--sunken)}
+.detail:focus{outline:none}
+.dt-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dt-id{margin:0;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dt-title{margin:0;font:700 18px/1.25 var(--display)}
+.dl{display:grid;grid-template-columns:4.7rem minmax(0,1fr);gap:7px 12px;margin:0;font-size:15px;line-height:1.45}
+.dl dt{font:700 14px/1.5 var(--display);color:var(--muted)}
+.dl dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.traps,.flags{margin:0;padding-left:1.1em}
+.traps li,.flags li{margin:0 0 5px}
+.tw{display:block;font-size:14px;color:var(--muted)}
+.cites{color:var(--muted);font-variant-numeric:tabular-nums}
+.flags{color:var(--partial)}
+.when{font-size:13px;color:var(--muted)}
+
+/* Past sessions */
+.hist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.h{display:grid;grid-template-columns:4rem minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding-block:10px;border-top:1px solid var(--rule)}
+.h:first-child{border-top:0;padding-top:2px}
+.h-date{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.h-main{display:flex;flex-direction:column;min-width:0}
+.h-code{font:700 15.5px/1.25 var(--display)}
+.h-cats{font-size:14px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h-score{font:700 14px/1 var(--display);padding:6px 9px;border-radius:6px;font-variant-numeric:tabular-nums}
+.h-miss{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:4px}
+.bk{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.bk p{margin:0;font-size:14.5px;line-height:1.45;color:var(--muted);max-width:60ch}
+.foot{margin:0;padding-inline:2px;font-size:13.5px;line-height:1.45;color:var(--muted)}
+
+@media (max-width:640px){
+  .q{grid-template-columns:2.25rem minmax(0,1fr)}
+  .marks{grid-column:2}
+  .row{grid-template-columns:minmax(0,1fr);gap:9px}
+  .row-h{padding-top:0}
+  .bubs{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:4px}
+  .bub{width:100%;max-width:34px;height:auto;aspect-ratio:1;justify-self:center}
+}
+@media (max-width:540px){
+  .wrap{padding:22px 12px 56px}
+  .panel{padding:16px 14px;border-radius:12px}
+  .ctl{grid-template-columns:minmax(0,1fr);gap:9px}
+  .ctl-label{padding-top:0}
+  .ctl-hint{grid-column:1}
+  .btn-primary{width:100%}
+  .dl{grid-template-columns:minmax(0,1fr);gap:0}
+  .dl dd{margin-bottom:9px}
+  .h{grid-template-columns:3.3rem minmax(0,1fr) auto}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important}
+  .bub:hover{transform:none}
+  .btn-primary:active{transform:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="mast">
+    <h1>Board Review Voice Coach</h1>
+    <p class="lede">Pick topics and copy the payload into ChatGPT. It walks you into voice mode and quizzes you out loud. Paste its report back here and this page remembers what you've covered and what you missed.</p>
+    <p class="savebar" id="savebar" data-kind="loading" role="status" aria-live="polite">Loading your saved progress…</p>
+  </header>
+
+  <section class="panel" aria-labelledby="build-h">
+    <div class="ph"><h2 id="build-h">Build a session</h2><span class="meta" id="bankmeta"></span></div>
+
+    <div class="controls" id="controls">
+      <div class="ctl">
+        <span class="ctl-label" id="lbl-cats">Topics</span>
+        <div class="ctl-body">
+          <div class="chips" id="cats" role="group" aria-labelledby="lbl-cats"></div>
+          <div class="chipacts"><button type="button" class="link" id="cats-all">Select all</button><button type="button" class="link" id="cats-none">Clear</button></div>
+        </div>
+      </div>
+      <div class="ctl" role="radiogroup" aria-labelledby="lbl-len">
+        <span class="ctl-label" id="lbl-len">Questions</span>
+        <div class="seg">
+          <label><input type="radio" name="len" value="5"><span class="opt">5</span></label>
+          <label><input type="radio" name="len" value="10"><span class="opt">10</span></label>
+          <label><input type="radio" name="len" value="15"><span class="opt">15</span></label>
+          <label><input type="radio" name="len" value="20"><span class="opt">20</span></label>
+        </div>
+      </div>
+      <div class="ctl" role="radiogroup" aria-labelledby="lbl-pick">
+        <span class="ctl-label" id="lbl-pick">Pick</span>
+        <div class="seg">
+          <label><input type="radio" name="pick" value="mix"><span class="opt">Smart mix</span></label>
+          <label><input type="radio" name="pick" value="new"><span class="opt">New first</span></label>
+          <label><input type="radio" name="pick" value="missed"><span class="opt">Missed first</span></label>
+        </div>
+        <p class="ctl-hint" id="hint-pick"></p>
+      </div>
+      <div class="ctl" role="radiogroup" aria-labelledby="lbl-style">
+        <span class="ctl-label" id="lbl-style">Answers</span>
+        <div class="seg">
+          <label><input type="radio" name="style" value="mcq"><span class="opt">Choices A to E</span></label>
+          <label><input type="radio" name="style" value="recall"><span class="opt">Open recall</span></label>
+        </div>
+        <p class="ctl-hint" id="hint-style"></p>
+      </div>
+      <div class="ctl" role="radiogroup" aria-labelledby="lbl-depth">
+        <span class="ctl-label" id="lbl-depth">Debrief</span>
+        <div class="seg">
+          <label><input type="radio" name="depth" value="brief"><span class="opt">Brief</span></label>
+          <label><input type="radio" name="depth" value="full"><span class="opt">Full</span></label>
+        </div>
+        <p class="ctl-hint" id="hint-depth"></p>
+      </div>
+    </div>
+
+    <div class="setbox">
+      <div class="setrow">
+        <div class="setsum"><strong id="set-sum">Loading…</strong><span class="mix" id="set-mix"></span></div>
+        <button type="button" class="btn-quiet" id="shuffle">Shuffle</button>
+      </div>
+      <div class="tags" id="set-tags" aria-label="Item numbers in the next set"></div>
+      <p class="setnote" id="set-note" hidden></p>
+      <div class="coderow">
+        <span class="code-k">Session code</span><strong class="code-v" id="next-code"></strong>
+        <p class="code-note">ChatGPT says this when voice starts, so you know the instructions carried over. It also goes on the report.</p>
+      </div>
+    </div>
+
+    <div class="go">
+      <button type="button" class="btn-primary" id="build" disabled>Build and copy payload</button>
+      <a class="out" href="https://chatgpt.com/" target="_blank" rel="noopener">Open ChatGPT</a>
+    </div>
+    <p class="status" id="buildstatus" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="panel" id="run-panel" aria-labelledby="run-h">
+    <div class="ph"><h2 id="run-h">Run it in voice</h2><span class="meta" id="runmeta"></span></div>
+    <ol class="steps" id="steps"></ol>
+
+    <div id="run-open" hidden>
+      <div class="flow">
+        <div class="opencard">
+          <div class="setrow">
+            <div><span class="code-k">Open session</span> <strong class="code-v" id="open-code"></strong></div>
+            <button type="button" class="btn-quiet" id="recopy">Copy payload again</button>
+          </div>
+          <p class="open-note" id="open-note"></p>
+          <p class="status" id="openstatus" role="status" aria-live="polite"></p>
+        </div>
+
+        <details class="pv" id="pv">
+          <summary>Show payload</summary>
+          <textarea id="payload" readonly spellcheck="false" aria-label="Payload text"></textarea>
+        </details>
+
+        <div class="report">
+          <label class="fld" for="report">Paste ChatGPT's report</label>
+          <textarea id="report" class="box" rows="5" spellcheck="false" placeholder="BOARD REVIEW REPORT&#10;session: …&#10;4.4 R&#10;…"></textarea>
+          <div class="go"><button type="button" class="btn-secondary" id="readreport">Read report</button></div>
+          <p class="status" id="reportstatus" role="status" aria-live="polite"></p>
+        </div>
+
+        <div class="scorebox">
+          <div class="score-num"><span id="score">0</span><small id="scoremax"> of 10</small></div>
+          <div class="score-side"><span class="verdict" id="verdict">Nothing marked yet</span><span class="score-help" id="score-help"></span></div>
+          <div class="bar" id="bar" aria-hidden="true"></div>
+        </div>
+
+        <div class="sheethead">
+          <h3 class="h3">Run sheet</h3>
+          <label class="tog"><input type="checkbox" id="showtopics"><span>Show topics</span></label>
+        </div>
+        <ol class="qs" id="sheet"></ol>
+
+        <div class="go">
+          <button type="button" class="btn-primary" id="save">Save results</button>
+          <button type="button" class="btn-quiet" id="discard">Discard session</button>
+        </div>
+      </div>
+    </div>
+    <div id="run-idle"></div>
+    <p class="status" id="runstatus" role="status" aria-live="polite"></p>
+  </section>
+
+  <section class="panel" id="sheet-panel" aria-labelledby="cov-h">
+    <div class="ph"><h2 id="cov-h">Answer sheet</h2><span class="meta" id="covmeta">Tap a bubble to review that item</span></div>
+    <p class="sum" id="sum"></p>
+    <div class="covtools">
+      <div class="seg" id="filters" role="radiogroup" aria-label="Show on the answer sheet">
+        <label><input type="radio" name="filter" value="all"><span class="opt">All</span></label>
+        <label><input type="radio" name="filter" value="missed"><span class="opt">To revisit</span></label>
+        <label><input type="radio" name="filter" value="new"><span class="opt">New</span></label>
+        <label id="flt-flag" hidden><input type="radio" name="filter" value="flag"><span class="opt">Flagged</span></label>
+      </div>
+      <ul class="legend" aria-label="Legend">
+        <li><span class="bub s-new" aria-hidden="true"></span>Not quizzed</li>
+        <li><span class="bub s-open" aria-hidden="true"></span>In open session</li>
+        <li><span class="bub s-right" aria-hidden="true"></span>Right last time</li>
+        <li><span class="bub s-partial" aria-hidden="true"></span>Partly right</li>
+        <li><span class="bub s-missed" aria-hidden="true"></span>Missed last time</li>
+        <li><span class="bub s-new flagged" aria-hidden="true"></span>Flagged by ChatGPT</li>
+      </ul>
+    </div>
+    <div class="rows" id="cov"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="hist-h">
+    <div class="ph"><h2 id="hist-h">Past sessions</h2><span class="meta" id="histmeta"></span></div>
+    <ol class="hist" id="hist"></ol>
+    <button type="button" class="link" id="hist-more" hidden>Show all</button>
+    <details class="pv" id="backup">
+      <summary>Backup and reset</summary>
+      <div class="bk">
+        <p>When this page runs inside Claude, your progress saves on its own. A backup is a block of text you can keep anywhere, then paste back here to restore it, including into a downloaded copy of this page.</p>
+        <div class="go"><button type="button" class="btn-quiet" id="bk-copy">Copy backup</button><button type="button" class="btn-quiet" id="bk-reset">Reset all progress</button></div>
+        <textarea id="bk-text" class="box" spellcheck="false" placeholder="Paste a backup here to restore it" aria-label="Backup text"></textarea>
+        <div class="go"><button type="button" class="btn-quiet" id="bk-restore">Restore from backup</button></div>
+        <p class="status" id="bk-status" role="status" aria-live="polite"></p>
+      </div>
+    </details>
+  </section>
+
+  <p class="foot">A study aid built from your own item file. ChatGPT writes the questions from your answer key, so check anything you'll act on against current guidelines.</p>
+</div>
+
+<!-- Item bank: the review file, in its original markdown format. Edit or replace it here; the page parses it on load. -->
+<script type="text/markdown" id="bank-md">
+## 1. Cardiology
+
+**1.1 — HFrEF four-pillar GDMT**
+- **Principle:** Every patient with HFrEF (LVEF ≤40%) should be on all four pillars — ARNI, evidence-based beta-blocker, MRA, and SGLT2 inhibitor — initiated and titrated within ~3 months, all Class I.[1][2][3]
+- **Distractors:** ACEi + beta-blocker alone (outdated dual therapy — misses MRA and SGLT2i)[12]; waiting to add SGLT2i until diabetes develops (benefit is independent of diabetes status)[4][7]; using digoxin as a pillar (reduces HF hospitalization but not mortality — DIG trial)[88]; stopping GDMT once EF recovers (HFimpEF requires continuation, Class I)[3].
+- **Citation:** [1][2][3][4][7][12][88]
+
+**1.2 — Evidence-based beta-blockers in HFrEF**
+- **Principle:** Only bisoprolol, carvedilol, and metoprolol succinate are proven to reduce mortality in HFrEF.[8][9]
+- **Distractors:** Metoprolol tartrate (short-acting, not evidence-based)[8]; atenolol (never studied/proven in HFrEF)[8]; any beta-blocker is interchangeable (false — mortality data are drug-specific)[9].
+- **Citation:** [8][9]
+
+**1.3 — Atrial fibrillation anticoagulation threshold**
+- **Principle:** Anticoagulate (Class I) when estimated annual stroke risk ≥2% — generally CHA₂DS₂-VASc ≥2 in men, ≥3 in women; DOACs preferred over warfarin for all eligible patients.[14][15][16][18]
+- **Distractors:** Aspirin monotherapy as an acceptable alternative (considered harmful/ineffective for stroke prevention in AF)[15]; a DOAC for a patient with mechanical valve or moderate-severe mitral stenosis (warfarin only — INVICTUS showed rivaroxaban inferior in rheumatic heart disease)[15][16][18]; counting female sex as an independent risk factor (it is now a risk modifier)[16].
+- **Citation:** [14][15][16][18]
+
+**1.4 — STEMI reperfusion timing**
+- **Principle:** Primary PCI with FMC-to-device ≤90 min (≤120 min if transfer); if PCI cannot be achieved within 120 min, give fibrinolysis for patients presenting <12 h from onset.[21][22][23][24]
+- **Distractors:** Fibrinolysis first when PCI is available within 90 min (PCI superior)[22]; full-dose tenecteplase in a patient >75 y (use half dose)[22][24]; prasugrel/ticagrelor as the P2Y₁₂ agent given with a fibrinolytic (clopidogrel is the one used with lytics)[28][32].
+- **Citation:** [21][22][23][24][28][32]
+
+**1.5 — P2Y₁₂ inhibitor choice in ACS with PCI**
+- **Principle:** Prasugrel or ticagrelor is preferred over clopidogrel for ACS treated with PCI (Class I); DAPT ≥12 months unless high bleeding risk.[28][29][31]
+- **Distractors:** Prasugrel in a patient with prior stroke/TIA (contraindicated)[33]; routine P2Y₁₂ pretreatment before angiography in NSTE-ACS with planned early invasive strategy (not recommended)[20][34]; clopidogrel as first choice when prasugrel/ticagrelor are options (inferior ischemic protection)[28].
+- **Citation:** [20][28][29][31][33][34]
+
+**1.6 — Secondary-prevention LDL targets (2026 dyslipidemia guideline)**
+- **Principle:** High-intensity statin for all ASCVD; LDL-C <55 mg/dL (non-HDL <85) for very-high-risk ASCVD, <70 mg/dL otherwise; add ezetimibe, PCSK9 mAb, or bempedoic acid as needed.[36][39][40]
+- **Distractors:** LDL <100 as the goal for very-high-risk ASCVD (too lax)[39]; requiring ezetimibe before any PCSK9 inhibitor (2026 guideline removed the mandatory step)[36][40]; moderate-intensity statin as adequate for established ASCVD (high-intensity is Class I)[36].
+- **Citation:** [36][39][40]
+
+**1.7 — SAVR vs TAVR by age**
+- **Principle:** For symptomatic severe AS, SAVR is recommended <65 y (life expectancy >20 y); either SAVR or transfemoral TAVR at 65–80 y; transfemoral TAVR preferred >80 y.[46][47][49]
+- **Distractors:** TAVR for a healthy 55-year-old (SAVR preferred)[47][49]; statin therapy to slow AS progression (no medical therapy slows AS)[46]; AVR only once EF <50% in symptomatic severe AS (symptoms alone are a Class I trigger)[47].
+- **Citation:** [46][47][49]
+
+**1.8 — Hypertension target (2025 guideline / SPRINT)**
+- **Principle:** Treat to <130/80 mmHg for most adults; SPRINT showed intensive SBP <120 cut CV events 25% and mortality 27% in high-risk non-diabetic adults.[57][58][59][60]
+- **Distractors:** Applying SPRINT's <120 target to diabetics (ACCORD showed no primary-composite benefit)[61]; <140/90 as the goal for a patient with CVD (too lax under current guideline)[57][59]; ignoring that SPRINT used automated unattended readings (~7–10 mmHg lower than routine office)[58][62].
+- **Citation:** [57][58][59][60][61][62]
+
+**1.9 — Acute/recurrent pericarditis therapy**
+- **Principle:** First-line is high-dose NSAID (or aspirin) PLUS colchicine for 3 months (first episode) or ≥6 months (recurrence); colchicine cut recurrence ~70% (COPE/ICAP/CORP).[65][66][67][68][69]
+- **Distractors:** Corticosteroids first-line (increase recurrence; reserve for NSAID/colchicine failure)[66][68]; NSAID alone without colchicine (misses the recurrence benefit)[65]; antibiotics (pericarditis is usually viral/idiopathic)[65].
+- **Citation:** [65][66][67][68][69]
+
+**1.10 — Endocarditis prophylaxis indications**
+- **Principle:** Antibiotic prophylaxis only for the highest-risk cardiac conditions (prosthetic valve/material, prior IE, specific CHD, transplant valvulopathy) AND only for dental procedures involving gingival/periapical manipulation; amoxicillin 2 g PO.[72][73][76]
+- **Distractors:** Prophylaxis for MVP, bicuspid aortic valve, rheumatic heart disease, or HCM (not indicated under current AHA/ACC)[73][78]; prophylaxis before GI/GU endoscopy (not recommended)[72][76]; clindamycin as an allergy alternative (no longer recommended)[76].
+- **Citation:** [72][73][76][78]
+
+**1.11 — Syncope: initial test and disposition**
+- **Principle:** Every syncope workup starts with history, exam, and a 12-lead ECG (Class I); presumptive vasovagal syncope is low-risk and managed outpatient.[79][80][82]
+- **Distractors:** Routine head CT/MRI or carotid Doppler in uncomplicated syncope (low yield)[80]; admitting all syncope (only high-risk features warrant admission)[80][82]; echocardiography as the universal first test (reserved for suspected structural disease)[80].
+- **Citation:** [79][80][82]
+
+---
+
+## 2. Pulmonary / Critical Care
+
+**2.1 — COPD initial inhaler therapy (GOLD groups A/B/E)**
+- **Principle:** Group A → single long-acting bronchodilator; groups B and E → LABA+LAMA; consider adding ICS in group E if blood eosinophils ≥300.[366][368][370]
+- **Distractors:** ICS/LABA as preferred initial therapy (ICS/LABA alone no longer recommended; triple preferred if ICS indicated)[374]; SABA-only maintenance (inadequate)[366]; adding ICS when eosinophils <100 and still exacerbating (little benefit — consider azithromycin/roflumilast)[372].
+- **Citation:** [366][368][370][372][374]
+
+**2.2 — Asthma: no SABA-only therapy**
+- **Principle:** GINA recommends ICS-containing therapy at every step; preferred Track 1 uses as-needed low-dose ICS-formoterol as reliever (and MART at steps 3–4).[376][378][379]
+- **Distractors:** SABA monotherapy for mild asthma (abandoned — ICS-formoterol cuts severe exacerbations ≥60%)[376][378]; LABA monotherapy (contraindicated without ICS)[376]; stepping up ICS dose + SABA instead of MART (SMART reduces first severe exacerbation ~30%)[379][380].
+- **Citation:** [376][378][379][380]
+
+**2.3 — PERC rule**
+- **Principle:** In a patient with low clinical gestalt (<15%), a negative PERC (all 8 criteria absent) excludes PE without D-dimer; PROPER confirmed subsequent PE ~0.1%.[385][386][388]
+- **Distractors:** Applying PERC to intermediate/high pre-test probability (invalid)[385]; ordering CTPA on a PERC-negative low-risk patient (unnecessary)[385]; using a fixed D-dimer cutoff in a 70-year-old instead of an age-adjusted one (age ×10 µg/L)[389].
+- **Citation:** [385][386][388][389]
+
+**2.4 — PE treatment with DOACs**
+- **Principle:** DOACs are first-line for VTE; apixaban (10 mg BID ×7 d → 5 mg BID) and rivaroxaban (15 mg BID ×21 d → 20 mg daily) need no parenteral lead-in; dabigatran/edoxaban require 5–10 d heparin lead-in.[390][391][392][393]
+- **Distractors:** A DOAC in antiphospholipid syndrome or CrCl <30 (use VKA)[390]; starting apixaban at 5 mg BID from day 1 (misses the loading phase)[391]; warfarin as preferred first-line (DOACs preferred)[390].
+- **Citation:** [390][391][392][393]
+
+**2.5 — ARDS low-tidal-volume ventilation**
+- **Principle:** Ventilate at 6 mL/kg predicted body weight with plateau pressure ≤30 cmH₂O; ARMA showed mortality 31% vs 39.8% vs 12 mL/kg.[403][404][405][406]
+- **Distractors:** 10–12 mL/kg "to improve oxygenation" (increases mortality)[403]; dosing tidal volume on actual rather than predicted body weight (overshoots)[403]; conservative SpO₂ target 88–92% (LOCO2 showed increased mortality)[405].
+- **Citation:** [403][404][405][406]
+
+**2.6 — Prone positioning in severe ARDS**
+- **Principle:** For P/F ≤150, prone positioning ≥12 h/day reduces mortality (PROSEVA: 28-day mortality 16.0% vs 32.8%).[407]
+- **Distractors:** Reserving proning for refractory hypoxemia only after ECMO (should be early in severe ARDS)[407][408]; high PEEP as a substitute for proning (different mechanism)[408].
+- **Citation:** [407][408]
+
+**2.7 — Surviving Sepsis antibiotics and fluids**
+- **Principle:** Antibiotics within 1 h for septic shock (within 3 h for sepsis without shock); 30 mL/kg balanced crystalloid; norepinephrine first-line to MAP ≥65.[409][411][413]
+- **Distractors:** Starches/hydroxyethyl starch for resuscitation (strong recommendation against)[413]; qSOFA as the sole screening tool (low sensitivity)[411][415]; dopamine as first-line vasopressor (norepinephrine preferred)[409].
+- **Citation:** [409][411][413][415]
+
+**2.8 — Solitary pulmonary nodule (Fleischner 2017)**
+- **Principle:** A solid nodule <6 mm in a low-risk patient needs no routine follow-up; 6–8 mm → CT at 6–12 mo; >8 mm → consider CT at 3 mo, PET/CT, or biopsy.[396][397]
+- **Distractors:** Immediate biopsy of a 5-mm nodule (over-aggressive)[396]; PET/CT for a sub-centimeter nodule (poor sensitivity below ~8 mm)[398]; routine follow-up of a pure ground-glass nodule <6 mm (not needed)[396].
+- **Citation:** [396][397][398]
+
+**2.9 — Sarcoidosis and serum ACE**
+- **Principle:** Diagnosis = compatible clinicoradiographic picture + noncaseating granulomas + exclusion of mimics; serum ACE is not recommended for diagnosis or monitoring (poor PPV).[430][433][435]
+- **Distractors:** Using serum ACE to confirm diagnosis or titrate steroids (unreliable)[433][435][437]; biopsying Löfgren syndrome in every case (classic presentation may not need biopsy)[432]; attributing hypercalcemia to PTH rather than macrophage calcitriol production[435].
+- **Citation:** [430][432][433][435][437]
+
+**2.10 — UIP vs NSIP pattern**
+- **Principle:** UIP (hallmark of IPF) = subpleural, basal, honeycombing + traction bronchiectasis; NSIP = lower-lobe ground-glass with subpleural sparing and no honeycombing.[425][427][428]
+- **Distractors:** Calling honeycombing a feature of NSIP (it is UIP)[428]; requiring surgical biopsy when CT shows definite UIP (not needed)[425]; treating fibrotic NSIP expecting the same steroid response as cellular NSIP[429].
+- **Citation:** [425][427][428][429]
+
+---
+
+## 3. Nephrology
+
+**3.1 — FENa in AKI (and its traps)**
+- **Principle:** FENa <1% suggests prerenal; >2% suggests ATN — but FENa <1% also occurs in contrast nephropathy, rhabdomyolysis, early sepsis, hepatorenal syndrome, and glomerulonephritis.[439][440][441]
+- **Distractors:** Trusting FENa in a diuretic-treated patient (use FEUrea <35% instead)[440][442]; FENa >1% "rules out" prerenal in every case (false in the above exceptions)[440]; muddy-brown casts pointing to prerenal (they indicate ATN)[441].
+- **Citation:** [439][440][441][442]
+
+**3.2 — Hyponatremia correction limits**
+- **Principle:** Limit correction to ≤10–12 mEq/L in 24 h (≤8 mEq/L if high ODS risk — Na <105, hypokalemia, alcoholism, malnutrition, liver disease); for severe symptoms give 3% saline boluses to raise Na 4–6 mEq/L acutely.[444][445][447][449]
+- **Distractors:** Rapid full correction of chronic hyponatremia (causes osmotic demyelination)[446][451]; withholding hypertonic saline in a seizing patient (bolus 3% saline is indicated)[444][445]; forgetting DDAVP to re-lower an overcorrection[444][449].
+- **Citation:** [444][445][447][449][451]
+
+**3.3 — Hyperkalemia sequence**
+- **Principle:** For K⁺ ≥6.5 or ECG changes: (1) IV calcium to stabilize myocardium, (2) insulin+glucose and albuterol to shift, (3) remove with diuretics/binders/dialysis.[454][455][456]
+- **Distractors:** Calcium "lowers" potassium (it only stabilizes membrane)[454]; sodium polystyrene sulfonate as a go-to (no longer recommended — bowel necrosis risk)[455][459]; insulin without glucose monitoring (hypoglycemia up to 75%)[457].
+- **Citation:** [454][455][456][457][459]
+
+**3.4 — Complement patterns in glomerulonephritis**
+- **Principle:** Low C3 with normal C4 → post-infectious GN or dense-deposit disease (alternative pathway); low C3 AND C4 → lupus nephritis or cryoglobulinemia (classical pathway); normal complement → IgA nephropathy, ANCA vasculitis, anti-GBM, membranous.[474][476][477][478]
+- **Distractors:** Low complement in ANCA vasculitis/anti-GBM (these are pauci-immune/normal complement)[476][477]; PLA2R antibody pointing to lupus (it indicates primary membranous)[479]; RBC casts in nephrotic rather than nephritic syndrome[476].
+- **Citation:** [474][476][477][478][479]
+
+**3.5 — SGLT2 inhibitors in CKD**
+- **Principle:** SGLT2i slow CKD progression regardless of diabetes status (DAPA-CKD HR 0.61; EMPA-KIDNEY HR 0.72) and can be started down to eGFR 20.[469][470][472]
+- **Distractors:** Restricting SGLT2i to diabetics (DAPA-CKD/EMPA-KIDNEY enrolled non-diabetics)[470][472]; stopping SGLT2i because of an initial eGFR dip (expected, benefit persists)[473]; requiring eGFR >45 to initiate (can start to 20)[470].
+- **Citation:** [469][470][472][473]
+
+**3.6 — Renal tubular acidosis typing**
+- **Principle:** Type 1 (distal) = hypokalemia + urine pH >5.5 + nephrolithiasis; type 2 (proximal) = hypokalemia + Fanconi, urine can acidify; type 4 = hyperkalemia + urine pH <5.5 (hypoaldosteronism); all are normal-AG acidosis.[468][485][486]
+- **Distractors:** Type 4 with hypokalemia (type 4 is hyperkalemic)[486]; type 1 with urine pH <5.5 (distal RTA cannot acidify below 5.5)[486][487]; a positive urine anion gap in diarrhea (diarrhea gives a negative UAG)[467][468].
+- **Citation:** [467][468][485][486][487]
+
+**3.7 — Contrast-associated AKI prevention**
+- **Principle:** IV isotonic crystalloid is the only proven prevention; sodium bicarbonate and N-acetylcysteine are not beneficial (PRESERVE).[481][482][483]
+- **Distractors:** NAC to prevent CA-AKI (PRESERVE negative)[481][483]; bicarbonate superior to saline (not superior)[481][483]; high-osmolar contrast as acceptable (use low/iso-osmolar, minimize volume)[483][484].
+- **Citation:** [481][482][483][484]
+
+---
+
+## 4. Endocrinology
+
+**4.1 — Drug selection in type 2 diabetes with comorbidity**
+- **Principle:** Use an SGLT2 inhibitor for HF or CKD and a GLP-1 RA for established/high ASCVD risk or when weight loss is a goal — independent of HbA1c or metformin use.[90][93][94]
+- **Distractors:** Sulfonylurea/basal insulin as preferred add-on in CKD/HF (inferior for mortality; hypoglycemia)[93]; withholding SGLT2i until metformin fails in a patient with HF (start regardless)[94][95]; defaulting to insulin before GLP-1 RA when an injectable is needed[90].
+- **Citation:** [90][93][94][95]
+
+**4.2 — DKA management milestones**
+- **Principle:** IV fluids + insulin 0.1 U/kg/h; when glucose ~250 mg/dL, add dextrose and reduce insulin to 0.05 U/kg/h; give basal insulin 1–2 h before stopping the drip; bicarbonate only if pH <6.9.[101][102][103][105]
+- **Distractors:** Stopping the insulin drip once glucose normalizes but before anion gap closes (precipitates rebound DKA)[105]; starting insulin when K⁺ <3.3 before repleting potassium[101]; routine bicarbonate for pH 7.0 (reserve for <6.9)[101].
+- **Citation:** [101][102][103][105]
+
+**4.3 — Thyroid nodule first step**
+- **Principle:** Measure TSH first; if suppressed, obtain a radionuclide scan — a hyperfunctioning ("hot") nodule is almost never malignant and does not need FNA.[108][109]
+- **Distractors:** FNA of every nodule regardless of TSH (hot nodules don't need FNA)[108]; ultrasound before TSH as the first test[108]; FNA of a <1 cm low-suspicion nodule (generally not indicated)[110][111].
+- **Citation:** [108][109][110][111]
+
+**4.4 — Pheochromocytoma preoperative blockade**
+- **Principle:** Alpha-blockade first for 7–14 days (phenoxybenzamine/doxazosin) with volume/salt loading; add beta-blockade only after adequate alpha-blockade.[133][134][135]
+- **Distractors:** Starting a beta-blocker first (unopposed alpha → hypertensive crisis)[133][134][136]; beta-blocker monotherapy[136]; plasma metanephrines drawn seated without rest (false positives — draw supine after rest)[126][132].
+- **Citation:** [126][132][133][134][135][136]
+
+**4.5 — Primary hyperparathyroidism: surgery criteria**
+- **Principle:** Parathyroidectomy in asymptomatic PHPT if calcium >1.0 mg/dL above normal, T-score ≤−2.5 (any site), vertebral fracture, CrCl <60, age <50, or nephrolithiasis/hypercalciuria.[139][140][141]
+- **Distractors:** Observing a 45-year-old with PHPT (age <50 is an operative indication)[139]; requiring symptoms before surgery (asymptomatic criteria exist)[139]; suppressed PTH still called PHPT (that indicates a PTH-independent cause)[138].
+- **Citation:** [138][139][140][141]
+
+**4.6 — Adrenal insufficiency diagnosis**
+- **Principle:** Morning cortisol <5 µg/dL supports AI and >10 makes it unlikely; indeterminate values need a cosyntropin test (peak <18 µg/dL = AI); primary AI has high ACTH.[114][116][117][118]
+- **Distractors:** A single random cortisol to exclude AI[114]; skipping plasma ACTH, the test that separates primary from secondary AI[114][118]; omitting fludrocortisone in primary AI[114].
+- **Citation:** [114][116][117][118]
+
+**4.7 — Cushing syndrome screening**
+- **Principle:** Confirm with two abnormal first-line tests from different modalities: 1-mg overnight DST (cortisol ≥1.8 µg/dL abnormal), 24-h UFC, or late-night salivary cortisol; then use plasma ACTH to localize.[120][121][124]
+- **Distractors:** A random cortisol to diagnose Cushing (not valid)[121]; relying on one abnormal test[120]; forgetting DST false positives from CYP3A4 inducers, estrogen/OCP, pregnancy[121].
+- **Citation:** [120][121][124]
+
+**4.8 — Osteoporosis treatment thresholds**
+- **Principle:** Treat if T-score ≤−2.5, a prior hip/vertebral fracture (any T-score), or T-score −1.0 to −2.5 with FRAX major-fracture risk ≥20% or hip ≥3%; oral bisphosphonate or zoledronate first-line.[144][145][147]
+- **Distractors:** Waiting for a T-score ≤−2.5 in a patient who already has a hip fracture (fracture alone warrants treatment)[144][148]; ibandronate when hip-fracture reduction is the goal (no hip/nonvertebral benefit)[149]; starting an antiresorptive before an anabolic in very-high-risk patients[144][150].
+- **Citation:** [144][145][147][148][149][150]
+
+---
+
+## 5. Infectious Disease
+
+**5.1 — HIV opportunistic-infection prophylaxis thresholds**
+- **Principle:** PCP prophylaxis (TMP-SMX) at CD4 <200; add toxoplasmosis coverage at CD4 <100 if Toxo IgG positive; MAC prophylaxis historically at CD4 <50 but unnecessary if starting ART promptly.[160][161][163][164]
+- **Distractors:** Starting PCP prophylaxis at CD4 <100 (threshold is <200)[160]; continuing PCP prophylaxis indefinitely despite CD4 ≥200 ×3 months on ART with suppression (can stop)[163][164]; azithromycin for PCP (TMP-SMX is first-line)[160].
+- **Citation:** [160][161][163][164]
+
+**5.2 — Latent TB treatment**
+- **Principle:** Preferred regimens are rifamycin-based short courses: 3HP (INH+rifapentine weekly ×12), 4R (rifampin ×4 mo), or 3HR; IGRA preferred over TST, especially if BCG-vaccinated.[167][168][170]
+- **Distractors:** 9 months of isoniazid as "preferred" (now an alternative — more hepatotoxicity, worse completion)[167][170]; TST over IGRA in a BCG-vaccinated patient[167][168]; using a ≥10 mm TST cutoff in an HIV patient (≥5 mm is positive)[169].
+- **Citation:** [167][168][169][170]
+
+**5.3 — Bacterial meningitis empiric therapy + dexamethasone**
+- **Principle:** Vancomycin + ceftriaxone for ages 2–50; add ampicillin if >50, immunocompromised, or pregnant (Listeria); dexamethasone 10 mg q6h ×4 d with/before the first antibiotic dose; don't delay antibiotics for CT.[194][195][196][197]
+- **Distractors:** Omitting ampicillin in a 70-year-old (misses Listeria)[195][196]; starting dexamethasone after antibiotics are well underway (give with/before)[194][198]; continuing dexamethasone once Listeria is confirmed (harmful)[195][199]; delaying antibiotics to get imaging[195].
+- **Citation:** [194][195][196][197][198][199]
+
+**5.4 — C. difficile first-line therapy**
+- **Principle:** Fidaxomicin 200 mg BID ×10 d (preferred) or oral vancomycin 125 mg QID ×10 d for initial episodes; fulminant → vancomycin 500 mg QID + IV metronidazole.[183][184][185]
+- **Distractors:** Metronidazole as first-line (only if the preferred agents are unavailable)[184][185]; IV vancomycin for CDI (ineffective — must be oral/enteral)[183]; stopping at standard-dose vancomycin in fulminant disease (needs 500 mg QID + IV metronidazole)[183][184].
+- **Citation:** [183][184][185]
+
+**5.5 — CAP outpatient regimen**
+- **Principle:** Healthy outpatient → amoxicillin 1 g TID or doxycycline; with comorbidities → beta-lactam + macrolide/doxycycline or a respiratory fluoroquinolone. Macrolide monotherapy only if local pneumococcal resistance <25%.[151][152][153]
+- **Distractors:** Azithromycin monotherapy as a default in the US (resistance >30%)[151][153]; adding empiric MRSA/Pseudomonas coverage without risk factors[158][159]; CURB-65 over PSI for disposition (PSI preferred)[157].
+- **Citation:** [151][152][153][157][158][159]
+
+**5.6 — Infective endocarditis diagnosis (Duke)**
+- **Principle:** Definite IE = 2 major, or 1 major + 3 minor, or 5 minor; obtain ≥3 blood-culture sets before antibiotics; TEE (sensitivity 87–100%) far exceeds TTE (44–63%).[173][174][178]
+- **Distractors:** Relying on a normal TTE to exclude IE (get TEE)[178][179]; a single positive culture of a skin contaminant as a major criterion[173]; starting antibiotics before cultures in a stable patient[179].
+- **Citation:** [173][174][178][179]
+
+**5.7 — Prosthetic joint infection + rifampin**
+- **Principle:** Staphylococcal PJI managed with debridement + implant retention (DAIR) requires rifampin combined with a companion agent (e.g., fluoroquinolone); DAIR suits acute infection with a well-fixed prosthesis.[200][202][203]
+- **Distractors:** Antibiotics alone without surgery (usually fails)[200]; rifampin monotherapy (rapid resistance)[202][203]; DAIR for chronic PJI with a sinus tract (needs revision)[200][201].
+- **Citation:** [200][201][202][203]
+
+---
+
+## 6. Hematology / Oncology
+
+**6.1 — Iron deficiency: ferritin threshold**
+- **Principle:** Ferritin <45 ng/mL (AGA) is sensitive and specific for iron deficiency; in inflammatory states use TSAT <20% because ferritin can be falsely normal; confirmed IDA in men/postmenopausal women warrants bidirectional endoscopy.[488][490][491][493]
+- **Distractors:** Requiring ferritin <15 to diagnose (too insensitive)[488][490]; calling a normal ferritin "rules out" iron deficiency in CKD/IBD/HF[491][492]; skipping GI evaluation in an older man with IDA[493].
+- **Citation:** [488][490][491][492][493]
+
+**6.2 — B12 vs folate deficiency**
+- **Principle:** B12 deficiency raises BOTH methylmalonic acid and homocysteine; folate deficiency raises homocysteine only with normal MMA; MMA is the most specific confirmatory test.[494][497][498][499]
+- **Distractors:** Using homocysteine alone to distinguish them (nonspecific)[497]; normal MMA excluding folate deficiency (folate deficiency has normal MMA)[497][498]; intrinsic-factor antibody as a sensitive screen for pernicious anemia (specific but insensitive)[499].
+- **Citation:** [494][497][498][499]
+
+**6.3 — TTP diagnosis and treatment**
+- **Principle:** ADAMTS13 <10% with MAHA + thrombocytopenia defines TTP; treat urgently with plasma exchange + steroids + rituximab (± caplacizumab). Use the PLASMIC score to triage.[521][522][524]
+- **Distractors:** Transfusing platelets (contraindicated unless life-threatening bleeding)[527]; waiting for ADAMTS13 before starting PLEX (start empirically if high PLASMIC)[522][524]; treating like DIC with factor replacement[522].
+- **Citation:** [521][522][524][527]
+
+**6.4 — Heparin-induced thrombocytopenia**
+- **Principle:** Suspected HIT (4Ts ≥4, platelets drop ≥50% at days 5–10) → stop all heparin and start a non-heparin anticoagulant such as argatroban; do not give warfarin until platelets recover.[529][530][531]
+- **Distractors:** Starting warfarin acutely (venous limb gangrene/skin necrosis)[530]; simply stopping heparin without an alternative anticoagulant (ongoing thrombotic risk)[530]; a low 4Ts score (≤3) prompting a full HIT workup (HIT unlikely)[529][530].
+- **Citation:** [529][530][531]
+
+**6.5 — Duration of anticoagulation for VTE**
+- **Principle:** All VTE ≥3 months; provoked by a major transient factor → stop at 3 months; unprovoked → extended/indefinite anticoagulation, preferably reduced-dose apixaban 2.5 mg BID or rivaroxaban 10 mg daily.[534][535][536][537]
+- **Distractors:** Stopping an unprovoked VTE at 3 months (high recurrence)[536][537]; indefinite full-dose anticoagulation when reduced-dose extended therapy suffices[535]; 3 months only for cancer-associated VTE (continue while cancer is active)[536][540].
+- **Citation:** [534][535][536][537][540]
+
+**6.6 — Anticoagulation reversal**
+- **Principle:** Warfarin major bleed → 4-factor PCC + IV vitamin K; dabigatran → idarucizumab 5 g; factor Xa inhibitors → 4-factor PCC is now the primary reversal agent (andexanet alfa withdrawn from the US market Dec 2025).[541][543][545][546]
+- **Distractors:** FFP as first-line for warfarin reversal in life-threatening bleeding (PCC faster/preferred)[541][543]; idarucizumab for apixaban (it reverses dabigatran only)[544]; vitamin K alone for an INR 9 with major bleeding (needs PCC)[541].
+- **Citation:** [541][543][544][545][546]
+
+**6.7 — Thrombophilia testing**
+- **Principle:** ASH 2023 recommends against thrombophilia testing to guide anticoagulation duration in unprovoked or surgically provoked VTE; MTHFR testing is not recommended; defer protein C/S and antithrombin until off anticoagulation.[548][549][551][555]
+- **Distractors:** Ordering a thrombophilia panel during acute clot on heparin (unreliable levels)[555][556]; MTHFR as part of a standard panel (not associated with VTE)[551][553]; testing that won't change management[548].
+- **Citation:** [548][549][551][553][555][556]
+
+**6.8 — Tumor lysis syndrome**
+- **Principle:** High-risk patients (Burkitt, ALL with WBC >100k, bulky high-LDH disease) → aggressive IV hydration + rasburicase; low-risk → allopurinol; rasburicase is contraindicated in G6PD deficiency.[561][563][565][566]
+- **Distractors:** Rasburicase in G6PD deficiency (hemolysis/methemoglobinemia)[561][565]; treating asymptomatic hypocalcemia with calcium (worsens Ca-phosphate precipitation)[561][566]; urine alkalinization (no longer recommended)[562][568].
+- **Citation:** [561][562][563][565][566][568]
+
+**6.9 — Malignant spinal cord compression**
+- **Principle:** New back pain + neurologic signs in a cancer patient → urgent spinal MRI + immediate dexamethasone; surgery + RT beats RT alone for a single-level compression by a non-radiosensitive tumor (Patchell).[569][570]
+- **Distractors:** Plain films instead of MRI (inadequate)[569][570]; withholding steroids pending imaging (give dexamethasone immediately)[569]; RT alone for a resectable single-level solid-tumor compression[569].
+- **Citation:** [569][570]
+
+**6.10 — Hypercalcemia of malignancy**
+- **Principle:** Aggressive IV saline → calcitonin for rapid transient lowering → IV zoledronic acid (onset 48–72 h) for durable control; denosumab for bisphosphonate-refractory or renal impairment; add glucocorticoids for calcitriol-mediated (lymphoma) hypercalcemia.[571][572][573][579][580]
+- **Distractors:** A loop diuretic before volume repletion (worsens hypercalcemia/dehydration)[573][574]; relying on zoledronate alone for the first 24 h (delayed onset — needs calcitonin bridge)[575][577]; a bisphosphonate in severe renal impairment (prefer denosumab)[580][582].
+- **Citation:** [571][572][573][574][575][577][579][580][582]
+
+---
+
+## 7. Gastroenterology / Hepatology
+
+**7.1 — GI bleeding transfusion threshold**
+- **Principle:** Restrictive transfusion at Hb <7 g/dL (<8 if cardiovascular disease); endoscopy within 24 h of admission.[584][586][587]
+- **Distractors:** Liberal transfusion to Hb 9–10 (worse outcomes, especially variceal bleeding)[593]; delaying endoscopy beyond 24 h in an admitted bleeder[584][587]; omitting prophylactic ceftriaxone in a cirrhotic with GI bleed[587][591].
+- **Citation:** [584][586][587][591][593]
+
+**7.2 — Spontaneous bacterial peritonitis**
+- **Principle:** Ascitic PMN >250/mm³ diagnoses SBP (culture not required); treat with ceftriaxone + IV albumin (1.5 g/kg day 1, 1 g/kg day 3); paracentesis every hospitalized cirrhotic with ascites.[593][601][602][603]
+- **Distractors:** Requiring a positive culture to treat (cultures are negative in >50%)[601][602]; ceftriaxone without albumin (albumin reduces mortality/HRS)[603]; deferring paracentesis in an asymptomatic admitted cirrhotic[601].
+- **Citation:** [593][601][602][603]
+
+**7.3 — Hepatic encephalopathy**
+- **Principle:** Acute OHE → lactulose titrated to 2–3 soft stools/day (± rifaximin); secondary prophylaxis → lactulose + rifaximin 550 mg BID; identify precipitants; do not use serum ammonia to guide therapy.[602][607][608][611][612]
+- **Distractors:** Protein restriction as standard therapy (outdated/harmful)[607]; checking serum ammonia to diagnose or titrate (not recommended)[612]; rifaximin monotherapy for prophylaxis without lactulose[607][611].
+- **Citation:** [602][607][608][611][612]
+
+**7.4 — Hepatitis C treatment principle**
+- **Principle:** Treat all chronic HCV with a pangenotypic DAA — sofosbuvir/velpatasvir ×12 wk or glecaprevir/pibrentasvir ×8 wk (no cirrhosis); SVR12 >95%; check for HBV coinfection first.[621][622][624][628]
+- **Distractors:** Reserving treatment for advanced fibrosis only (treat all)[621][623]; genotyping every patient before a pangenotypic regimen (simplified algorithm)[621]; stopping HCC surveillance after SVR in a cirrhotic (continue lifelong)[622].
+- **Citation:** [621][622][623][624][628]
+
+**7.5 — Hepatitis B first-line antivirals**
+- **Principle:** Entecavir, TDF, or TAF are preferred (high potency, minimal resistance); TDF preferred in pregnancy; TAF/entecavir favored with renal or bone concerns.[613][614][615]
+- **Distractors:** Lamivudine as first-line (high resistance)[613]; peginterferon in decompensated cirrhosis (contraindicated)[615]; TDF when osteoporosis/renal disease is present (prefer TAF/entecavir)[614][618].
+- **Citation:** [613][614][615][618]
+
+**7.6 — Celiac disease testing**
+- **Principle:** First test is tTG-IgA plus total IgA (use IgG-based tests if IgA deficient); confirm with duodenal biopsy while the patient is still eating gluten.[638][639][640]
+- **Distractors:** Testing after the patient has started a gluten-free diet (false negatives)[639][646]; HLA-DQ2/DQ8 as a diagnostic (only useful to exclude)[640][642]; skipping biopsy in adults per US adult guidelines[638][645].
+- **Citation:** [638][639][640][642][645][646]
+
+**7.7 — Acute pancreatitis diagnosis and severity**
+- **Principle:** Diagnose with ≥2 of 3: typical pain, lipase/amylase >3× ULN, or imaging; classify severity by the Revised Atlanta criteria (persistent organ failure >48 h = severe); early fluids and early enteral feeding, no prophylactic antibiotics for sterile necrosis.[629][630][637]
+- **Distractors:** Prophylactic antibiotics for sterile necrosis (not indicated)[629][637]; prolonged NPO over early enteral feeding[629][637]; amylase/lipase level correlating with severity (it does not)[629].
+- **Citation:** [629][630][637]
+
+**7.8 — IBD biologic selection**
+- **Principle:** For moderate-to-severe UC in biologic-naïve patients, AGA recommends higher-efficacy agents (infliximab, vedolizumab, upadacitinib, risankizumab, ozanimod) over adalimumab; combination infliximab + thiopurine beats monotherapy.[594][599][600]
+- **Distractors:** Adalimumab monotherapy as the preferred first biologic (lower efficacy)[594]; JAK inhibitors first-line before TNF exposure (labeling restricts to TNF-exposed)[596]; 5-ASA for moderate-to-severe Crohn's disease[598].
+- **Citation:** [594][596][598][599][600]
+
+---
+
+## 8. Rheumatology
+
+**8.1 — Rheumatoid arthritis treat-to-target**
+- **Principle:** Methotrexate is the first-line DMARD with treat-to-target (remission/low activity by 6 months) and short-term bridging glucocorticoids; escalate to a biologic (TNFi) or JAK inhibitor if MTX fails with poor-prognosis features.[206][207][208][209]
+- **Distractors:** Long-term glucocorticoid monotherapy (should be bridging only)[206]; starting a biologic before trying MTX in average-risk disease[207]; ignoring JAK-inhibitor cardiovascular/malignancy risk in at-risk patients[209].
+- **Citation:** [206][207][208][209]
+
+**8.2 — Gout urate-lowering therapy**
+- **Principle:** Target serum urate <6 mg/dL (<5 for tophaceous disease); allopurinol is first-line, start low (≤100 mg/day, 50 if eGFR <60) and titrate, with anti-inflammatory prophylaxis for 3–6 months; ULT can be started during a flare.[210][211][212][214]
+- **Distractors:** Holding ULT until a flare fully resolves (can start during flare with prophylaxis)[212]; starting full-dose allopurinol (risk of flare/hypersensitivity)[210][212]; stopping ULT after urate normalizes (continue indefinitely)[211].
+- **Citation:** [210][211][212][214]
+
+**8.3 — HLA-B*58:01 before allopurinol**
+- **Principle:** Test HLA-B*58:01 before allopurinol in higher-prevalence groups (Han Chinese, Korean, Thai, African American) to prevent severe cutaneous reactions.[215][216][217]
+- **Distractors:** Universal HLA-B*58:01 testing in all populations (low yield in white/Hispanic patients)[215][216]; HLA-B*15:02 as the allopurinol allele (that one is for carbamazepine)[294][297].
+- **Citation:** [215][216][217][294][297]
+
+**8.4 — Giant cell arteritis**
+- **Principle:** Start high-dose prednisone (40–60 mg/day) immediately on suspicion — do not wait for biopsy — because of blindness risk; tocilizumab is a steroid-sparing option.[219][220][222][223]
+- **Distractors:** Delaying steroids until temporal artery biopsy (risks irreversible vision loss)[219][220]; low-dose prednisone (12.5–25 mg) as used for PMR (too low for GCA)[219]; NSAIDs as primary therapy[219].
+- **Citation:** [219][220][222][223]
+
+**8.5 — Antiphospholipid syndrome anticoagulation**
+- **Principle:** Thrombotic APS is treated with warfarin (target INR 2–3); DOACs are not recommended, especially in triple-positive disease; obstetric APS uses aspirin + LMWH.[233][234][238][239]
+- **Distractors:** A DOAC for thrombotic APS (inferior, higher event rates in triple-positive)[234][239]; aspirin alone for a patient with prior thrombosis[233]; diagnosing on a single positive antibody (needs persistence ≥12 weeks apart)[233][237].
+- **Citation:** [233][234][237][238][239]
+
+**8.6 — Lupus nephritis induction**
+- **Principle:** Class III/IV lupus nephritis is treated with pulse methylprednisolone then tapered prednisone PLUS a two-drug regimen (MPAA + belimumab, MPAA + a CNI such as voclosporin, or low-dose cyclophosphamide + belimumab); hydroxychloroquine for all SLE.[226][228][229][231]
+- **Distractors:** Prednisone monotherapy for proliferative lupus nephritis (inadequate)[228]; stopping hydroxychloroquine during flare (continue — mortality benefit)[226]; indefinite high-dose steroids (goal ≤5 mg/day by 6 months)[229].
+- **Citation:** [226][228][229][231]
+
+**8.7 — Septic arthritis synovial fluid**
+- **Principle:** Synovial WBC >50,000/µL with neutrophil predominance strongly suggests septic arthritis, but a lower count does not exclude it, and the presence of crystals does not rule out concurrent infection; culture is the gold standard.[251][252][254][255]
+- **Distractors:** Excluding septic arthritis because WBC is <50,000[251]; attributing a hot joint entirely to gout when crystals are seen (co-infection possible)[255]; relying on a negative Gram stain to exclude infection (sensitivity 30–65%)[253][255].
+- **Citation:** [251][252][253][254][255]
+
+**8.8 — Systemic sclerosis antibodies and renal crisis**
+- **Principle:** Limited cutaneous SSc associates with anticentromere antibodies (and PAH risk); diffuse SSc with anti-Scl-70 (ILD risk) and anti-RNA polymerase III (renal crisis); treat scleroderma renal crisis with ACE inhibitors.[246][247][248][249]
+- **Distractors:** Prophylactic ACE inhibitors to prevent renal crisis (only treat, not prevent)[248]; anticentromere predicting diffuse disease (it marks limited)[246]; corticosteroids for renal crisis (can precipitate it)[248].
+- **Citation:** [246][247][248][249]
+
+---
+
+## 9. Neurology
+
+**9.1 — Acute ischemic stroke thrombolysis**
+- **Principle:** IV alteplase 0.9 mg/kg (max 90 mg) within 4.5 h of onset, or tenecteplase 0.25 mg/kg; BP must be <185/110 before lysis and <180/105 for 24 h after.[257][258][259][262]
+- **Distractors:** Thrombolysis with BP 200/115 without lowering first[257][261]; aggressively lowering BP <220/120 in a non-lysis candidate during the first 48–72 h (not recommended)[261][263]; a rigid 3-hour window (standard window is 4.5 h, extendable with perfusion imaging)[260][265].
+- **Citation:** [257][258][259][260][261][262][263][265]
+
+**9.2 — First unprovoked seizure**
+- **Principle:** Workup includes MRI (epilepsy protocol) and EEG; an AED after a first unprovoked seizure reduces 2-year recurrence but does not change long-term remission; recurrence risk is higher with prior brain insult, epileptiform EEG, or abnormal imaging.[269][270][271]
+- **Distractors:** Mandatory lifelong AED after a single seizure regardless of risk[269][274]; CT alone as adequate imaging (MRI preferred)[271][273]; treating after one seizure improving long-term remission (it does not)[270].
+- **Citation:** [269][270][271][273][274]
+
+**9.3 — Thunderclap/secondary headache red flags**
+- **Principle:** Thunderclap headache → non-contrast CT within 12 h and LP if negative to exclude SAH; use SNNOOP10 red flags, and consider GCA (ESR/CRP) for new headache >50 y.[275][276][278]
+- **Distractors:** Reassurance/outpatient triptan for a thunderclap headache[278]; skipping LP after a negative early CT when SAH is suspected[278][279]; attributing a new headache in a 70-year-old to tension type without checking inflammatory markers[275][280].
+- **Citation:** [275][276][278][279][280]
+
+**9.4 — Parkinson disease levodopa**
+- **Principle:** Levodopa is the most effective therapy for motor symptoms and should not be withheld out of fear of dyskinesia (PD MED showed persistent benefit); dopamine agonists carry impulse-control and cognitive risks, especially in the elderly.[281][282][283]
+- **Distractors:** Delaying levodopa to "save it" for later[281][283]; a dopamine agonist first-line in an elderly patient (cognitive/behavioral risk)[281][283]; amantadine as first-line for bradykinesia (it's for dyskinesia)[284][285].
+- **Citation:** [281][282][283][284][285]
+
+**9.5 — Multiple sclerosis diagnosis**
+- **Principle:** Diagnosis requires dissemination in space and time (McDonald criteria); CSF oligoclonal bands can substitute for dissemination in time; ocrelizumab is the only DMT approved for primary progressive MS.[286][287][289][291]
+- **Distractors:** A single clinical attack with one lesion diagnosing MS (needs DIS + DIT)[288]; interferons/glatiramer for primary progressive MS (ineffective — ocrelizumab)[291]; requiring a second clinical relapse when oligoclonal bands already satisfy DIT[289].
+- **Citation:** [286][287][288][289][291]
+
+---
+
+## 10. Dermatology
+
+**10.1 — SJS/TEN culprit drugs and classification**
+- **Principle:** Classify by BSA detachment (SJS <10%, overlap 10–30%, TEN >30%); classic culprits are allopurinol, aromatic anticonvulsants, sulfonamides, oxicam NSAIDs, and nevirapine; HLA-B*15:02 predicts carbamazepine SJS/TEN in Southeast Asians.[292][293][294][297]
+- **Distractors:** TEN defined as <10% BSA (that's SJS)[292][294]; HLA-B*58:01 as the carbamazepine allele (that's allopurinol)[293][297]; beta-lactams as the classic trigger (sulfonamides, not penicillins, are the high-risk antibiotics)[293].
+- **Citation:** [292][293][294][297]
+
+**10.2 — DRESS syndrome**
+- **Principle:** DRESS appears 2–6 weeks after the drug with rash, fever, facial edema, eosinophilia/atypical lymphocytosis, and visceral involvement (hepatitis, nephritis, myocarditis); common culprits are allopurinol, vancomycin, lamotrigine, carbamazepine, TMP-SMX; HHV-6 reactivation is frequent.[298][299][300][302]
+- **Distractors:** A 1–2 day onset typical of DRESS (latency is weeks)[298][299]; mucosal sloughing as the hallmark (that's SJS/TEN)[302]; stopping at drug withdrawal without systemic steroids in organ involvement[298][306].
+- **Citation:** [298][299][300][302][306]
+
+---
+
+## 11. Allergy / Immunology
+
+**11.1 — Anaphylaxis first-line treatment**
+- **Principle:** IM epinephrine to the anterolateral thigh is first-line (adults 0.3–0.5 mg of 1:1000), repeated every 5–15 min as needed; antihistamines and steroids are adjunctive only.[307][309][310]
+- **Distractors:** Antihistamines/corticosteroids as primary treatment (do not replace epinephrine)[307][310][311]; subcutaneous rather than IM epinephrine (slower absorption)[310]; withholding epinephrine pending IV access (give IM immediately)[309].
+- **Citation:** [307][309][310][311]
+
+**11.2 — Penicillin allergy delabeling**
+- **Principle:** >90% of patients labeled penicillin-allergic tolerate penicillins; low-risk histories can be delabeled with a direct amoxicillin challenge, and penicillin–cephalosporin cross-reactivity is ~2% (not 10%).[312][313][315]
+- **Distractors:** Avoiding all beta-lactams and cephalosporins for a mild/remote rash[313][315]; quoting 8–10% cephalosporin cross-reactivity[313][317]; avoiding carbapenems (can be given without special precautions)[315][317].
+- **Citation:** [312][313][315][317]
+
+**11.3 — ACE-inhibitor and hereditary angioedema**
+- **Principle:** ACE-inhibitor angioedema is bradykinin-mediated — permanently discontinue the ACEi; it does not reliably respond to antihistamines/steroids/epinephrine. HAE (C1-INH deficiency) shows low C4, no urticaria, and needs C1-INH concentrate, icatibant, or ecallantide.[319][320][322][325]
+- **Distractors:** Restarting the ACE inhibitor once swelling resolves[320][322]; treating ACEi angioedema like histaminergic angioedema and expecting resolution[319][320]; expecting urticaria with HAE (its absence is the clue)[325][327].
+- **Citation:** [319][320][322][325][327]
+
+---
+
+## 12. General IM / Preventive
+
+**12.1 — Lung cancer screening (USPSTF 2021)**
+- **Principle:** Annual low-dose CT for adults 50–80 with ≥20 pack-years who currently smoke or quit within 15 years.[557][558]
+- **Distractors:** The old 55/30-pack-year threshold[557]; chest radiography as a screening modality (ineffective)[558]; continuing screening >15 years after quitting[557].
+- **Citation:** [557][558]
+
+**12.2 — Colorectal cancer screening start age**
+- **Principle:** Begin average-risk screening at age 45 (USPSTF B for 45–49, A for 50–75; selective 76–85) — colonoscopy q10y, annual FIT, or other approved modalities.[330][332][333][560]
+- **Distractors:** Starting at 50 for average-risk patients (lowered to 45 in 2021)[334][560]; a one-time colonoscopy as lifelong clearance[333]; continuing routine screening past life expectancy <10 years[559].
+- **Citation:** [330][332][333][334][559][560]
+
+**12.3 — Breast cancer screening (USPSTF 2024)**
+- **Principle:** Biennial mammography for women 40–74.[328][329]
+- **Distractors:** Starting routine screening at 50[328][336]; annual (rather than biennial) as the USPSTF recommendation[329]; stopping at 65[329].
+- **Citation:** [328][329][336]
+
+**12.4 — Adult immunization high-yield points**
+- **Principle:** Shingrix (2 doses) for all adults ≥50; one pneumococcal conjugate vaccine for all PCV-naïve adults ≥50 (ACIP 2024) and 19–49 with risk conditions — PCV20 or PCV21 alone, or PCV15 → PPSV23; Tdap once then Td q10y, with Tdap each pregnancy at 27–36 weeks.[339][340][341]
+- **Distractors:** Zostavax/live zoster vaccine as current standard (Shingrix preferred)[339][340]; PPSV23 alone as adequate adult pneumococcal coverage[339][340]; waiting until 65 to give a healthy adult a pneumococcal vaccine (ACIP lowered the age to 50 in 2024); skipping Tdap in pregnancy[339][340].
+- **Citation:** [339][340][341]
+
+**12.5 — Perioperative cardiac risk (RCRI)**
+- **Principle:** RCRI uses 6 predictors; patients with ≥4 METs functional capacity (e.g., climbing 2 flights) generally need no stress testing; do not start high-dose beta-blockers de novo perioperatively (POISE harm); continue statins.[342][344][345][348]
+- **Distractors:** Routine preoperative stress testing for low-risk surgery[345][348]; prophylactic coronary revascularization to reduce perioperative risk (does not help)[348]; initiating high-dose beta-blockade the day of surgery (increased stroke/death)[348].
+- **Citation:** [342][344][345][348]
+
+**12.6 — Statin primary prevention (USPSTF 2022)**
+- **Principle:** Prescribe a statin for adults 40–75 with ≥1 CVD risk factor and a 10-year ASCVD risk ≥10% (B); selectively offer at 7.5–<10% (C).[349][350][351]
+- **Distractors:** Statins for everyone ≥76 regardless of risk (insufficient evidence)[349][350]; withholding a statin in a patient with LDL-C ≥190 pending risk calculation (treat with high-intensity statin outright)[41][42]; a 20% risk threshold for initiation[349].
+- **Citation:** [41][42][349][350][351]
+
+**12.7 — Smoking cessation pharmacotherapy**
+- **Principle:** Offer every tobacco user behavioral support plus pharmacotherapy; varenicline (EAGLES quit rate 21.8% vs 9.4% placebo) or combination NRT (patch + short-acting) are most effective.[357][359][360][362]
+- **Distractors:** Counseling alone when pharmacotherapy is appropriate[357][360]; single-agent NRT as the most effective option (combination NRT is superior)[360][363]; avoiding varenicline over neuropsychiatric fears (EAGLES established safety)[359][362].
+- **Citation:** [357][359][360][362][363]
+</script>
+<script>
+/* Board Review Voice Coach: logic only, no DOM. Runs in the page and in Node for tests. */
+(function (root) {
+  'use strict';
+
+  /* ---------- Item bank: parses the markdown format of the review file ---------- */
+  const SHORT = [
+    [/cardio/i, 'Cardiology'], [/pulm|critical/i, 'Pulm & CCM'], [/nephro|renal|kidney/i, 'Nephrology'],
+    [/endocrin/i, 'Endocrine'], [/infect/i, 'ID'], [/hemat|oncol/i, 'Heme & Onc'],
+    [/gastro|hepat/i, 'GI & Liver'], [/rheum/i, 'Rheum'], [/neuro/i, 'Neuro'],
+    [/derm/i, 'Derm'], [/allerg|immun/i, 'Allergy'], [/general|prevent/i, 'General IM']
+  ];
+  function shortName(name) {
+    for (let i = 0; i < SHORT.length; i++) if (SHORT[i][0].test(name)) return SHORT[i][1];
+    return name;
+  }
+  const stripCites = s => String(s || '')
+    .replace(/\s*\[\d+\]/g, '')
+    .replace(/\s+([,.;:)])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  const cap = s => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+  const uniq = arr => arr.filter((x, i) => arr.indexOf(x) === i);
+
+  /* Split on semicolons that sit outside parentheses and brackets. */
+  function splitTop(s) {
+    const out = [];
+    let depth = 0, buf = '';
+    for (const ch of String(s || '')) {
+      if (ch === '(' || ch === '[') depth++;
+      else if ((ch === ')' || ch === ']') && depth > 0) depth--;
+      if (ch === ';' && depth === 0) { if (buf.trim()) out.push(buf.trim()); buf = ''; }
+      else buf += ch;
+    }
+    if (buf.trim()) out.push(buf.trim());
+    return out;
+  }
+
+  /* "Wrong answer (why it's wrong)[12]" -> { a: 'Wrong answer', why: "why it's wrong" } */
+  function parseTrap(part) {
+    const t = stripCites(part).replace(/[.;]\s*$/, '').trim();
+    let a = t, why = '';
+    if (t.endsWith(')')) {
+      let depth = 0;
+      for (let i = t.length - 1; i >= 0; i--) {
+        if (t[i] === ')') depth++;
+        else if (t[i] === '(') {
+          depth--;
+          if (depth === 0) {
+            const head = t.slice(0, i).trim();
+            if (head) { a = head; why = t.slice(i + 1, -1).trim(); }
+            break;
+          }
+        }
+      }
+    }
+    return { a: cap(a), why: why };
+  }
+
+  function parseBank(md) {
+    const cats = [], items = [], seen = {};
+    let cat = null, it = null;
+    String(md || '').split(/\r?\n/).forEach(raw => {
+      const line = raw.trim();
+      let m;
+      if ((m = line.match(/^#{2,3}\s*(\d+)\.\s*(.+?)\s*$/))) {
+        cat = { n: Number(m[1]), name: m[2].replace(/\*+/g, '').trim(), ids: [] };
+        cat.short = shortName(cat.name);
+        cats.push(cat);
+        it = null;
+        return;
+      }
+      if ((m = line.match(/^\*\*\s*(\d+\.\d+)\s*[—–-]+\s*(.+?)\s*\*\*$/))) {
+        if (seen[m[1]]) { it = null; return; }
+        it = { id: m[1], title: m[2].trim(), cat: cat ? cat.n : 0, principle: '', traps: [], cites: [] };
+        seen[it.id] = true;
+        items.push(it);
+        return;
+      }
+      if (!it) return;
+      if ((m = line.match(/^[-*•]\s*\*\*\s*Principle\s*:?\s*\*\*\s*:?\s*(.+)$/i))) it.principle = stripCites(m[1]);
+      else if ((m = line.match(/^[-*•]\s*\*\*\s*Distractors?\b[^*]*\*\*\s*:?\s*(.+)$/i))) it.traps = splitTop(m[1]).map(parseTrap).filter(x => x.a);
+      else if ((m = line.match(/^[-*•]\s*\*\*\s*Citations?\s*:?\s*\*\*\s*:?\s*(.+)$/i))) it.cites = uniq((m[1].match(/\d+/g) || []).map(Number));
+    });
+    const good = items.filter(x => x.principle);
+    const byId = {};
+    good.forEach(x => { byId[x.id] = x; });
+    cats.forEach(c => { c.ids = good.filter(x => x.cat === c.n).map(x => x.id); });
+    return { cats: cats.filter(c => c.ids.length), items: good, byId: byId };
+  }
+
+  /* ---------- Picking the next set ---------- */
+  const DAY = 864e5;
+  function hash01(str) {
+    let h = 2166136261;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    h ^= h >>> 13; h = Math.imul(h, 0x5bd1e995); h ^= h >>> 15;
+    return (h >>> 0) / 4294967296;
+  }
+  function statusOf(st) {
+    if (!st || !st.lastAt) return 'new';
+    return st.last === 'R' ? 'right' : st.last === 'P' ? 'partial' : 'missed';
+  }
+  /* Higher comes first: missed last time, then never quizzed, then stale. Right answers in a row push an item back. */
+  function priority(id, st, pick, seed, now) {
+    const s = st || {};
+    const seen = !!s.lastAt;
+    let p = hash01(seed + '|' + id) * 1.5;
+    if (!seen) p += 3;
+    else {
+      if (s.last === 'W') p += 5;
+      else if (s.last === 'P') p += 3;
+      else p -= Math.min(s.streak || 1, 3);
+      p += Math.min((now - s.lastAt) / DAY / 7, 3);
+    }
+    if (s.lastSrv && (!s.lastAt || s.lastSrv > s.lastAt) && now - s.lastSrv < 2 * DAY) p -= 4;
+    if (pick === 'new' && !seen) p += 20;
+    if (pick === 'missed' && seen && s.last !== 'R') p += 20;
+    return p;
+  }
+  /* Keep neighbours from sharing a topic where possible. */
+  function interleave(list) {
+    const rest = list.slice(), out = [];
+    while (rest.length) {
+      const prev = out.length ? out[out.length - 1].cat : null;
+      let i = rest.findIndex(x => x.cat !== prev);
+      if (i < 0) i = 0;
+      out.push(rest.splice(i, 1)[0]);
+    }
+    return out;
+  }
+  function pickSet(bank, stats, o) {
+    const cats = new Set(o.cats || []);
+    const ex = new Set(o.exclude || []);
+    const now = o.now || Date.now();
+    const seed = o.seed || '';
+    const pool = bank.items.filter(it => cats.has(it.cat) && !ex.has(it.id));
+    const take = Math.max(0, Math.min(o.len || 10, pool.length));
+    const chosen = pool
+      .map(it => ({ it: it, p: priority(it.id, stats[it.id], o.pick, seed, now) }))
+      .sort((a, b) => b.p - a.p)
+      .slice(0, take)
+      .map(x => x.it)
+      .sort((a, b) => hash01(seed + '#' + a.id) - hash01(seed + '#' + b.id));
+    return { items: interleave(chosen), pool: pool.length };
+  }
+
+  /* ---------- Payload ---------- */
+  const NUMW = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve',
+    'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty'];
+  const say = n => NUMW[n] || String(n);
+  function joinAnd(list) {
+    if (list.length < 3) return list.join(' and ');
+    return list.slice(0, -1).join(', ') + ', and ' + list[list.length - 1];
+  }
+  const spokenCat = name => name.replace(/\bIM\b/g, 'internal medicine').replace(/\s*\/\s*/g, ' and ').toLowerCase();
+
+  function gradeRule(mcq, full) {
+    if (mcq) {
+      return 'Grading turn: say "Correct." or "Not quite, it\'s" and the right letter. Then ' + (full
+        ? 'give the key point in up to two sentences, then go through the other four choices by letter, one short clause each on why it\'s wrong.'
+        : 'give the key point in one sentence, and if they were wrong, one more sentence on why their choice fails.') +
+        ' End the first grading turn with "Say next to continue." After that, just stop and wait.';
+    }
+    return 'Grading turn: say "Right.", "Partly right.", or "Not quite." Partly right means they got part of the key but missed something that matters. Then ' + (full
+      ? 'give the key point in up to two sentences, then the two most tempting wrong answers from the traps, one short clause each on why they\'re wrong.'
+      : 'give the key point in one or two sentences, and if they weren\'t right, name the trap they fell into in one sentence.') +
+      ' End the first grading turn with "Say next to continue." After that, just stop and wait.';
+  }
+
+  function buildPayload(bank, sess) {
+    const items = sess.ids.map(id => bank.byId[id]).filter(Boolean);
+    const M = items.length;
+    const code = sess.code;
+    const mcq = sess.style !== 'recall';
+    const full = sess.depth === 'full';
+    const catName = n => (bank.cats.find(c => c.n === n) || { name: 'General' }).name;
+    const names = uniq(items.map(it => catName(it.cat)));
+    const topics = names.length <= 3 ? ' from ' + joinAnd(names.map(spokenCat)) : ' across ' + say(names.length) + ' topics';
+    const Mw = say(M);
+    const plural = M === 1 ? '' : 's';
+    const cmds = mcq ? 'repeat, choices, why, skip, score, pause, or end' : 'repeat, why, skip, score, pause, or end';
+    const o = [];
+    const P = s => o.push(s);
+    let rn = 0;
+    const R = s => P((++rn) + '. ' + s);
+
+    P('# VOICE BOARD REVIEW (payload v1)');
+    P('For ChatGPT. Read all of this before you reply. These instructions run this whole chat: in text now, in voice after the switch, and in text again for the report.');
+    P('');
+    P('## 1. How this chat runs');
+    P('PHASE 1, text, now. Do not start the quiz. Send only the lines between the markers, exactly as written, with no greeting, summary, or questions.');
+    P('----- reply -----');
+    P('Loaded: ' + M + ' board question' + plural + ', session ' + code + '.');
+    P(mcq
+      ? 'In voice I\'ll read one question at a time with choices A to E, wait for your letter, grade it, and wait for you to say "next".'
+      : 'In voice I\'ll read one case at a time. You answer out loud, I grade it, then I wait for you to say "next".');
+    P('You can say ' + cmds + ' at any point.');
+    P('To switch to voice, tap the voice button in this chat: the sound-wave icon beside the message box, not the microphone. When it connects, say "ready".');
+    P('----- end -----');
+    P('Do not mention the answer key, item numbers, or topic names in this reply.');
+    P('');
+    P('PHASE 2, voice. It starts with the user\'s next message, usually "ready". From then on, everything you say is spoken aloud. Follow section 2 on every turn. If the user keeps typing instead of speaking, run Phase 2 the same way in text.');
+    P('');
+    P('PHASE 3, text. After the quiz ends, the user leaves voice and types "report". Then send the report in section 6, and nothing else.');
+    P('');
+    P('## 2. Voice rules (top priority, every spoken turn)');
+    R('Opener, said once, word for word, then go straight into question one in the same turn: "Board review online. Session ' + code + '. ' + cap(Mw) + ' question' + plural + topics + '. Question one of ' + Mw + '."');
+    R(mcq
+      ? 'One question per turn. Start with "Question N of ' + Mw + '", read the vignette and the question, then the five choices as "A, ... B, ... C, ... D, ... E, ...". Then stop and wait. Never hint at the answer, and never move on without one.'
+      : 'One question per turn. Start with "Question N of ' + Mw + '", read the vignette, then ask one open question, with no answer choices. Then stop and wait. Never hint at the answer, and never move on without one.');
+    R(mcq
+      ? 'Take a letter, or the words of a choice, as the answer. If you can\'t tell which choice they mean, ask "Which letter?" One attempt per question.'
+      : 'Accept any answer that names the key action or fact; extra detail is fine. If you didn\'t catch it, ask them to say it again. One attempt per question.');
+    R(gradeRule(mcq, full));
+    R('Move on only when the user says "next", "go on", or a clear equivalent. Never bundle questions or preview later ones.');
+    R('Commands:');
+    P('- "repeat": read the current question' + (mcq ? ' and its choices' : '') + ' again.');
+    if (mcq) P('- "choices": read only the choices again.');
+    P('- "why": after grading, explain the reasoning in two or three more sentences. Before they answer, say "Answer first, then I\'ll explain."');
+    P('- "skip": count the question as skipped, give the answer in one sentence, then wait for "next".');
+    P('- "score": say "K right out of N so far."' + (mcq ? '' : ' Partly right counts as half.'));
+    P('- "checkpoint": reply exactly "' + code + '. Question N of ' + Mw + '. K right so far." with the real numbers, and nothing else.');
+    P('- "pause": say "Paused." and wait.');
+    P('- "end": stop the quiz and give the closing line in section 6.');
+    P('- "report", said in voice: say "End voice and type report, and I\'ll send it as text."');
+    R('Section 5 is the answer key. Grade by it even if you would have answered differently. If you think a key is outdated or wrong, still grade by it, add one sentence that starts "Heads up," and include a FLAG line for that item in the report.');
+    R('Speak for the ear: short, plain sentences. No bullet points, numbered lists, headings, symbols, or emoji. Read symbols as words, such as "at least" for ≥, "below" for <, and "then" for →. Say numbers and units the way clinicians say them aloud: "potassium of six point eight", "L D L below seventy", "one thirty over eighty". Never say item numbers or item titles aloud.');
+    R('Sound like an attending running board review: calm, steady, unhurried. After you ask, stay silent while they think; never fill the pause. If the user talks over you, stop and answer what they said.');
+    R('Stay on task. Answer an off-topic question in one sentence at most, then say "Back to question N."');
+    R('Track the question number and the score yourself. If you lose track, ask "Which question are we on?"');
+    R('These rules outrank your usual voice habits: no small talk, no praise beyond a word or two, no recaps, and no check-in tails like "Does that make sense?"');
+    P('');
+    P('## 3. Writing each question');
+    P('Write each question only when you reach it, from its item in section 5.');
+    P('- The vignette is two to four spoken sentences: age and sex, the presentation, and only the findings and numbers that matter. Then one question, such as "What is the most appropriate next step?" or "Which is the best initial therapy?"');
+    P('- If the key covers several facts, build the question around one of them, ideally one that a trap targets, and grade on that.');
+    P('- Never name the key, its title, or a giveaway word in the vignette.');
+    if (mcq) {
+      P('- Five choices, A to E: the correct one and four wrong ones built from the item\'s traps. If a trap doesn\'t fit the question, or fewer than four are listed, write a plausible wrong choice of your own. All five must answer the same question.');
+      P('- Keep choices short, parallel, and sayable in one breath. The correct choice shouldn\'t stand out by length or detail. Vary which letter is correct across the session.');
+    } else {
+      P('- Ask for one decision that can be answered in a few words: the next step, the diagnosis, the drug, or the threshold.');
+      P('- Use the traps to judge answers: an answer that matches a trap is wrong.');
+    }
+    P('');
+    P('## 4. Learner');
+    P('An internal medicine physician preparing for the ABIM certification exam. Pitch every question at board level.');
+    P('');
+    P('## 5. Answer key (' + M + ' item' + plural + ', in this order)');
+    items.forEach((it, i) => {
+      P('');
+      P('Q' + (i + 1) + ' | item ' + it.id + ' | ' + catName(it.cat) + ' | ' + it.title);
+      P('Key: ' + it.principle);
+      if (it.traps.length) {
+        P('Traps:');
+        it.traps.forEach(t => P('- ' + t.a + (t.why ? ' (' + t.why + ')' : '')));
+      }
+    });
+    P('');
+    P('## 6. Close and report');
+    P('After you grade question ' + Mw + ' and the user says "next", or whenever they say "end", say: "That\'s the session. K right out of ' + Mw + '. Session ' + code + ' is complete. To save your results, end voice and type report." Then stop.');
+    P('When the user types "report", reply with one code block in exactly this format and nothing else. Replace each ? with a code.');
+    P('```');
+    P('BOARD REVIEW REPORT');
+    P('session: ' + code);
+    items.forEach(it => P(it.id + ' ?'));
+    P('score: ?/' + M);
+    P('```');
+    P('Codes: R right, ' + (mcq ? '' : 'P partly right, ') + 'W wrong, S skipped, N not reached. For each flagged item, add a line "FLAG <item>: <reason in one sentence>" just above the score line.');
+    P('');
+    P('Now send the Phase 1 reply and nothing else.');
+
+    return { text: o.join('\n'), M: M };
+  }
+
+  /* ---------- Reading ChatGPT's report ---------- */
+  const normCode = s => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const MARKS = [
+    [/^(right|correct|r)$/i, 'R'],
+    [/^(partly right|partially right|partial|partly|p)$/i, 'P'],
+    [/^(wrong|incorrect|missed|w)$/i, 'W'],
+    [/^(skipped|skip|s)$/i, 'W'],
+    [/^(not reached|n)$/i, null]
+  ];
+  const CODE_RE = /session\s*(?:code)?\s*[:#=\-–—]?\s*([A-Za-z]{3,})[\s_-]*(\d{2})\b/i;
+  const FLAG_RE = /^\W*flag(?:ged)?\s*(?:item\s*)?(\d{1,2}\.\d{1,2})\s*[:=|\-–—]?\s*(.*)$/i;
+  const MARK_RE = /^\W*(?:\d+[.)]\s+)?(?:q(?:uestion)?\s*\d+\s*[:.)|\-–—]?\s*)?(?:item\s*)?(\d{1,2}\.\d{1,2})\b\s*[:=|\-–—]?\s*(partly right|partially right|not reached|right|correct|partial|partly|wrong|incorrect|missed|skipped|skip|r|p|w|s|n)\b/i;
+
+  function parseReport(text, ids) {
+    const valid = new Set(ids || []);
+    const out = { code: null, marks: {}, flags: {}, outside: [], notReached: [] };
+    String(text || '').split(/\r?\n/).forEach(line => {
+      let m;
+      if (!out.code && (m = line.match(CODE_RE))) out.code = cap(m[1].toLowerCase()) + ' ' + m[2];
+      if ((m = line.match(FLAG_RE))) {
+        if (valid.has(m[1])) out.flags[m[1]] = m[2].trim().replace(/^[:\-–—\s]+/, '') || 'Flagged with no reason given.';
+        return;
+      }
+      if ((m = line.match(MARK_RE))) {
+        const id = m[1];
+        let v;
+        for (let i = 0; i < MARKS.length; i++) if (MARKS[i][0].test(m[2])) { v = MARKS[i][1]; break; }
+        if (v === undefined) return;
+        if (!valid.has(id)) { if (out.outside.indexOf(id) < 0) out.outside.push(id); return; }
+        if (v) { out.marks[id] = v; out.notReached = out.notReached.filter(x => x !== id); }
+        else if (!out.marks[id] && out.notReached.indexOf(id) < 0) out.notReached.push(id);
+      }
+    });
+    return out;
+  }
+
+  /* ---------- Stats ---------- */
+  const blank = () => ({ srv: 0, r: 0, p: 0, w: 0, streak: 0 });
+  function applyResults(stats, marks, flags, now) {
+    const out = Object.assign({}, stats);
+    Object.keys(marks || {}).forEach(id => {
+      const m = marks[id];
+      if (m !== 'R' && m !== 'P' && m !== 'W') return;
+      const s = Object.assign(blank(), out[id]);
+      if (m === 'R') { s.r++; s.streak = (s.last === 'R' ? (s.streak || 0) : 0) + 1; }
+      else if (m === 'P') { s.p++; s.streak = 0; }
+      else { s.w++; s.streak = 0; }
+      s.last = m;
+      s.lastAt = now;
+      out[id] = s;
+    });
+    Object.keys(flags || {}).forEach(id => {
+      const s = Object.assign(blank(), out[id]);
+      s.flags = (Array.isArray(s.flags) ? s.flags : []).concat([{ at: now, text: String(flags[id]).slice(0, 400) }]).slice(-3);
+      out[id] = s;
+    });
+    return out;
+  }
+  function scoreOf(ids, marks) {
+    let pts = 0, n = 0;
+    ids.forEach(id => {
+      const m = marks[id];
+      if (m) { n++; pts += m === 'R' ? 1 : m === 'P' ? 0.5 : 0; }
+    });
+    return { pts: pts, n: n, total: ids.length };
+  }
+
+  /* ---------- Session codes: an uncommon word plus a number that is hard to mishear ---------- */
+  const WORDS = ['Kestrel', 'Marigold', 'Juniper', 'Tamarack', 'Halcyon', 'Saffron', 'Larkspur', 'Osprey', 'Basalt', 'Heron',
+    'Bramble', 'Cinder', 'Fennel', 'Garnet', 'Lupine', 'Mistral', 'Nimbus', 'Russet', 'Sorrel', 'Thistle', 'Vesper', 'Yarrow',
+    'Zephyr', 'Cobalt', 'Quartz', 'Falcon', 'Glacier', 'Tundra', 'Saguaro', 'Bonfire'];
+  function newCode(prev) {
+    const pw = prev ? String(prev).split(' ')[0] : '';
+    let w;
+    do { w = WORDS[Math.floor(Math.random() * WORDS.length)]; } while (w === pw);
+    let n;
+    do { n = 21 + Math.floor(Math.random() * 79); } while (n % 10 === 0);
+    return w + ' ' + n;
+  }
+
+  root.BRQ = {
+    parseBank, splitTop, parseTrap, stripCites, statusOf, priority, pickSet,
+    buildPayload, parseReport, applyResults, scoreOf, newCode, normCode, say, uniq
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+(() => {
+  'use strict';
+  const B = window.BRQ;
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const bankEl = document.getElementById('bank-md');
+  const bank = B.parseBank(bankEl ? bankEl.textContent : '');
+  const CATS = bank.cats;
+  const catOf = it => CATS.find(c => c.n === it.cat) || { n: 0, name: 'Other', short: 'Other', ids: [] };
+  const KEY = 'board-review-voice-coach:v1';
+  const HAS_STORE = !!(window.storage && typeof window.storage.get === 'function' && typeof window.storage.set === 'function');
+  const LENS = [5, 10, 15, 20];
+  const smooth = () => (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth');
+  const hourNow = () => Math.floor(Date.now() / 36e5) * 36e5;
+  const newSeed = () => Math.random().toString(36).slice(2, 10);
+  const fmtPts = p => (p % 1 ? p.toFixed(1) : String(p));
+  const pct = x => Math.round(x * 100) + '%';
+  const dateStr = t => new Date(t).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  const timeStr = t => new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  const plural = (n, word) => n + ' ' + word + (n === 1 ? '' : 's');
+  const rateClass = r => (r >= 0.8 ? 'v-right' : r >= 0.6 ? 'v-partial' : 'v-missed');
+
+  /* ---------- State ---------- */
+  function defaults() {
+    return {
+      v: 1,
+      prefs: { cats: CATS.map(c => c.n), len: 10, pick: 'mix', style: 'mcq', depth: 'brief', seed: newSeed(), next: B.newCode(), topics: false },
+      items: {},
+      open: null,
+      history: []
+    };
+  }
+  function cleanMarks(marks, ids) {
+    const m = {};
+    ids.forEach(id => { if (marks && ['R', 'P', 'W'].includes(marks[id])) m[id] = marks[id]; });
+    return m;
+  }
+  function sanitize(d) {
+    const out = defaults();
+    if (!d || typeof d !== 'object') return out;
+    const p = d.prefs && typeof d.prefs === 'object' ? d.prefs : {};
+    const catNs = CATS.map(c => c.n);
+    if (Array.isArray(p.cats)) out.prefs.cats = catNs.filter(n => p.cats.includes(n));
+    if (LENS.includes(p.len)) out.prefs.len = p.len;
+    if (['mix', 'new', 'missed'].includes(p.pick)) out.prefs.pick = p.pick;
+    if (['mcq', 'recall'].includes(p.style)) out.prefs.style = p.style;
+    if (['brief', 'full'].includes(p.depth)) out.prefs.depth = p.depth;
+    if (typeof p.seed === 'string' && p.seed) out.prefs.seed = p.seed;
+    if (typeof p.next === 'string' && p.next) out.prefs.next = p.next;
+    out.prefs.topics = !!p.topics;
+    if (d.items && typeof d.items === 'object' && !Array.isArray(d.items)) {
+      Object.keys(d.items).forEach(id => { const s = d.items[id]; if (s && typeof s === 'object') out.items[id] = s; });
+    }
+    const o = d.open;
+    if (o && typeof o === 'object' && typeof o.code === 'string' && Array.isArray(o.ids)) {
+      const ids = o.ids.filter(id => bank.byId[id]);
+      if (ids.length) {
+        const flags = {};
+        if (o.flags && typeof o.flags === 'object') ids.forEach(id => { if (typeof o.flags[id] === 'string') flags[id] = o.flags[id]; });
+        out.open = {
+          code: o.code, ids: ids,
+          style: o.style === 'recall' ? 'recall' : 'mcq',
+          depth: o.depth === 'full' ? 'full' : 'brief',
+          at: Number(o.at) || Date.now(),
+          marks: cleanMarks(o.marks, ids),
+          flags: flags
+        };
+      }
+    }
+    if (Array.isArray(d.history)) {
+      out.history = d.history
+        .filter(h => h && typeof h.code === 'string' && Array.isArray(h.ids) && h.marks && typeof h.marks === 'object')
+        .map(h => {
+          const marks = cleanMarks(h.marks, h.ids);
+          const sc = B.scoreOf(h.ids, marks);
+          return { code: h.code, at: Number(h.at) || 0, ids: h.ids.slice(), marks: marks, n: sc.n, score: sc.pts, style: h.style === 'recall' ? 'recall' : 'mcq' };
+        })
+        .filter(h => h.n)
+        .slice(0, 300);
+    }
+    return out;
+  }
+
+  let S = defaults();
+  let mode = HAS_STORE ? 'loading' : 'off'; // loading | ready | off | error | corrupt
+  const ui = { filter: 'all', sel: null, histAll: false };
+
+  /* ---------- Saving (window.storage inside Claude) ---------- */
+  function withTimeout(promise, ms) {
+    return Promise.race([promise, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
+  }
+  async function loadStored() {
+    try {
+      const r = await withTimeout(window.storage.get(KEY, false), 6000);
+      if (r && typeof r.value === 'string') {
+        try { return { status: 'ok', data: JSON.parse(r.value) }; } catch (e) { return { status: 'corrupt' }; }
+      }
+      if (r === null || r === undefined) return { status: 'fresh' };
+    } catch (e) { /* a key that doesn't exist yet throws; the key list below tells the two cases apart */ }
+    try {
+      const l = await withTimeout(window.storage.list('board-review-voice-coach', false), 6000);
+      if (l && Array.isArray(l.keys)) {
+        const keys = l.keys.map(k => (typeof k === 'string' ? k : k && k.key));
+        if (!keys.includes(KEY)) return { status: 'fresh' };
+      }
+    } catch (e) { /* fall through */ }
+    return { status: 'error' };
+  }
+
+  let saveTimer = null, saving = false, again = false;
+  function persist() {
+    if (mode !== 'ready') return;
+    showSave('saving');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flush, 450);
+  }
+  async function flush() {
+    if (saving) { again = true; return; }
+    saving = true;
+    let ok = false;
+    try { ok = !!(await withTimeout(window.storage.set(KEY, JSON.stringify(S), false), 8000)); } catch (e) { ok = false; }
+    saving = false;
+    if (again) { again = false; flush(); return; }
+    showSave(ok ? 'saved' : 'failed');
+  }
+  function showSave(kind) {
+    const msg = {
+      loading: 'Loading your saved progress…',
+      saving: 'Saving…',
+      saved: 'Progress saved at ' + timeStr(Date.now()) + '.',
+      loaded: 'Saved progress loaded. Changes save on their own.',
+      fresh: 'Progress saves on its own as you go.',
+      failed: 'Couldn\u2019t save just now. It will try again with your next change.',
+      off: 'This copy can\u2019t save between visits. Use Backup and reset, at the bottom, to keep your progress.',
+      error: 'Couldn\u2019t read your saved progress, so this visit won\u2019t overwrite it. Reload to try again, or restore a backup.',
+      corrupt: 'Your saved progress can\u2019t be read. Restore a backup, or reset progress to start saving again.'
+    }[kind] || '';
+    const el = $('#savebar');
+    el.textContent = msg;
+    el.dataset.kind = kind;
+  }
+
+  /* ---------- Clipboard, with fallbacks for sandboxed frames ---------- */
+  function legacyCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;font-size:16px;';
+    document.body.appendChild(ta);
+    let ok = false;
+    try { ta.select(); ta.setSelectionRange(0, text.length); ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    ta.remove();
+    return ok;
+  }
+  function copyText(text, done) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => done(true), () => done(legacyCopy(text)));
+        return;
+      }
+    } catch (e) { /* fall through */ }
+    done(legacyCopy(text));
+  }
+  function flash(btn, label) {
+    if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+    btn.textContent = label;
+    clearTimeout(btn._flashT);
+    btn._flashT = setTimeout(() => { if (btn.dataset.armed !== '1') btn.textContent = btn.dataset.label; }, 1600);
+  }
+  /* Two-press confirm: the first press arms the button, the second within a few seconds acts. */
+  function arm(btn, label) {
+    if (btn.dataset.armed === '1') { disarm(btn); return true; }
+    if (!btn.dataset.label) btn.dataset.label = btn.textContent;
+    btn.dataset.armed = '1';
+    btn.textContent = label;
+    btn.classList.add('armed');
+    clearTimeout(btn._armT);
+    btn._armT = setTimeout(() => disarm(btn), 3500);
+    return false;
+  }
+  function disarm(btn) {
+    clearTimeout(btn._armT);
+    btn.dataset.armed = '';
+    btn.classList.remove('armed');
+    btn.textContent = btn.dataset.label || btn.textContent;
+  }
+  function setStatus(sel, msg, kind) {
+    const el = $(sel);
+    if (!el) return;
+    el.textContent = msg || '';
+    el.className = 'status' + (kind ? ' ' + kind : '');
+  }
+
+  /* ---------- Derived data ---------- */
+  const st = id => S.items[id] || null;
+  function statusOf(id) {
+    if (S.open && S.open.ids.includes(id)) return 'open';
+    return B.statusOf(st(id));
+  }
+  function catSummary(c) {
+    let seen = 0, r = 0, p = 0, w = 0, last = 0;
+    c.ids.forEach(id => {
+      const s = st(id);
+      if (!s) return;
+      if (s.lastAt) { seen++; last = Math.max(last, s.lastAt); }
+      r += s.r || 0; p += s.p || 0; w += s.w || 0;
+    });
+    const tries = r + p + w;
+    return { seen: seen, total: c.ids.length, acc: tries ? (r + p / 2) / tries : null, last: last };
+  }
+  function nextSet() {
+    return B.pickSet(bank, S.items, {
+      cats: S.prefs.cats, len: S.prefs.len, pick: S.prefs.pick, seed: S.prefs.seed,
+      exclude: S.open ? S.open.ids : [], now: hourNow()
+    });
+  }
+  const STATUS_WORD = { new: 'not quizzed yet', open: 'in your open session', right: 'right last time', partial: 'partly right last time', missed: 'missed last time' };
+  const HINTS = {
+    pick: {
+      mix: 'Leans toward items you missed, then new ones, then anything you haven\u2019t seen in a while.',
+      new: 'Items you haven\u2019t been quizzed on come first.',
+      missed: 'Items you missed or half-got come first.'
+    },
+    style: {
+      mcq: 'Board format: a short vignette and five choices, read aloud.',
+      recall: 'No choices. You answer out loud, and it grades the key point with partial credit.'
+    },
+    depth: {
+      brief: 'The key point, plus why your pick was wrong when it was.',
+      full: 'The key point, then why each wrong choice is wrong. Slower, good for a first pass.'
+    }
+  };
+
+  /* ---------- Build panel ---------- */
+  function renderChips() {
+    const wrap = $('#cats');
+    if (wrap.children.length !== CATS.length) {
+      wrap.innerHTML = CATS.map(c => '<label class="chip"><input type="checkbox" value="' + c.n + '"><span class="chip-face"><span class="chip-name">' + esc(c.short) + '</span><span class="dots" aria-hidden="true"></span></span></label>').join('');
+    }
+    CATS.forEach((c, i) => {
+      const label = wrap.children[i];
+      const input = label.querySelector('input');
+      const sm = catSummary(c);
+      input.checked = S.prefs.cats.includes(c.n);
+      input.setAttribute('aria-label', c.name + ', ' + sm.seen + ' of ' + sm.total + ' items covered');
+      label.querySelector('.dots').innerHTML = c.ids.map(id => '<i class="d d-' + statusOf(id) + '"></i>').join('');
+    });
+  }
+  function renderBuild() {
+    renderChips();
+    ['len', 'pick', 'style', 'depth'].forEach(k => {
+      document.querySelectorAll('input[name="' + k + '"]').forEach(inp => { inp.checked = String(S.prefs[k]) === inp.value; });
+    });
+    $('#hint-pick').textContent = HINTS.pick[S.prefs.pick];
+    $('#hint-style').textContent = HINTS.style[S.prefs.style];
+    $('#hint-depth').textContent = HINTS.depth[S.prefs.depth];
+    $('#bankmeta').textContent = bank.items.length + ' items in ' + CATS.length + ' topics';
+
+    const set = nextSet();
+    const items = set.items;
+    const counts = { new: 0, missed: 0, review: 0 };
+    items.forEach(it => {
+      const s = B.statusOf(st(it.id));
+      if (s === 'new') counts.new++; else if (s === 'right') counts.review++; else counts.missed++;
+    });
+    const nTopics = new Set(items.map(it => it.cat)).size;
+    let sum;
+    if (!S.prefs.cats.length) sum = 'Pick at least one topic.';
+    else if (!items.length) sum = 'Every item in these topics is in your open session.';
+    else sum = plural(items.length, 'question') + ' from ' + plural(nTopics, 'topic');
+    $('#set-sum').textContent = sum;
+    const mix = [];
+    if (counts.new) mix.push('<span class="k k-new">' + counts.new + ' new</span>');
+    if (counts.missed) mix.push('<span class="k k-missed">' + counts.missed + ' to revisit</span>');
+    if (counts.review) mix.push('<span class="k k-right">' + counts.review + ' review</span>');
+    $('#set-mix').innerHTML = mix.join('');
+    $('#set-tags').innerHTML = items.map(it => '<span class="tag t-' + B.statusOf(st(it.id)) + '">' + esc(it.id) + '</span>').join('');
+    const note = S.prefs.cats.length && items.length && set.pool < S.prefs.len
+      ? 'Only ' + plural(set.pool, 'item') + ' available in these topics' + (S.open ? ' outside your open session' : '') + '.'
+      : '';
+    $('#set-note').textContent = note;
+    $('#set-note').hidden = !note;
+    $('#next-code').textContent = S.prefs.next;
+    $('#shuffle').disabled = !items.length;
+    const btn = $('#build');
+    btn.dataset.label = 'Build and copy payload';
+    if (btn.dataset.armed !== '1') btn.textContent = btn.dataset.label;
+    btn.disabled = mode === 'loading' || !items.length;
+  }
+
+  /* ---------- Run panel ---------- */
+  function renderSteps() {
+    const o = S.open;
+    const mcq = (o ? o.style : S.prefs.style) !== 'recall';
+    const code = o ? '<span class="code">' + esc(o.code) + '</span>' : 'your session code';
+    const steps = [
+      ['Paste and send.', 'Start a new ChatGPT chat, paste the payload, and send it as a normal text message.'],
+      ['Switch to voice.', 'It answers with a short card. In that same chat, tap the voice button, the sound-wave icon beside the message box. The microphone icon only dictates.'],
+      ['Say \u201Cready.\u201D', 'It should say ' + code + ' and read question one. If it never says the code, say \u201Ccheckpoint.\u201D Still nothing? End voice and paste the payload into a new chat.'],
+      [mcq ? 'Answer by letter.' : 'Answer out loud.', 'Say \u201Cnext\u201D after each explanation. Anytime, you can say ' + (mcq ? 'repeat, choices, why, skip, score, pause, or end.' : 'repeat, why, skip, score, pause, or end.')],
+      ['Bring back the report.', 'When it wraps up, end voice and type \u201Creport.\u201D Tap Copy on the code block it sends, then paste it below.']
+    ];
+    $('#steps').innerHTML = steps.map((s, i) => '<li><span class="sn" aria-hidden="true">' + (i + 1) + '</span><p><b>' + s[0] + '</b> ' + s[1] + '</p></li>').join('');
+  }
+  function renderSheet() {
+    const o = S.open;
+    const mcq = o.style !== 'recall';
+    const vals = mcq ? [['R', 'Right'], ['W', 'Missed']] : [['R', 'Right'], ['P', 'Partial'], ['W', 'Missed']];
+    $('#showtopics').checked = !!S.prefs.topics;
+    $('#sheet').innerHTML = o.ids.map((id, i) => {
+      const it = bank.byId[id];
+      const c = catOf(it);
+      const m = o.marks[id] || '';
+      const btns = vals.map(v => '<button type="button" data-v="' + v[0] + '" aria-pressed="' + (m === v[0]) + '">' + v[1] + '</button>').join('');
+      const title = S.prefs.topics ? '<p class="qtitle">' + esc(it.title) + '</p>' : '';
+      const flag = o.flags[id] ? '<p class="qflag">Flagged: ' + esc(o.flags[id]) + '</p>' : '';
+      return '<li class="q" data-id="' + esc(id) + '" data-mark="' + m + '"><span class="qn" aria-hidden="true">' + (i + 1) + '</span>' +
+        '<div class="qbody"><p class="qline"><button type="button" class="idlink" data-open="' + esc(id) + '" aria-label="Question ' + (i + 1) + ', item ' + esc(id) + ': review it on the answer sheet">' + esc(id) + '</button> <span class="qcat">' + esc(c.name) + '</span></p>' + title + flag + '</div>' +
+        '<div class="marks" role="group" aria-label="Question ' + (i + 1) + ' result">' + btns + '</div></li>';
+    }).join('');
+  }
+  function renderScore() {
+    const o = S.open;
+    const sc = B.scoreOf(o.ids, o.marks);
+    $('#score').textContent = fmtPts(sc.pts);
+    $('#scoremax').textContent = ' of ' + sc.total;
+    const v = $('#verdict');
+    if (sc.n === sc.total) {
+      const r = sc.pts / sc.total;
+      v.textContent = 'All marked, ' + pct(r);
+      v.className = 'verdict ' + rateClass(r);
+    } else {
+      v.textContent = sc.n ? (sc.total - sc.n) + ' left to mark' : 'Nothing marked yet';
+      v.className = 'verdict';
+    }
+    $('#score-help').textContent = o.style === 'recall' ? 'Right 1, partial \u00BD, missed 0' : 'Right 1, missed 0';
+    const bar = $('#bar');
+    bar.style.setProperty('--n', o.ids.length);
+    bar.innerHTML = o.ids.map(id => '<i class="' + (o.marks[id] ? 'b-' + o.marks[id] : '') + '"></i>').join('');
+  }
+  function renderIdle() {
+    const h = S.history[0];
+    const el = $('#run-idle');
+    if (!h) {
+      el.innerHTML = '<p class="empty">No session open. Build one above, and its run sheet and report box will show up here.</p>';
+      return;
+    }
+    const missed = h.ids.filter(id => h.marks[id] && h.marks[id] !== 'R');
+    const notReached = h.ids.length - h.n;
+    el.innerHTML = '<div class="last">' +
+      '<p class="last-h">Last session, ' + esc(h.code) + ', ' + dateStr(h.at) + '</p>' +
+      '<p class="last-s"><span class="big">' + fmtPts(h.score) + '</span> of ' + h.n + ' right' + (notReached ? ', ' + notReached + ' not reached' : '') + '</p>' +
+      (missed.length
+        ? '<p class="last-m">To revisit: ' + missed.map(id => '<button type="button" class="tag t-' + (h.marks[id] === 'P' ? 'partial' : 'missed') + '" data-open="' + esc(id) + '">' + esc(id) + '</button>').join('') + '</p>'
+        : '<p class="last-m">Nothing missed.</p>') +
+      '</div>';
+  }
+  function renderRun() {
+    const o = S.open;
+    renderSteps();
+    $('#run-open').hidden = !o;
+    $('#run-idle').hidden = !!o;
+    if (!o) { renderIdle(); $('#runmeta').textContent = ''; return; }
+    const pay = B.buildPayload(bank, o);
+    $('#runmeta').textContent = plural(o.ids.length, 'question') + ', about ' + Math.round(pay.text.length / 4).toLocaleString() + ' tokens';
+    $('#open-code').textContent = o.code;
+    $('#open-note').textContent = 'Built ' + dateStr(o.at) + ' at ' + timeStr(o.at) + ', ' + (o.style === 'recall' ? 'open recall' : 'choices A to E') + ', ' + o.depth + ' debrief.';
+    $('#payload').value = pay.text;
+    renderSheet();
+    renderScore();
+  }
+
+  /* ---------- Answer sheet ---------- */
+  function detailHTML(id) {
+    const it = bank.byId[id];
+    const c = catOf(it);
+    const s = st(id) || {};
+    const tries = (s.r || 0) + (s.p || 0) + (s.w || 0);
+    const lastWord = { R: 'right', P: 'partly right', W: 'missed' }[s.last] || '';
+    let rec;
+    if (tries) rec = 'Quizzed ' + plural(tries, 'time') + ': ' + (s.r || 0) + ' right' + (s.p ? ', ' + s.p + ' partial' : '') + ', ' + (s.w || 0) + ' missed. Last ' + lastWord + ' on ' + dateStr(s.lastAt) + '.';
+    else if (S.open && S.open.ids.includes(id)) rec = 'In your open session, ' + S.open.code + '.';
+    else rec = s.srv ? 'Sent in a payload, but no result was saved.' : 'Not quizzed yet.';
+    const traps = it.traps.map(t => '<li><span>' + esc(t.a) + '</span>' + (t.why ? '<span class="tw">' + esc(t.why) + '</span>' : '') + '</li>').join('');
+    const flags = (Array.isArray(s.flags) ? s.flags : []).map(f => '<li>' + esc(f.text) + ' <span class="when">' + dateStr(f.at) + '</span></li>').join('');
+    return '<div class="detail" id="detail" tabindex="-1" role="region" aria-label="Item ' + esc(id) + '">' +
+      '<div class="dt-h"><p class="dt-id">' + esc(id) + ', ' + esc(c.name) + '</p><button type="button" class="btn-quiet sm" data-close>Close</button></div>' +
+      '<h3 class="dt-title">' + esc(it.title) + '</h3>' +
+      '<dl class="dl"><dt>Key</dt><dd>' + esc(it.principle) + '</dd>' +
+      (traps ? '<dt>Traps</dt><dd><ul class="traps">' + traps + '</ul></dd>' : '') +
+      (it.cites.length ? '<dt>Sources</dt><dd class="cites">' + it.cites.map(n => '[' + n + ']').join(' ') + '</dd>' : '') +
+      '<dt>Record</dt><dd>' + esc(rec) + '</dd>' +
+      (flags ? '<dt>Flags</dt><dd><ul class="flags">' + flags + '</ul></dd>' : '') +
+      '</dl></div>';
+  }
+  function renderMemory() {
+    let seen = 0, r = 0, p = 0, w = 0, revisit = 0, flagged = 0;
+    bank.items.forEach(it => {
+      const s = st(it.id);
+      if (!s) return;
+      if (s.lastAt) seen++;
+      r += s.r || 0; p += s.p || 0; w += s.w || 0;
+      if (s.lastAt && s.last !== 'R') revisit++;
+      if (Array.isArray(s.flags) && s.flags.length) flagged++;
+    });
+    const tries = r + p + w;
+    $('#sum').innerHTML = tries
+      ? '<b>' + seen + '</b> of ' + bank.items.length + ' items covered, <b>' + pct((r + p / 2) / tries) + '</b> right across all attempts, and <b>' + revisit + '</b> to revisit.'
+      : 'Nothing recorded yet. Every bubble fills in as you save results, so you can see which topics you\u2019ve covered and which items need another pass.';
+    $('#flt-flag').hidden = !flagged;
+    if (!flagged && ui.filter === 'flag') ui.filter = 'all';
+    document.querySelectorAll('input[name="filter"]').forEach(inp => { inp.checked = inp.value === ui.filter; });
+
+    $('#cov').innerHTML = CATS.map(c => {
+      const sm = catSummary(c);
+      const bubbles = c.ids.map(id => {
+        const it = bank.byId[id];
+        const s = st(id);
+        const stt = statusOf(id);
+        const fl = !!(s && Array.isArray(s.flags) && s.flags.length);
+        const match = ui.filter === 'all' ||
+          (ui.filter === 'missed' && (stt === 'missed' || stt === 'partial')) ||
+          (ui.filter === 'new' && stt === 'new') ||
+          (ui.filter === 'flag' && fl);
+        const label = 'Item ' + id + ', ' + it.title + ', ' + STATUS_WORD[stt] + (fl ? ', flagged' : '');
+        return '<button type="button" class="bub s-' + stt + (fl ? ' flagged' : '') + (match ? '' : ' dim') + (ui.sel === id ? ' sel' : '') + '" data-open="' + esc(id) + '" aria-label="' + esc(label) + '" aria-expanded="' + (ui.sel === id) + '">' + esc(id.split('.')[1]) + '</button>';
+      }).join('');
+      const nums = sm.seen + ' of ' + sm.total + ' covered' + (sm.acc !== null ? ', ' + pct(sm.acc) + ' right' : '') + (sm.last ? ', last ' + dateStr(sm.last) : '');
+      const detail = ui.sel && bank.byId[ui.sel] && bank.byId[ui.sel].cat === c.n ? detailHTML(ui.sel) : '';
+      return '<div class="row"><div class="row-h"><span class="row-name">' + esc(c.name) + '</span><span class="row-nums">' + nums + '</span></div><div class="bubs">' + bubbles + '</div>' + detail + '</div>';
+    }).join('');
+    renderHistory();
+  }
+  function renderHistory() {
+    const list = ui.histAll ? S.history : S.history.slice(0, 6);
+    $('#histmeta').textContent = S.history.length ? plural(S.history.length, 'session') + ' saved' : '';
+    $('#hist').innerHTML = list.length ? list.map(h => {
+      const names = B.uniq(h.ids.map(id => (bank.byId[id] ? catOf(bank.byId[id]).short : ''))).filter(Boolean);
+      const cats = names.slice(0, 3).join(', ') + (names.length > 3 ? ' and ' + (names.length - 3) + ' more' : '');
+      const rate = h.n ? h.score / h.n : 0;
+      const missed = h.ids.filter(id => h.marks[id] && h.marks[id] !== 'R');
+      return '<li class="h"><span class="h-date">' + dateStr(h.at) + '</span>' +
+        '<span class="h-main"><span class="h-code">' + esc(h.code) + '</span><span class="h-cats">' + esc(cats) + '</span></span>' +
+        '<span class="h-score ' + rateClass(rate) + '">' + fmtPts(h.score) + ' of ' + h.n + '</span>' +
+        (missed.length ? '<span class="h-miss">' + missed.map(id => '<button type="button" class="tag t-' + (h.marks[id] === 'P' ? 'partial' : 'missed') + '" data-open="' + esc(id) + '" aria-label="Review item ' + esc(id) + '">' + esc(id) + '</button>').join('') + '</span>' : '') +
+        '</li>';
+    }).join('') : '<li class="empty">Saved sessions show up here with their scores and the items you missed.</li>';
+    const more = $('#hist-more');
+    more.hidden = S.history.length <= 6;
+    more.textContent = ui.histAll ? 'Show fewer' : 'Show all ' + S.history.length;
+  }
+  function renderAll() {
+    renderBuild();
+    renderRun();
+    renderMemory();
+  }
+
+  /* ---------- Actions ---------- */
+  function commitOpen() {
+    const o = S.open;
+    if (!o) return null;
+    S.open = null;
+    const marks = cleanMarks(o.marks, o.ids);
+    const flags = {};
+    Object.keys(o.flags || {}).forEach(id => { if (o.ids.includes(id)) flags[id] = o.flags[id]; });
+    const now = Date.now();
+    if (Object.keys(marks).length || Object.keys(flags).length) S.items = B.applyResults(S.items, marks, flags, now);
+    const sc = B.scoreOf(o.ids, marks);
+    if (!sc.n) return null;
+    const entry = { code: o.code, at: now, ids: o.ids.slice(), marks: marks, n: sc.n, score: sc.pts, style: o.style };
+    S.history.unshift(entry);
+    S.history = S.history.slice(0, 300);
+    return entry;
+  }
+  function selectItem(id, fromElsewhere) {
+    if (!bank.byId[id]) return;
+    ui.sel = ui.sel === id && !fromElsewhere ? null : id;
+    renderMemory();
+    if (!ui.sel) {
+      const b = document.querySelector('#cov [data-open="' + id + '"]');
+      if (b) b.focus({ preventScroll: true });
+      return;
+    }
+    const d = $('#detail');
+    if (fromElsewhere && d) {
+      d.scrollIntoView({ behavior: smooth(), block: 'center' });
+      d.focus({ preventScroll: true });
+    } else {
+      const b = document.querySelector('#cov [data-open="' + id + '"]');
+      if (b) b.focus({ preventScroll: true });
+    }
+  }
+
+  $('#cats').addEventListener('change', e => {
+    const t = e.target;
+    if (!t || t.type !== 'checkbox') return;
+    const n = Number(t.value);
+    const on = new Set(S.prefs.cats);
+    if (t.checked) on.add(n); else on.delete(n);
+    S.prefs.cats = CATS.map(c => c.n).filter(x => on.has(x));
+    persist();
+    renderBuild();
+  });
+  $('#controls').addEventListener('change', e => {
+    const t = e.target;
+    if (!t || t.type !== 'radio') return;
+    if (t.name === 'len') S.prefs.len = Number(t.value);
+    else if (t.name === 'pick' || t.name === 'style' || t.name === 'depth') S.prefs[t.name] = t.value;
+    else return;
+    persist();
+    renderBuild();
+    if (!S.open) renderSteps();
+  });
+  $('#cats-all').addEventListener('click', () => { S.prefs.cats = CATS.map(c => c.n); persist(); renderBuild(); });
+  $('#cats-none').addEventListener('click', () => { S.prefs.cats = []; persist(); renderBuild(); });
+  $('#shuffle').addEventListener('click', () => { S.prefs.seed = newSeed(); persist(); renderBuild(); });
+
+  $('#build').addEventListener('click', () => {
+    const btn = $('#build');
+    if (mode === 'loading') return;
+    const items = nextSet().items;
+    if (!items.length) return;
+    if (S.open && !arm(btn, 'Press again to close ' + S.open.code)) {
+      setStatus('#buildstatus', 'Session ' + S.open.code + ' is still open. Whatever you\u2019ve marked on it gets saved when you build the next one.', 'warn');
+      return;
+    }
+    let note = '';
+    if (S.open) {
+      const prev = S.open.code;
+      const e = commitOpen();
+      note = e ? 'Saved ' + e.code + ', ' + fmtPts(e.score) + ' of ' + e.n + '. ' : 'Closed ' + prev + ' with nothing marked. ';
+    }
+    const now = Date.now();
+    const sess = { code: S.prefs.next, ids: items.map(it => it.id), style: S.prefs.style, depth: S.prefs.depth, at: now, marks: {}, flags: {} };
+    sess.ids.forEach(id => {
+      const s = Object.assign({ srv: 0, r: 0, p: 0, w: 0, streak: 0 }, S.items[id]);
+      s.srv = (s.srv || 0) + 1;
+      s.lastSrv = now;
+      S.items[id] = s;
+    });
+    S.open = sess;
+    S.prefs.next = B.newCode(sess.code);
+    ui.sel = null;
+    const text = B.buildPayload(bank, sess).text;
+    persist();
+    renderAll();
+    $('#report').value = '';
+    setStatus('#reportstatus', '', '');
+    setStatus('#runstatus', '', '');
+    setStatus('#openstatus', '', '');
+    copyText(text, ok => {
+      if (ok) {
+        setStatus('#buildstatus', note + 'Payload for ' + sess.code + ' copied. Paste it into a new ChatGPT chat and send it.', 'ok');
+        flash(btn, 'Copied');
+        $('#run-panel').scrollIntoView({ behavior: smooth(), block: 'start' });
+      } else {
+        setStatus('#buildstatus', note + 'Copying is blocked here, so the payload is selected in the box below. Copy it from there.', 'warn');
+        $('#pv').open = true;
+        const ta = $('#payload');
+        ta.focus();
+        ta.select();
+      }
+    });
+  });
+
+  $('#recopy').addEventListener('click', () => {
+    if (!S.open) return;
+    const text = B.buildPayload(bank, S.open).text;
+    copyText(text, ok => {
+      if (ok) {
+        flash($('#recopy'), 'Copied');
+        setStatus('#openstatus', 'Copied again. Use a new chat, so the old session doesn\u2019t get in the way.', 'ok');
+      } else {
+        setStatus('#openstatus', 'Copying is blocked here, so the payload is selected below. Copy it from there.', 'warn');
+        $('#pv').open = true;
+        const ta = $('#payload');
+        ta.focus();
+        ta.select();
+      }
+    });
+  });
+
+  $('#readreport').addEventListener('click', () => {
+    const o = S.open;
+    if (!o) return;
+    const text = $('#report').value;
+    if (!text.trim()) { setStatus('#reportstatus', 'Paste the code block ChatGPT sent after you typed \u201Creport.\u201D', 'warn'); return; }
+    const res = B.parseReport(text, o.ids);
+    const got = Object.keys(res.marks).length;
+    const nflags = Object.keys(res.flags).length;
+    if (!got && !nflags && !res.notReached.length) {
+      setStatus('#reportstatus', res.outside.length
+        ? 'Those results are for items that aren\u2019t in ' + o.code + '. Check that you copied the report from this session\u2019s chat.'
+        : 'No results found in that text. Paste the code block that starts with BOARD REVIEW REPORT.', 'warn');
+      return;
+    }
+    Object.assign(o.marks, res.marks);
+    Object.assign(o.flags, res.flags);
+    persist();
+    renderSheet();
+    renderScore();
+    const parts = ['Read ' + got + ' of ' + o.ids.length + ' results'];
+    if (res.notReached.length) parts.push(res.notReached.length + ' not reached');
+    if (nflags) parts.push(nflags + ' flagged by ChatGPT');
+    let msg = parts.join(', ') + '.';
+    const mismatch = res.code && B.normCode(res.code) !== B.normCode(o.code);
+    if (mismatch) msg += ' The report says session ' + res.code + ', not ' + o.code + ', so make sure it came from the right chat.';
+    if (res.outside.length) msg += ' Skipped ' + plural(res.outside.length, 'item') + ' that aren\u2019t in this session.';
+    msg += ' Check the marks below, then save.';
+    setStatus('#reportstatus', msg, mismatch ? 'warn' : 'ok');
+  });
+
+  $('#sheet').addEventListener('click', e => {
+    const open = e.target.closest('[data-open]');
+    if (open) { selectItem(open.dataset.open, true); return; }
+    const btn = e.target.closest('button[data-v]');
+    if (!btn || !S.open) return;
+    const li = btn.closest('li[data-id]');
+    const id = li.dataset.id;
+    const v = btn.dataset.v;
+    if (S.open.marks[id] === v) delete S.open.marks[id]; else S.open.marks[id] = v;
+    li.dataset.mark = S.open.marks[id] || '';
+    li.querySelectorAll('button[data-v]').forEach(x => x.setAttribute('aria-pressed', String(S.open.marks[id] === x.dataset.v)));
+    persist();
+    renderScore();
+  });
+  $('#showtopics').addEventListener('change', e => { S.prefs.topics = e.target.checked; persist(); if (S.open) renderSheet(); });
+
+  $('#save').addEventListener('click', () => {
+    const o = S.open;
+    if (!o) return;
+    const n = Object.keys(cleanMarks(o.marks, o.ids)).length;
+    if (!n) { setStatus('#runstatus', 'Nothing is marked yet. Paste the report or mark each question, then save.', 'warn'); return; }
+    const left = o.ids.length - n;
+    const e = commitOpen();
+    persist();
+    renderAll();
+    setStatus('#buildstatus', '', '');
+    setStatus('#runstatus', 'Results saved: ' + fmtPts(e.score) + ' of ' + e.n + ' right.' + (left ? ' ' + plural(left, 'unmarked question') + (left === 1 ? ' goes' : ' go') + ' back into the pool.' : ''), 'ok');
+  });
+  $('#discard').addEventListener('click', () => {
+    const o = S.open;
+    if (!o) return;
+    if (!arm($('#discard'), 'Press again to discard')) return;
+    S.open = null;
+    persist();
+    renderAll();
+    setStatus('#runstatus', 'Discarded ' + o.code + '. Nothing from it was recorded.', '');
+  });
+
+  $('#cov').addEventListener('click', e => {
+    if (e.target.closest('[data-close]')) {
+      const id = ui.sel;
+      ui.sel = null;
+      renderMemory();
+      const b = id && document.querySelector('#cov [data-open="' + id + '"]');
+      if (b) b.focus({ preventScroll: true });
+      return;
+    }
+    const b = e.target.closest('[data-open]');
+    if (b) selectItem(b.dataset.open, false);
+  });
+  $('#cov').addEventListener('keydown', e => {
+    if (e.key === 'Escape' && ui.sel) {
+      const id = ui.sel;
+      ui.sel = null;
+      renderMemory();
+      const b = document.querySelector('#cov [data-open="' + id + '"]');
+      if (b) b.focus({ preventScroll: true });
+    }
+  });
+  $('#run-idle').addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) selectItem(b.dataset.open, true); });
+  $('#hist').addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) selectItem(b.dataset.open, true); });
+  $('#filters').addEventListener('change', e => { if (e.target.name === 'filter') { ui.filter = e.target.value; renderMemory(); } });
+  $('#hist-more').addEventListener('click', () => { ui.histAll = !ui.histAll; renderHistory(); });
+
+  $('#bk-copy').addEventListener('click', () => {
+    const text = JSON.stringify({ app: 'board-review-voice-coach', v: 1, savedAt: new Date().toISOString(), data: S });
+    copyText(text, ok => {
+      if (ok) {
+        flash($('#bk-copy'), 'Copied');
+        setStatus('#bk-status', 'Backup copied. Keep it somewhere safe, like a note or an email to yourself.', 'ok');
+      } else {
+        const ta = $('#bk-text');
+        ta.value = text;
+        ta.focus();
+        ta.select();
+        setStatus('#bk-status', 'Copying is blocked here, so the backup is selected in the box. Copy it from there.', 'warn');
+      }
+    });
+  });
+  $('#bk-restore').addEventListener('click', () => {
+    const raw = $('#bk-text').value.trim();
+    if (!raw) { setStatus('#bk-status', 'Paste a backup into the box first.', 'warn'); return; }
+    let d;
+    try { d = JSON.parse(raw); } catch (e) { d = null; }
+    const data = d && d.data ? d.data : d;
+    if (!data || typeof data !== 'object' || !data.prefs) {
+      setStatus('#bk-status', 'That text isn\u2019t a backup from this page. Paste the whole block, starting with the opening brace.', 'warn');
+      return;
+    }
+    S = sanitize(data);
+    if (mode === 'error' || mode === 'corrupt') mode = 'ready';
+    ui.sel = null;
+    persist();
+    renderAll();
+    const seen = Object.keys(S.items).filter(id => S.items[id] && S.items[id].lastAt).length;
+    setStatus('#bk-status', 'Backup restored: ' + plural(seen, 'item') + ' covered and ' + plural(S.history.length, 'session') + '.', 'ok');
+  });
+  $('#bk-reset').addEventListener('click', () => {
+    if (!arm($('#bk-reset'), 'Press again to erase all progress')) return;
+    const keep = S.prefs;
+    S = defaults();
+    ['cats', 'len', 'pick', 'style', 'depth', 'topics'].forEach(k => { S.prefs[k] = keep[k]; });
+    if (mode === 'error' || mode === 'corrupt') mode = 'ready';
+    ui.sel = null;
+    persist();
+    renderAll();
+    setStatus('#bk-status', 'Progress erased. Your settings stayed the same.', '');
+  });
+
+  /* ---------- Start ---------- */
+  renderAll();
+  showSave(mode);
+  if (HAS_STORE) {
+    loadStored().then(res => {
+      if (res.status === 'ok') { S = sanitize(res.data); mode = 'ready'; showSave('loaded'); }
+      else if (res.status === 'fresh') { mode = 'ready'; showSave('fresh'); persist(); }
+      else { mode = res.status; showSave(mode); }
+      renderAll();
+    });
+  }
+})();
+</script>
+</body>
+</html>
