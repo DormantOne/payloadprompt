@@ -22,6 +22,13 @@
    "grand_rounds": [
                       {
       "id": "gr_afib",
+      "grand_rounds_name": "std",
+      "teams_team_name": "CMI Primary Care Education Series Review",
+      "teams_folder": "Documents",
+      "teams_filename": "stdtranscript.docx"
+    },
+                      {
+      "id": "gr_afib",
       "grand_rounds_name": "afib",
       "teams_team_name": "CMI Primary Care Education Series Review",
       "teams_folder": "Documents",
